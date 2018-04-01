@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.eds.device" >
+
+    <select id="queryNearbyDevices" resultType="com.eds.ma.bis.device.vo.DeviceInfoVo$DeviceDetailVo">
+        SELECT ed.id AS deviceId,es.spName,es.spAddress,es.spBusinessTime,es.spImage,es.spLat,es.spLng,ed.borrowTimes
+        FROM t_eds_sp es
+        LEFT JOIN t_eds_sp_device esd ON es.id = esd.spId
+        LEFT JOIN t_eds_device ed ON esd.deviceId = ed.id
+        WHERE es.dataStatus = 1 AND ed.dataStatus = 1 AND ed.deviceStatus = 'S_SPZT_DZJ'
+            AND es.spLat &gt;= #{minUserLat} and es.spLat &lt;= #{maxUserLat}
+            AND es.spLng &gt;= #{minUserLng} and es.spLng &lt;= #{maxUserLng}
+    </select>
+
+</mapper>

@@ -1,0 +1,29 @@
+target/
+src/main/resources/application.properties
+src/main/resources/sys-common-config.properties
+
+!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+/src/main/resources/sys-common-config.properties
+/src/main/resources/application.properties
