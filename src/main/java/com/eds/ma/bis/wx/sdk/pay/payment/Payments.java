@@ -12,12 +12,14 @@ import com.eds.ma.bis.wx.sdk.pay.base.WxEndpoint;
 import com.eds.ma.bis.wx.sdk.pay.payment.bean.*;
 import com.eds.ma.bis.wx.sdk.pay.payment.wrapper.*;
 import com.eds.ma.bis.wx.sdk.pay.util.SignatureUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 import java.util.SortedMap;
 
 /**
@@ -146,7 +148,7 @@ public class Payments {
      * @param refundRequest
      * @return
      */
-    public RefundResponse refund(RefundRequest refundRequest) {
+    public void refund(RefundRequest refundRequest, Payments.ResultListener resultListener) throws Exception {
         RefundRequestWrapper wrapper = new RefundRequestWrapper();
         wrapper.setRequest(refundRequest);
         setBaseSettings(wrapper);
@@ -155,17 +157,43 @@ public class Payments {
         sign(wrapper, refundRequestMap);
 
         String url = WxEndpoint.get("url.pay.payment.refund.refund");
-        try {
-            String xml = XmlObjectMapper.nonEmptyMapper().toXml(wrapper);
-            logger.info("支付 refund request: {}", xml);
-            String response = wxSslClient.post(url, xml);
-            logger.info("支付 refund response: {}", response);
+        String xml = XmlObjectMapper.nonEmptyMapper().toXml(wrapper);
+        logger.info("支付 refund request: {}", xml);
+        String response = wxSslClient.post(url, xml);
+        logger.info("支付 refund response: {}", response);
 
-            RefundResponseWrapper responseWrapper = XmlObjectMapper.defaultMapper().fromXml(response, RefundResponseWrapper.class);
-            return responseWrapper.getResponse();
-        } catch (Exception e) {
-            throw new WxRuntimeException(999, "refund failed:" + e.getMessage());
+        RefundResponseWrapper responseWrapper = XmlObjectMapper.defaultMapper().fromXml(response, RefundResponseWrapper.class);
+        RefundResponse refundResponse = responseWrapper.getResponse();
+
+        if(Objects.nonNull(refundResponse) && Objects.nonNull(refundResponse.getReturnCode())) {
+            if(Objects.equals(refundResponse.getReturnCode(),"FAIL")) {
+                logger.error("退款API系统返回失败，请检测Post给API的数据是否规范合法");
+                resultListener.onFailByReturnCodeFail(refundResponse);
+            } else {
+                if(Objects.equals(refundResponse.getResultCode(),"FAIL")) {
+                    logger.error("退款失败，错误码：" + refundResponse.getErrorCode() + "     错误信息：" + refundResponse.getErrorCodeDesc());
+                    resultListener.onRefundFail(refundResponse);
+                } else {
+                    logger.info("退款成功");
+                    resultListener.onRefundSuccess(refundResponse);
+                }
+            }
+
+        } else {
+            logger.error("退款API请求逻辑错误，请仔细检测传过去的每一个参数是否合法，或是看API能否被正常访问");
+            resultListener.onFailByReturnCodeError(refundResponse);
         }
+
+    }
+
+    public interface ResultListener {
+        void onFailByReturnCodeError(RefundResponse var1);
+
+        void onFailByReturnCodeFail(RefundResponse var1);
+
+        void onRefundFail(RefundResponse var1);
+
+        void onRefundSuccess(RefundResponse var1);
     }
 
     /**

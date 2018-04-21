@@ -2,6 +2,8 @@ package com.eds.ma.bis.wx.service;
 
 import com.eds.ma.bis.user.vo.UserInfoVo;
 
+import java.math.BigDecimal;
+
 /**
  * 微信小程序服务
  * @Author gaoyan
@@ -17,6 +19,13 @@ public interface IWxMaService {
      * @return
      */
     UserInfoVo queryMaUserInfo(String code, String encryptedData, String iv);
+
+    /**
+     * 微信推送消息
+     * @param openId
+     * @param tmplEvent
+     */
+    void pushWxMaMessage(String openId,String tmplEvent);
 
 }
 

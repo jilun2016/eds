@@ -1,9 +1,12 @@
 package com.eds.ma.resource;
 
+import com.eds.ma.bis.common.entity.EdsConfig;
+import com.eds.ma.bis.common.service.IEdsConfigService;
 import com.eds.ma.bis.device.service.IDeviceService;
 import com.eds.ma.bis.device.vo.DeviceInfoVo;
 import com.eds.ma.config.SysConfig;
 import com.eds.ma.resource.request.DeviceDepositPrePayRequest;
+import com.eds.ma.resource.request.DeviceRentRequest;
 import com.eds.ma.resource.request.SearchDeviceRequest;
 import com.eds.ma.util.DistanceUtil;
 import com.xcrm.log.Logger;
@@ -15,6 +18,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -31,6 +35,9 @@ public class DeviceResource extends BaseAuthedResource{
 	private IDeviceService deviceService;
 
 	@Autowired
+	private IEdsConfigService edsConfigService;
+
+	@Autowired
 	private SysConfig sysConfig;
 
 	/**
@@ -43,7 +50,8 @@ public class DeviceResource extends BaseAuthedResource{
 	public DeviceInfoVo queryNearbyDevices(@BeanParam SearchDeviceRequest request) {
 		logger.debug("----DeviceResource.queryNearbyDevices({})----", request);
 		if(Objects.isNull(request.getDistance())){
-			request.setDistance(5000);
+			EdsConfig edsConfig = edsConfigService.queryEdsConfig();
+			request.setDistance(edsConfig.getNearbyDistance());
 		}
         double[] distanceArr = DistanceUtil.getAround(request.getUserLat().doubleValue(), request.getUserLng().doubleValue(), request.getDistance());
         List<DeviceInfoVo.DeviceDetailVo> deviceDetailVos = deviceService.queryNearbyDevices(distanceArr[0], distanceArr[1], distanceArr[2],distanceArr[3]);
@@ -56,15 +64,29 @@ public class DeviceResource extends BaseAuthedResource{
 
     /**
      * 微信押金支付
-     * @param request
      */
     @POST
     @Path("/deposit/pay")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deviceDepositPrepay(@Valid DeviceDepositPrePayRequest request){
-        logger.debug("WxMaResource.depositPrepay({},{})",super.getOpenId(),request);
-        deviceService.deviceDepositPrepay(super.getOpenId(),request.getDeviceId(), request.getUserLat(),request.getUserLng());
-        return Response.noContent().build();
+    public Response deviceDepositPrepay(){
+        logger.debug("WxMaResource.depositPrepay({})",super.getOpenId());
+        Map<String, Object> paySignMap = deviceService.deviceDepositPrepay(super.getOpenId());
+        return Response.ok(paySignMap).build();
     }
+
+	/**
+	 * 租借设备
+	 * @param request
+	 */
+	@POST
+	@Path("/device/rent")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response deviceRent(@Valid DeviceRentRequest request) {
+		logger.debug("WxMaResource.deviceRent({},{})",super.getOpenId(), request);
+        deviceService.deviceRent(request.getDeviceId(),super.getOpenId(),request.getUserLat(),request.getUserLng());
+		return Response.status(Response.Status.CREATED).build();
+	}
+
 }

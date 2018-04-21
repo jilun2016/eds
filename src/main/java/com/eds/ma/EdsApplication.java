@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -28,6 +29,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @EnableTransactionManagement
 @ComponentScan(basePackages = {"com.eds.ma", "com.xcrm.cloud.database"})
 @EnableScheduling
+@EnableAsync
 public class EdsApplication extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {
@@ -44,7 +46,7 @@ public class EdsApplication extends SpringBootServletInitializer {
 	 * 自定义异步线程池
 	 * @return
 	 */
-	@Bean
+	@Bean(name = "taskExecutor")
 	public AsyncTaskExecutor taskExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setThreadNamePrefix("eds_thread_pool");

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.eds.order" >
+
+    <resultMap id="orderMap" type="com.eds.ma.bis.order.vo.OrderVo">
+        <result property="orderId" column="id"/>
+        <result property="orderCode" column="orderCode"/>
+        <result property="orderStatus" column="orderStatus"/>
+        <result property="orderStatusDesc" column="orderStatusDesc"/>
+        <result property="rentStartTime" column="rentStartTime"/>
+        <result property="rentSpId" column="rentSpId"/>
+        <result property="spName" column="rentSpName"/>
+        <result property="spLat" column="rentSpLat"/>
+        <result property="spLng" column="rentSpLng"/>
+        <result property="deviceId" column="deviceId"/>
+        <result property="userId" column="userId"/>
+        <result property="totalFee" column="totalFee"/>
+    </resultMap>
+
+    <select id="queryOrders" resultMap="orderMap">
+        SELECT o.id,o.orderCode,o.orderStatus,sc.sysName AS orderStatusDesc,o.rentStartTime,
+               o.rentSpId,o.deviceId,o.userId,o.totalFee,s.spName,s.spLat,s.spLng
+        FROM t_eds_order o
+        LEFT JOIN t_eds_sp s ON o.rentSpId = s.id
+        LEFT JOIN t_b_sys_code sc ON o.orderStatus = sc.sysCode
+        WHERE o.orderStatus = #{orderStatus} AND o.userId = #{userId} AND o.dataStatus = 1
+        ORDER BY o.created DESC
+        LIMIT #{start}, #{pageSize}
+    </select>
+
+    <select id="queryOrderDetail" resultType="com.eds.ma.bis.order.vo.OrderDetailVo">
+        SELECT o.id,o.orderCode,o.orderStatus,sc.sysName AS orderStatusDesc,o.rentStartTime,o.rentEndTime,
+               o.rentSpId,s1.spName AS rentSpName,s1.spLat AS rentSpLat,s1.spLng AS rentSpLng,
+               o.rentSpId,s1.spName AS rentSpName,s1.spLat AS rentSpLat,s1.spLng AS rentSpLng,
+               o.returnSpId,s2.spName AS returnSpName,s2.spLat AS returnSpLat,s2.spLng AS returnSpLng,
+               o.deviceId,o.userId,o.totalFee,o.balance
+        FROM t_eds_order o
+        LEFT JOIN t_eds_sp s1 ON o.rentSpId = s1.id
+        LEFT JOIN t_eds_sp s2 ON o.returnSpId = s2.id
+        LEFT JOIN t_b_sys_code sc ON o.orderStatus = sc.sysCode
+        WHERE o.id = #{orderId} AND o.userId = #{userId} AND o.dataStatus = 1
+    </select>
+
+    <select id="queryLatestOrderId" resultType="java.lang.Long">
+        SELECT o.id
+        FROM t_eds_order o
+        WHERE o.userId = #{userId} AND o.orderStatus = 'S_DDZT_JXZ' AND o.dataStatus = 1
+    </select>
+
+
+</mapper>

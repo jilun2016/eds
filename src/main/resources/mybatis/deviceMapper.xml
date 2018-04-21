@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.eds.device" >
+
+    <select id="queryNearbyDevices" resultType="com.eds.ma.bis.device.vo.DeviceInfoVo$DeviceDetailVo">
+        SELECT ed.id AS deviceId,es.spName,es.spAddress,es.spBusinessTime,es.spImage,es.spLat,es.spLng,ed.borrowTimes
+        FROM t_eds_sp es
+        LEFT JOIN t_eds_device ed ON es.id = ed.spId
+        WHERE es.dataStatus = 1 AND ed.dataStatus = 1 AND ed.deviceStatus = 'S_SPZT_DZJ'
+            AND es.spLat &gt;= #{minUserLat} and es.spLat &lt;= #{maxUserLat}
+            AND es.spLng &gt;= #{minUserLng} and es.spLng &lt;= #{maxUserLng}
+    </select>
+
+    <select id="queryRentDeviceById" resultType="com.eds.ma.bis.device.vo.DeviceRentDetailVo">
+        SELECT ed.id AS deviceId,es.spLng AS deviceLng,es.spLat AS deviceLat,ed.deviceStatus,ed.spId
+        FROM t_eds_device ed
+        LEFT JOIN t_eds_sp es ON ed.spId = es.id
+        WHERE  ed.id = #{deviceId} AND es.dataStatus = 1 AND ed.dataStatus = 1
+        FOR UPDATE
+    </select>
+
+    <select id="queryUserRentingDeviceCount" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM t_eds_device ed
+        WHERE  ed.userId = #{userId} AND ed.deviceStatus = #{S_SPZT_SYZ} AND ed.dataStatus = 1
+        FOR UPDATE
+    </select>
+
+    <update id="updateRentDevice">
+        UPDATE t_eds_device
+        SET borrowTimes = borrowTimes + 1,userId = #{userId},orderId = #{orderId},deviceStatus = #{S_SPZT_SYZ}
+        WHERE id=#{deviceId}
+    </update>
+
+
+
+</mapper>

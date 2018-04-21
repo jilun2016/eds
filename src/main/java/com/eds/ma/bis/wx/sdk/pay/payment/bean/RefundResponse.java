@@ -131,4 +131,22 @@ public class RefundResponse extends BaseResponse {
     public void setCashRefundFee(int cashRefundFee) {
         this.cashRefundFee = cashRefundFee;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("RefundResponse{");
+        sb.append("transactionId='").append(transactionId).append('\'');
+        sb.append(", tradeNumber='").append(tradeNumber).append('\'');
+        sb.append(", refundNumber='").append(refundNumber).append('\'');
+        sb.append(", refundId='").append(refundId).append('\'');
+        sb.append(", refundChannel='").append(refundChannel).append('\'');
+        sb.append(", refundFee=").append(refundFee);
+        sb.append(", totalFee=").append(totalFee);
+        sb.append(", settlementTotalFee=").append(settlementTotalFee);
+        sb.append(", feeType='").append(feeType).append('\'');
+        sb.append(", cashFee=").append(cashFee);
+        sb.append(", cashRefundFee=").append(cashRefundFee);
+        sb.append('}');
+        return sb.toString();
+    }
 }

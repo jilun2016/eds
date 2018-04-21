@@ -3,6 +3,7 @@ package com.eds.ma.rest;
 import com.eds.ma.rest.integration.AuthoricationFilter;
 import com.eds.ma.rest.integration.AuthoricationFilterFeature;
 import com.eds.ma.rest.integration.BizExceptionMapper;
+import com.eds.ma.rest.integration.NotFoundExceptionMapper;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.reflections.Reflections;
@@ -19,6 +20,7 @@ public class App extends ResourceConfig {
         // 向jersey框架注册资源类，凡完全限定名是以指定字符串开头的类，都将包含  ,"com.xcrm.rest.integration"
         scan("com.eds.ma.resource");
         register(BizExceptionMapper.class);
+        register(NotFoundExceptionMapper.class);
         register(JacksonFeature.class);
         register(AuthoricationFilterFeature.class);
         Set<Class<?>> resources = new HashSet<>();

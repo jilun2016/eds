@@ -32,15 +32,9 @@ public class WxJob {
 	@Scheduled(cron="0 * * * * ?")
 	public void wxRefreshTokenJob() {
 		//每小时扫描时效
-//		if(!Objects.equals(sysConfig.getProjectProfile(), SystemProfileEnum.DEVELOP.value())){
-			logger.info("#############wxRefreshTokenJob############");
-			logger.info("----------------wxRefreshTokenJob JOB begin "+ DateFormatUtils.formatDate(new Date(),null)+"-------------------");
-			try {
-				jobService.wxRefreshTokenJob();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		if(!Objects.equals(sysConfig.getProjectProfile(), SystemProfileEnum.DEVELOP.value())){
+
 			logger.info("----------------wxRefreshTokenJob JOB end "+ DateFormatUtils.formatDate(new Date(),null)+"-------------------");
-//		}
+		}
 	}
 }

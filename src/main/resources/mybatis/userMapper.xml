@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.eds.user" >
+    <update id="updateUserWallet">
+        UPDATE t_eds_user_wallet
+        SET updated = now()
+            <if test="deposit != null">
+                ,deposit = deposit + #{deposit}
+            </if>
+            <if test="balance != null">
+                ,balance = balance + #{balance}
+            </if>
+        WHERE userId=#{userId}
+    </update>
+
+    <select id="queryUserWalletByUserIdWithLock" resultType="com.eds.ma.bis.user.entity.UserWallet">
+        SELECT *
+        FROM t_eds_user_wallet euw
+        WHERE  euw.userId = #{userId}
+        FOR UPDATE
+    </select>
+
+</mapper>

@@ -1,7 +1,8 @@
 package com.eds.ma.bis.wx.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.eds.ma.bis.common.AsyncService;
+import com.eds.ma.bis.device.service.IDeviceService;
+import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.bis.user.vo.UserInfoVo;
 import com.eds.ma.bis.wx.service.IWxMaService;
 import com.eds.ma.config.SysConfig;
@@ -32,14 +33,10 @@ public class WxMaServiceImpl implements IWxMaService {
     private static Logger logger = Logger.getLogger(WxMaServiceImpl.class);
 
     @Autowired
-    private AsyncService asyncService;
-
-    @Autowired
     private SysConfig sysConfig;
 
     @Autowired
-    private BaseDaoSupport dao;
-
+    private IUserService userService;
 
     @Override
     public UserInfoVo queryMaUserInfo(String code, String encryptedData, String iv) {
@@ -65,7 +62,7 @@ public class WxMaServiceImpl implements IWxMaService {
                     userInfoVo.setHeadimgurl(userInfoJSON.getString("avatarUrl"));
                     userInfoVo.setNickName(userInfoJSON.getString("nickName"));
                     //异步保存用户信息
-                    asyncService.asyncSaveOpenId(userInfoVo.getOpenId(),userInfoVo.getNickName(),userInfoVo.getHeadimgurl(),userInfoJSON.toJSONString());
+                    userService.asyncSaveOpenId(userInfoVo.getOpenId(),userInfoVo.getNickName(),userInfoVo.getHeadimgurl(),userInfoJSON.toJSONString());
                     return userInfoVo;
                 }else{
                     logger.error("WxMinaServiceImpl.parse user info failed.resultJson:{}",resultJson);

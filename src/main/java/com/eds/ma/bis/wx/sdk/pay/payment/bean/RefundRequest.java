@@ -83,4 +83,18 @@ public class RefundRequest {
     public void setOperatorId(String operatorId) {
         this.operatorId = operatorId;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("RefundRequest{");
+        sb.append("transactionId='").append(transactionId).append('\'');
+        sb.append(", tradeNumber='").append(tradeNumber).append('\'');
+        sb.append(", refundNumber='").append(refundNumber).append('\'');
+        sb.append(", totalFee=").append(totalFee);
+        sb.append(", refundFee=").append(refundFee);
+        sb.append(", refundFeeType='").append(refundFeeType).append('\'');
+        sb.append(", operatorId='").append(operatorId).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

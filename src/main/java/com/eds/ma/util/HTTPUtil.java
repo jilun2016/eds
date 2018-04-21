@@ -53,12 +53,12 @@ public class HTTPUtil {
             String line = "";
             while ((line = rd.readLine()) != null) {
                 if (status != 200) {
-                    logger.error("----请求失败----status:" + status + "，action:" + action + "，line:" + line);
+                    logger.error("----请求失败----status:" + status + "，servlet:" + action + "，line:" + line);
                 }
                 result = line;
             }
         } catch (Exception e) {
-            logger.error("----请求失败----status:" + status + "，action:" + action + "，result:" + result,e);
+            logger.error("----请求失败----status:" + status + "，servlet:" + action + "，result:" + result,e);
         }
         return result;
     }
@@ -90,13 +90,13 @@ public class HTTPUtil {
             String line = "";
             while ((line = rd.readLine()) != null) {
                 if (status != 200) {
-                    logger.error("----请求失败----status:" + status + "，action:" + action + "，line:" + line);
+                    logger.error("----请求失败----status:" + status + "，servlet:" + action + "，line:" + line);
                 }
                 result += line;
             }
 
         } catch (Exception e) {
-            logger.error("----请求失败----status:" + status + "，action:" + action + "，result:" + result,e);
+            logger.error("----请求失败----status:" + status + "，servlet:" + action + "，result:" + result,e);
         }
         return result;
     }

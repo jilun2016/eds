@@ -110,6 +110,30 @@ public class SysConfig {
     private String wxMaAppSecret;
 
     /**
+     * 微信支付信息url
+     */
+    @Value("${wxPayUrl}")
+    private String wxPayUrl;
+
+    /**
+     * 微信支付回调信息url
+     */
+    @Value("${wxPayCallbackUrl}")
+    private String wxPayCallbackUrl;
+
+    /**
+     * 微信商户号
+     */
+    @Value("${wxMchId}")
+    private String wxMchId;
+
+    /**
+     * 微信商户号
+     */
+    @Value("${wxMerchantKey}")
+    private String wxMerchantKey;
+
+    /**
      * openId的Cookie配置
      */
     @Value("${edsCookieHost}")
@@ -249,5 +273,37 @@ public class SysConfig {
 
     public void setEdsCookieHost(String edsCookieHost) {
         this.edsCookieHost = edsCookieHost;
+    }
+
+    public String getWxPayUrl() {
+        return wxPayUrl;
+    }
+
+    public void setWxPayUrl(String wxPayUrl) {
+        this.wxPayUrl = wxPayUrl;
+    }
+
+    public String getWxPayCallbackUrl() {
+        return wxPayCallbackUrl;
+    }
+
+    public void setWxPayCallbackUrl(String wxPayCallbackUrl) {
+        this.wxPayCallbackUrl = wxPayCallbackUrl;
+    }
+
+    public String getWxMchId() {
+        return wxMchId;
+    }
+
+    public void setWxMchId(String wxMchId) {
+        this.wxMchId = wxMchId;
+    }
+
+    public String getWxMerchantKey() {
+        return wxMerchantKey;
+    }
+
+    public void setWxMerchantKey(String wxMerchantKey) {
+        this.wxMerchantKey = wxMerchantKey;
     }
 }
