@@ -72,6 +72,20 @@ public interface BizErrorConstants {
 	 */
 	String WALLET_WITHDRAW_PART_ERROR = "E10012";
 
+	/**
+	 * 短信发送频率过高,请30秒之后重试
+	 */
+	String WALLET_WITHDRAW_SMS_CHECK_FREQUENCY_ERROR = "E10013";
+
+    /**
+     * 短信验证码错误,清重试
+     */
+    String WALLET_WITHDRAW_SMSCODE_ERROR = "E10014";
+    /**
+     * 短信验证码过期,清重试
+     */
+    String WALLET_WITHDRAW_SMSCODE_EXPIRED = "E10015";
+
 
 
 }

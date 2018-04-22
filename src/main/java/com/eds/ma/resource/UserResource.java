@@ -5,11 +5,14 @@ import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.bis.user.vo.UserInfoVo;
 import com.eds.ma.bis.user.vo.UserWalletVo;
 import com.eds.ma.exception.BizCoreRuntimeException;
+import com.eds.ma.resource.request.SendSmsCodeRequest;
+import com.eds.ma.resource.request.UserWithdrawRequest;
 import com.eds.ma.rest.common.BizErrorConstants;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 
+import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -93,12 +96,27 @@ public class UserResource extends BaseAuthedResource{
     @Path("/wallet/withdraw")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response walletWithdraw(){
-        logger.debug("UserResource.walletWithdraw({})",super.getOpenId());
-        int result = userService.walletWithdraw(super.getOpenId());
+    public Response walletWithdraw(@Valid UserWithdrawRequest request){
+        logger.debug("UserResource.walletWithdraw({},{})",super.getOpenId(),request);
+        int result = userService.walletWithdraw(super.getOpenId(),request.getSmsCode());
         if(result == 0){
             throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_PART_ERROR);
         }
+        return Response.ok().build();
+    }
+
+    /**
+     * 发送用户提现短信验证码
+     * @param request
+     * @return
+     */
+    @POST
+    @Path("/wallet/withdraw/sms_code")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response sendWithdrawSmsCode(@Valid SendSmsCodeRequest request){
+        logger.debug("UserResource.sendWithdrawSmsCode({},{})",super.getOpenId(),request);
+        userService.sendWithdrawSmsCode(super.getOpenId(),request.getMobile());
         return Response.ok().build();
     }
 }

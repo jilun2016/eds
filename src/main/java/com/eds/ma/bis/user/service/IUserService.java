@@ -4,7 +4,6 @@ import com.eds.ma.bis.order.entity.PayOrder;
 import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.entity.UserWallet;
 import com.eds.ma.bis.user.vo.UserWalletVo;
-import org.springframework.scheduling.annotation.Async;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -84,8 +83,9 @@ public interface IUserService {
      * 用户提现
      * 提现金额 = 余额+押金
      * @param openId
+     * @param smsCode
      */
-    int walletWithdraw(String openId);
+    int walletWithdraw(String openId, String smsCode);
 
     /**
      * 用户退款失败回滚
@@ -110,4 +110,11 @@ public interface IUserService {
      * @return 退款部分失败 0 退款成功 :1
      */
     int asyncPayRefund(List<PayOrder> refundPayOrderPool, BigDecimal toRefundMoney);
+
+    /**
+     * 发送用户提现短信验证码
+     * @param openId
+     * @param mobile
+     */
+    void sendWithdrawSmsCode(String openId, String mobile);
 }

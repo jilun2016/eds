@@ -1,5 +1,8 @@
 package com.eds.ma.bis.user.service;
 
+import com.eds.ma.bis.message.TmplEvent;
+import com.eds.ma.bis.message.service.IMessageService;
+import com.eds.ma.bis.message.vo.SmsMessageContent;
 import com.eds.ma.bis.order.TransTypeEnum;
 import com.eds.ma.bis.order.entity.PayOrder;
 import com.eds.ma.bis.order.service.IOrderService;
@@ -18,6 +21,9 @@ import com.xcrm.cloud.database.db.query.expression.Restrictions;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.common.util.ListUtil;
 import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -54,6 +61,9 @@ public class UserServiceImpl implements IUserService {
 
     @Autowired
     private IWxRefundPayService wxRefundPayService;
+
+    @Autowired
+    private IMessageService messageService;
 
     @Autowired
     private TaskExecutor taskExecutor;
@@ -140,7 +150,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public int walletWithdraw(String openId) {
+    public int walletWithdraw(String openId, String smsCode) {
         int result = 1;
         User user = checkUserExist(openId);
         Long userId = user.getId();
@@ -151,6 +161,23 @@ public class UserServiceImpl implements IUserService {
         BigDecimal allRefundMoney = balance.add(deposit);
         if (allRefundMoney.compareTo(BigDecimal.ZERO) <= 0) {
             throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_ZERO_ERROR);
+        }
+
+        //验证码校验
+        String dbSmsCode = userWallet.getSmsCode();
+        long now = System.currentTimeMillis();
+        Date activeExpired = userWallet.getSmsExpired();
+
+        if(StringUtils.isEmpty(dbSmsCode)) {
+            //验证码错误
+            throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_ERROR);
+        }
+        if(!dbSmsCode.equals(smsCode)) {
+            //验证码错误
+            throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_ERROR);
+        } else if(activeExpired != null && activeExpired.getTime() < now) {
+            //已过期
+            throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_EXPIRED);
         }
 
         List<PayOrder> payOrderList = orderService.queryToRefundPayOrder(openId);
@@ -337,5 +364,51 @@ public class UserServiceImpl implements IUserService {
         }
 
         return BooleanUtils.toInteger(resultList.stream().noneMatch(result -> result == 0));
+    }
+
+    @Override
+    public void sendWithdrawSmsCode(String openId, String mobile) {
+        User user = checkUserExist(openId);
+        Long userId = user.getId();
+        UserWallet userWallet = queryUserWalletByUserIdWithLock(userId);
+        BigDecimal balance = userWallet.getBalance();
+        BigDecimal deposit = userWallet.getDeposit();
+        //校验总金额大于0 ,可以进行发送提现验证码
+        BigDecimal allRefundMoney = balance.add(deposit);
+        if (allRefundMoney.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_ZERO_ERROR);
+        }
+
+        //验证短信的发送频率不能小于30秒
+        Date smsExpired = userWallet.getSmsExpired();
+        String smsCode = null;
+        if(Objects.nonNull(smsExpired) && StringUtils.isNotEmpty(userWallet.getSmsCode())) {
+            DateTime activationCodeExpired2 = new DateTime(smsExpired);
+            if(activationCodeExpired2.isBeforeNow()) {
+                //短信码已经失效则发送新的验证码
+                smsCode = RandomStringUtils.randomNumeric(6);
+            } else {
+                //短信码有效期内发送相同的验证码
+                smsCode = userWallet.getSmsCode();
+            }
+            Date lastSendTime = new Timestamp(smsExpired.getTime() - 30 * 60 * 1000);
+            if(System.currentTimeMillis() - lastSendTime.getTime() < 30 * 1000)
+                //频率小于30秒
+                throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMS_CHECK_FREQUENCY_ERROR);
+        } else {
+            smsCode = RandomStringUtils.randomNumeric(6);
+        }
+        UserWallet updateUserWallet = new UserWallet();
+        updateUserWallet.setId(userWallet.getId());
+        updateUserWallet.setSmsCode(smsCode);
+        updateUserWallet.setSmsExpired(new Timestamp(System.currentTimeMillis()
+                + 30 * 60 * 1000));
+        dao.update(updateUserWallet);
+        //发送验证码短信
+        SmsMessageContent smsMessageContent = new SmsMessageContent();
+        smsMessageContent.setTmplEvent(TmplEvent.wallet_withdraw_check.value());
+        smsMessageContent.setMobile(mobile);
+        smsMessageContent.setSmsParams(new String[]{smsCode});
+        messageService.pushSmsMessage(smsMessageContent);
     }
 }

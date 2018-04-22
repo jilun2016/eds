@@ -77,4 +77,6 @@ public class WxMaServiceImpl implements IWxMaService {
             throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
         }
     }
+
+
 }

@@ -20,12 +20,5 @@ public interface IWxMaService {
      */
     UserInfoVo queryMaUserInfo(String code, String encryptedData, String iv);
 
-    /**
-     * 微信推送消息
-     * @param openId
-     * @param tmplEvent
-     */
-    void pushWxMaMessage(String openId,String tmplEvent);
-
 }
 
