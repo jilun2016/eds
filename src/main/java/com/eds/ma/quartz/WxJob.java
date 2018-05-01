@@ -29,7 +29,7 @@ public class WxJob {
 	@Autowired
 	private IJobService jobService;
 	
-	@Scheduled(cron="0 * * * * ?")
+	@Scheduled(cron="0 0 * * * ?")
 	public void wxRefreshTokenJob() {
 		//每小时扫描时效
 		if(!Objects.equals(sysConfig.getProjectProfile(), SystemProfileEnum.DEVELOP.value())){

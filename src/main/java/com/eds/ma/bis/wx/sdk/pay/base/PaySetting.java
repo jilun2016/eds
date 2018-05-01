@@ -22,11 +22,6 @@ public class PaySetting {
      */
     private String key;
 
-    /**
-     * 支付路径
-     */
-    private String wxEndpoint;
-
     public String getMchId() {
         return mchId;
     }
@@ -49,13 +44,5 @@ public class PaySetting {
 
     public void setKey(String key) {
         this.key = key;
-    }
-
-    public String getWxEndpoint() {
-        return wxEndpoint;
-    }
-
-    public void setWxEndpoint(String wxEndpoint) {
-        this.wxEndpoint = wxEndpoint;
     }
 }

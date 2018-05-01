@@ -43,7 +43,7 @@ public interface BizErrorConstants {
 	String DEVICE_RENT_OUT_RANGE = "E10006";
 
 	/**
-	 * 当前钱包无法体现
+	 * 当前钱包无法提现
 	 */
 	String WALLET_WITHDRAW_ZERO_ERROR = "E10007";
 

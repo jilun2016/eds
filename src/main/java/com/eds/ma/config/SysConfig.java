@@ -110,12 +110,6 @@ public class SysConfig {
     private String wxMaAppSecret;
 
     /**
-     * 微信支付信息url
-     */
-    @Value("${wxPayUrl}")
-    private String wxPayUrl;
-
-    /**
      * 微信支付回调信息url
      */
     @Value("${wxPayCallbackUrl}")
@@ -273,14 +267,6 @@ public class SysConfig {
 
     public void setEdsCookieHost(String edsCookieHost) {
         this.edsCookieHost = edsCookieHost;
-    }
-
-    public String getWxPayUrl() {
-        return wxPayUrl;
-    }
-
-    public void setWxPayUrl(String wxPayUrl) {
-        this.wxPayUrl = wxPayUrl;
     }
 
     public String getWxPayCallbackUrl() {

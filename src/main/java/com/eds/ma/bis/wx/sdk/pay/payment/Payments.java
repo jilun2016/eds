@@ -62,7 +62,7 @@ public class Payments {
         SortedMap<String, Object> unifiedOrderRequestMap = JsonMapper.nonEmptyMapper().getMapper().convertValue(wrapper, SortedMap.class);
         sign(wrapper, unifiedOrderRequestMap);
 
-        String url = paySetting.getWxEndpoint();
+        String url = WxEndpoint.get("wxPayUrl");
         try {
             String xml = XmlObjectMapper.nonEmptyMapper().toXml(wrapper);
             logger.info("支付 unified order request: {}", xml);
@@ -156,7 +156,7 @@ public class Payments {
         SortedMap<String, Object> refundRequestMap = JsonMapper.nonEmptyMapper().getMapper().convertValue(wrapper, SortedMap.class);
         sign(wrapper, refundRequestMap);
 
-        String url = WxEndpoint.get("url.pay.payment.refund.refund");
+        String url = WxEndpoint.get("wxPayRefundUrl");
         String xml = XmlObjectMapper.nonEmptyMapper().toXml(wrapper);
         logger.info("支付 refund request: {}", xml);
         String response = wxSslClient.post(url, xml);
@@ -246,7 +246,7 @@ public class Payments {
         SortedMap<String, Object> refundQueryRequestMap = JsonMapper.nonEmptyMapper().getMapper().convertValue(refundQueryRequestWrapper, SortedMap.class);
         sign(refundQueryRequestWrapper, refundQueryRequestMap);
 
-        String url = WxEndpoint.get("url.pay.payment.refund.query");
+        String url = WxEndpoint.get("wxPayRefundQueryUrl");
         try {
             String xml = XmlObjectMapper.nonEmptyMapper().toXml(refundQueryRequestWrapper);
             logger.info("支付 refund query request: {}", xml);

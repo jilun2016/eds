@@ -129,6 +129,9 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public User checkUserExist(String openId) {
+        if (Objects.isNull(openId)) {
+            throw new BizCoreRuntimeException(BizErrorConstants.USER_NOT_EXIST_ERROR);
+        }
         //对用户信息,钱包进行校验
         User user = queryUserByOpenId(openId);
         if (Objects.isNull(user) || Objects.isNull(user.getId())) {
@@ -160,22 +163,22 @@ public class UserServiceImpl implements IUserService {
             throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_ZERO_ERROR);
         }
 
-        //验证码校验
-        String dbSmsCode = userWallet.getSmsCode();
-        long now = System.currentTimeMillis();
-        Date activeExpired = userWallet.getSmsExpired();
-
-        if(StringUtils.isEmpty(dbSmsCode)) {
-            //验证码错误
-            throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_ERROR);
-        }
-        if(!dbSmsCode.equals(smsCode)) {
-            //验证码错误
-            throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_ERROR);
-        } else if(activeExpired != null && activeExpired.getTime() < now) {
-            //已过期
-            throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_EXPIRED);
-        }
+//        //验证码校验
+//        String dbSmsCode = userWallet.getSmsCode();
+//        long now = System.currentTimeMillis();
+//        Date activeExpired = userWallet.getSmsExpired();
+//
+//        if(StringUtils.isEmpty(dbSmsCode)) {
+//            //验证码错误
+//            throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_ERROR);
+//        }
+//        if(!dbSmsCode.equals(smsCode)) {
+//            //验证码错误
+//            throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_ERROR);
+//        } else if(activeExpired != null && activeExpired.getTime() < now) {
+//            //已过期
+//            throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_EXPIRED);
+//        }
 
         List<PayOrder> payOrderList = orderService.queryToRefundPayOrder(user.getOpenId());
         if (ListUtil.isNotEmpty(payOrderList)) {

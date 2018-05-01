@@ -203,7 +203,6 @@ public class WxPayServiceImpl implements IWxPayService {
         paySetting.setAppId(sysConfig.getWxAppId());
         paySetting.setKey(sysConfig.getWxMerchantKey());
         paySetting.setMchId(sysConfig.getWxMchId());
-        paySetting.setWxEndpoint(sysConfig.getWxPayUrl());
         return paySetting;
     }
 
