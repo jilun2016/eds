@@ -1,19 +1,28 @@
 package com.eds.ma.resource;
 
+import com.eds.ma.bis.device.service.IDeviceService;
+import com.eds.ma.bis.device.vo.UserDeviceVo;
 import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.bis.user.vo.UserInfoVo;
 import com.eds.ma.bis.user.vo.UserWalletVo;
+import com.eds.ma.config.SysConfig;
 import com.eds.ma.exception.BizCoreRuntimeException;
 import com.eds.ma.resource.request.SendSmsCodeRequest;
 import com.eds.ma.resource.request.UserWithdrawRequest;
 import com.eds.ma.rest.common.BizErrorConstants;
+import com.eds.ma.rest.common.CommonConstants;
+import com.eds.ma.rest.integration.annotation.NoAuth;
+import com.eds.ma.util.CookieUtils;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.*;
@@ -34,31 +43,23 @@ public class UserResource extends BaseAuthedResource{
 	private IUserService userService;
 
     @Autowired
-    private TaskExecutor taskExecutor;
+    private IDeviceService deviceService;
+
+    @Autowired
+    private SysConfig sysConfig;
 
 
 	@GET
 	@Path("/test")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response test() throws InterruptedException, ExecutionException {
-        List<Integer> taskList = Arrays.asList(1, 2, 3, 4, 5, 6, 7);
-        List<String> list2 = new ArrayList<String>();
-        CompletableFuture[] cfs = taskList.stream().map(object-> CompletableFuture.supplyAsync(()->{
-            if(object == 5){
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            return object;
-        }, taskExecutor)
-                .thenApply(h->Integer.toString(h))
-                .whenComplete((v, e) -> {//如需获取任务完成先手顺序，此处代码即可
-                    System.out.println("任务"+v+"完成!result="+v+"，异常 e="+e+","+new Date());
-                }))
-                .toArray(CompletableFuture[]::new);
-        CompletableFuture.allOf(cfs).join();//封装后无返回值，必须自己whenComplete()获取
+    @NoAuth
+	public Response test(@Context HttpServletRequest request, @Context HttpServletResponse response) throws InterruptedException, ExecutionException {
+	    UserInfoVo userInfoVo = new UserInfoVo();
+	    userInfoVo.setHeadimgurl("https://wx.qlogo.cn/mmopen/vi_32/DYAIOgq83epwsY5aWbnrFNJh7JZNLG9KGyRgYczicuiavQaU6BkkpdKm5lEb3MHiarUQDnGGZdyrgj94tdJ8EtwLA/0");
+        userInfoVo.setNickName("高岩");
+        userInfoVo.setOpenId("oiyZc5Qn8pe8wnO_BDl142Ozj6eE");
+        CookieUtils.addCookie(request,response,  CommonConstants.WX_OPEN_ID_COOKIE, userInfoVo.getOpenId(),
+                null, sysConfig.getEdsCookieHost());
         return Response.ok().build();
 	}
 
@@ -68,8 +69,8 @@ public class UserResource extends BaseAuthedResource{
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public UserInfoVo queryUserInfo() {
-        logger.debug("UserResource.queryUserInfo({})", super.getOpenId());
-        User user = userService.checkUserExist(super.getOpenId());
+        logger.debug("UserResource.queryUserInfo({},{})", super.getOpenId(),super.getUser());
+        User user = super.getUser();
         UserInfoVo userInfoVo = new UserInfoVo();
         userInfoVo.setHeadimgurl(user.getHeadimgurl());
         userInfoVo.setNickName(user.getNickname());
@@ -78,15 +79,27 @@ public class UserResource extends BaseAuthedResource{
     }
 
 	/**
-	 * 查询用户钱包信息
+	 * 查询用户的租借中的设备信息
 	 */
 	@GET
-	@Path("/wallet")
+	@Path("/devices")
 	@Produces(MediaType.APPLICATION_JSON)
-	public UserWalletVo queryUserWallet() {
-		logger.debug("UserResource.queryUserWallet({})", super.getOpenId());
-		return userService.queryUserWallet(super.getOpenId());
+	public List<UserDeviceVo> queryUserDeviceList() {
+		logger.debug("UserResource.queryUserWallet({},{})", super.getOpenId(),super.getUser());
+        User user = super.getUser();
+		return deviceService.queryUserDeviceList(user.getId());
 	}
+
+    /**
+     * 查询用户钱包信息
+     */
+    @GET
+    @Path("/wallet")
+    @Produces(MediaType.APPLICATION_JSON)
+    public UserWalletVo queryUserWallet() {
+        logger.debug("UserResource.queryUserWallet({},{})", super.getOpenId(),super.getUser());
+        return userService.queryUserWallet(super.getUser());
+    }
 
     /**
      * 用户提现
@@ -97,8 +110,8 @@ public class UserResource extends BaseAuthedResource{
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response walletWithdraw(@Valid UserWithdrawRequest request){
-        logger.debug("UserResource.walletWithdraw({},{})",super.getOpenId(),request);
-        int result = userService.walletWithdraw(super.getOpenId(),request.getSmsCode());
+        logger.debug("UserResource.walletWithdraw({},{},{})",super.getOpenId(),super.getUser(),request);
+        int result = userService.walletWithdraw(super.getUser(),request.getSmsCode());
         if(result == 0){
             throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_PART_ERROR);
         }
@@ -115,8 +128,8 @@ public class UserResource extends BaseAuthedResource{
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response sendWithdrawSmsCode(@Valid SendSmsCodeRequest request){
-        logger.debug("UserResource.sendWithdrawSmsCode({},{})",super.getOpenId(),request);
-        userService.sendWithdrawSmsCode(super.getOpenId(),request.getMobile());
+        logger.debug("UserResource.sendWithdrawSmsCode({},{},{})",super.getOpenId(),super.getUser(),request);
+        userService.sendWithdrawSmsCode(super.getUser(),request.getMobile());
         return Response.ok().build();
     }
 }

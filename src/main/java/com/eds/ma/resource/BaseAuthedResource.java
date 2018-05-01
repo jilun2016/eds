@@ -1,6 +1,7 @@
 package com.eds.ma.resource;
 
 
+import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.rest.common.CommonConstants;
 
 import javax.ws.rs.container.ContainerRequestContext;
@@ -18,6 +19,10 @@ public class BaseAuthedResource {
 	
 	public String getOpenId() {
 		return (String) containerRequestContext.getProperty(CommonConstants.WX_OPEN_ID_COOKIE);
+	}
+
+	public User getUser() {
+		return (User) containerRequestContext.getProperty(CommonConstants.EDS_USER);
 	}
 
 }

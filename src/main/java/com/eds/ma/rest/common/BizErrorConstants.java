@@ -38,9 +38,9 @@ public interface BizErrorConstants {
     String USER_DEPOSIT_NOT_ENOUGH_ERROR = "E10005";
 
 	/**
-	 * 归还设备超出范围
+	 * 租借设备超出范围
 	 */
-	String DEVICE_RETURN_OUT_RANGE = "E10006";
+	String DEVICE_RENT_OUT_RANGE = "E10006";
 
 	/**
 	 * 当前钱包无法体现
@@ -85,6 +85,37 @@ public interface BizErrorConstants {
      * 短信验证码过期,清重试
      */
     String WALLET_WITHDRAW_SMSCODE_EXPIRED = "E10015";
+
+	/**
+	 * 未查询到归还的设备
+	 */
+	String DEVICE_RETURN_NOT_EXIST_ERROR = "E10016";
+
+	/**
+	 * 设备已经归还,如有问题,请联系客服
+	 */
+	String DEVICE_ON_RETURN_STATUS_ERROR = "E10017";
+
+	/**
+	 * 归还设备超出范围
+	 */
+	String DEVICE_RETURN_OUT_RANGE = "E10018";
+
+    /**
+     * 未查询到归属店铺,请重新归还,如有问题,请联系客服
+     */
+    String DEVICE_RETURN_SP_NOT_EXIST = "E10019";
+
+    /**
+     * 设备归还发生异常,请联系客服
+     */
+    String DEVICE_RETURN_ORDER_ID_NOT_EXIST_ERROR = "E10020";
+
+    /**
+     * 更新订单信息失败,请联系客服
+     */
+    String DEVICE_RETURN_ORDER_NOT_EXIST_ERROR = "E10021";
+
 
 
 

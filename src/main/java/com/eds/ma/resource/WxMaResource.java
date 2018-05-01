@@ -3,12 +3,17 @@ package com.eds.ma.resource;
 import com.eds.ma.bis.user.vo.UserInfoVo;
 import com.eds.ma.bis.wx.service.IWxMaService;
 import com.eds.ma.config.SysConfig;
+import com.eds.ma.rest.common.CommonConstants;
 import com.eds.ma.rest.integration.annotation.NoAuth;
+import com.eds.ma.util.CookieUtils;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -38,10 +43,14 @@ public class WxMaResource extends BaseAuthedResource {
 	@NoAuth
 	public UserInfoVo queryMaUserInfo(@NotNull(message = "登录code不允许为空") @PathParam("code") String code,
 			@NotNull(message = "加密数据不允许为空") @QueryParam("encryptedData") String encryptedData,
-			@NotNull(message = "加密算法的初始向量不允许为空") @QueryParam("iv") String iv) {
+			@NotNull(message = "加密算法的初始向量不允许为空") @QueryParam("iv") String iv,
+			@Context HttpServletRequest request, @Context HttpServletResponse response) {
 
 		logger.debug("----WxMaResource.queryMaSession({},{},{})",code,encryptedData,iv);
-		return wxMaService.queryMaUserInfo(code,encryptedData,iv);
+		UserInfoVo userInfoVo = wxMaService.queryMaUserInfo(code,encryptedData,iv);
+		CookieUtils.addCookie(request,response,  CommonConstants.WX_OPEN_ID_COOKIE, userInfoVo.getOpenId(),
+				null, sysConfig.getEdsCookieHost());
+		return userInfoVo;
 	}
 
 

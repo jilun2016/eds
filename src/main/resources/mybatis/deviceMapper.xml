@@ -11,11 +11,26 @@
             AND es.spLng &gt;= #{minUserLng} and es.spLng &lt;= #{maxUserLng}
     </select>
 
+    <select id="queryNearbySpByCoordinate" resultType="com.eds.ma.bis.device.vo.SpDetailVo">
+        SELECT es.id AS spId,
+            (6378137 * ACOS(COS( RADIANS(#{userLat})) * COS( RADIANS( es.spLat ) ) * COS( RADIANS(es.spLng ) - RADIANS(#{userLng}) )
+                            + SIN( RADIANS(#{userLat}) ) * SIN( RADIANS( es.spLat ) ) ) ) AS spDistance
+        FROM t_eds_sp es
+        WHERE es.dataStatus = 1 and
+        (6378137 * ACOS(COS( RADIANS(#{userLat})) * COS( RADIANS( es.spLat ) ) * COS( RADIANS(es.spLng ) - RADIANS(#{userLng}) )
+            + SIN( RADIANS(#{userLat}) ) * SIN( RADIANS( es.spLat ) ) ) ) &lt;= #{nearbyDistance}
+        order by spDistance desc
+    </select>
+
     <select id="queryRentDeviceById" resultType="com.eds.ma.bis.device.vo.DeviceRentDetailVo">
-        SELECT ed.id AS deviceId,es.spLng AS deviceLng,es.spLat AS deviceLat,ed.deviceStatus,ed.spId
+        SELECT ed.id AS deviceId,es.spLng AS deviceLng,es.spLat AS deviceLat,ed.deviceStatus,ed.spId,ed.orderId,ed.userId
         FROM t_eds_device ed
         LEFT JOIN t_eds_sp es ON ed.spId = es.id
         WHERE  ed.id = #{deviceId} AND es.dataStatus = 1 AND ed.dataStatus = 1
+            <if test="userId != null">
+                and ed.userId = #{userId}
+            </if>
+
         FOR UPDATE
     </select>
 
@@ -26,10 +41,28 @@
         FOR UPDATE
     </select>
 
+    <select id="queryIdleDeviceListBySpId" resultType="com.eds.ma.bis.device.vo.IdleDeviceVo">
+        SELECT ed.id as deviceId, ed.deviceCode,ed.borrowTimes
+        FROM t_eds_device ed
+        WHERE ed.spId = #{spId} and ed.userId is null and ed.orderId is null AND ed.deviceStatus = 'S_SPZT_DZJ' AND ed.dataStatus = 1
+    </select>
+
+    <select id="queryUserDeviceList" resultType="com.eds.ma.bis.device.vo.UserDeviceVo">
+        SELECT ed.id as deviceId, ed.deviceCode,ed.borrowTimes
+        FROM t_eds_device ed
+        WHERE  ed.userId = #{userId} AND ed.deviceStatus = 'S_SPZT_SYZ' AND ed.dataStatus = 1
+    </select>
+
     <update id="updateRentDevice">
         UPDATE t_eds_device
-        SET borrowTimes = borrowTimes + 1,userId = #{userId},orderId = #{orderId},deviceStatus = #{S_SPZT_SYZ}
+        SET borrowTimes = borrowTimes + 1,userId = #{userId},orderId = #{orderId},deviceStatus = 'S_SPZT_SYZ'
         WHERE id=#{deviceId}
+    </update>
+
+    <update id="updateReturnDevice">
+        UPDATE t_eds_device
+        SET spId = #{spId},userId = null ,orderId = null,deviceStatus = 'S_SPZT_DZJ'
+        WHERE id=#{deviceId} and orderId = #{orderId} and userId = #{userId} and dataStatus = 1
     </update>
 
 

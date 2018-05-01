@@ -28,9 +28,6 @@ public class OrderServiceImpl implements IOrderService {
     @Autowired
     private BaseDaoSupport dao;
 
-    @Autowired
-    private IUserService userService;
-
     @Override
     public Order queryOrderById(Long orderId) {
         return dao.queryById(orderId, Order.class);
@@ -90,9 +87,8 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public Pagination queryOrders(String orderStatus, String openId, Integer pageNo, Integer pageSize) {
+    public Pagination queryOrders(String orderStatus, User user, Integer pageNo, Integer pageSize) {
         //通过openId查询userId
-        User user = userService.checkUserExist(openId);
         Ssqb queryOrderListSqb = Ssqb.create("com.eds.order.queryOrders")
                 .setParam("orderStatus", orderStatus)
                 .setParam("userId", user.getId())
@@ -102,9 +98,8 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public OrderDetailVo queryOrderDetail(String openId, Long orderId) {
+    public OrderDetailVo queryOrderDetail(User user, Long orderId) {
         //通过openId查询userId
-        User user = userService.checkUserExist(openId);
         Ssqb queryOrderDetailSqb = Ssqb.create("com.eds.order.queryOrderDetail")
                 .setParam("userId", user.getId())
                 .setParam("id", orderId);
@@ -112,9 +107,8 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public Long queryLatestOrderId(String openId) {
+    public Long queryLatestOrderId(User user) {
         //通过openId查询userId
-        User user = userService.checkUserExist(openId);
         Ssqb queryOrderIdSqb = Ssqb.create("com.eds.order.queryLatestOrderId")
                 .setParam("userId", user.getId());
         return dao.findForObj(queryOrderIdSqb,Long.class);

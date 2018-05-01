@@ -139,8 +139,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public UserWalletVo queryUserWallet(String openId) {
-        User user = checkUserExist(openId);
+    public UserWalletVo queryUserWallet(User user) {
         UserWallet userWallet = queryUserWalletByUserId(user.getId());
         UserWalletVo userWalletVo = new UserWalletVo();
         userWalletVo.setUserId(userWallet.getUserId());
@@ -150,9 +149,8 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public int walletWithdraw(String openId, String smsCode) {
+    public int walletWithdraw(User user, String smsCode) {
         int result = 1;
-        User user = checkUserExist(openId);
         Long userId = user.getId();
         UserWallet userWallet = queryUserWalletByUserIdWithLock(userId);
         BigDecimal balance = userWallet.getBalance();
@@ -180,7 +178,7 @@ public class UserServiceImpl implements IUserService {
             throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_EXPIRED);
         }
 
-        List<PayOrder> payOrderList = orderService.queryToRefundPayOrder(openId);
+        List<PayOrder> payOrderList = orderService.queryToRefundPayOrder(user.getOpenId());
         if (ListUtil.isNotEmpty(payOrderList)) {
             //校验提现的金额应该大于钱包中的余额
             BigDecimal allWxRefundMoney = payOrderList.stream()
@@ -367,8 +365,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public void sendWithdrawSmsCode(String openId, String mobile) {
-        User user = checkUserExist(openId);
+    public void sendWithdrawSmsCode(User user, String mobile) {
         Long userId = user.getId();
         UserWallet userWallet = queryUserWalletByUserIdWithLock(userId);
         BigDecimal balance = userWallet.getBalance();

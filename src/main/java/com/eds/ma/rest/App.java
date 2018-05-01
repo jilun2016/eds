@@ -1,6 +1,5 @@
 package com.eds.ma.rest;
 
-import com.eds.ma.rest.integration.AuthoricationFilter;
 import com.eds.ma.rest.integration.AuthoricationFilterFeature;
 import com.eds.ma.rest.integration.BizExceptionMapper;
 import com.eds.ma.rest.integration.NotFoundExceptionMapper;

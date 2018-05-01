@@ -46,7 +46,7 @@ public class OrderResource extends BaseAuthedResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Pagination queryOrders(@QueryParam("orderStatus") String orderStatus, @BeanParam PageRequest pageRequest) {
 		logger.debug("----OrderResource.queryOrders({},{})",orderStatus,super.getOpenId());
-		return orderService.queryOrders(orderStatus,super.getOpenId(),pageRequest.getPageNo(),pageRequest.getPageSize());
+		return orderService.queryOrders(orderStatus,super.getUser(),pageRequest.getPageNo(),pageRequest.getPageSize());
 	}
 
     /**
@@ -60,7 +60,7 @@ public class OrderResource extends BaseAuthedResource {
     public OrderDetailVo queryOrderDetail(@NotNull(message="订单ID不允许为空") @PathParam("orderId") Long orderId) {
         logger.debug("OrderResource.queryOrderDetail({},{})",super.getOpenId(), orderId);
 
-        OrderDetailVo orderDetailVO = orderService.queryOrderDetail(super.getOpenId(),orderId);
+        OrderDetailVo orderDetailVO = orderService.queryOrderDetail(super.getUser(),orderId);
         if(orderDetailVO == null) {
             throw new NotFoundException("未查询到该订单详情");
         } else {
@@ -77,7 +77,7 @@ public class OrderResource extends BaseAuthedResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response queryLatestOrderId() {
         logger.debug("OrderResource.queryLatestOrderId({})",super.getOpenId());
-        Long orderId = orderService.queryLatestOrderId(super.getOpenId());
+        Long orderId = orderService.queryLatestOrderId(super.getUser());
         Map<String,Long> resultMap = new HashMap<>(1);
         resultMap.put("orderId",orderId);
         return Response.ok(resultMap).build();

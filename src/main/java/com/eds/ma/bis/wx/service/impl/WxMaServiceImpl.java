@@ -9,6 +9,7 @@ import com.eds.ma.config.SysConfig;
 import com.eds.ma.exception.BizCoreRuntimeException;
 import com.eds.ma.rest.common.BizErrorConstants;
 import com.eds.ma.util.AesCbcUtil;
+import com.eds.ma.util.CookieUtils;
 import com.eds.ma.util.HTTPUtil;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
 import com.xcrm.log.Logger;
@@ -44,7 +45,7 @@ public class WxMaServiceImpl implements IWxMaService {
         sessionParaMap.put("js_code",code);
         sessionParaMap.put("appid",sysConfig.getWxMaAppId());
         sessionParaMap.put("grant_type","authorization_code");
-        sessionParaMap.put("sysConfig",sysConfig.getWxMaAppSecret());
+        sessionParaMap.put("secret",sysConfig.getWxMaAppSecret());
 
         String resultJson = HTTPUtil.sendGetString(sysConfig.getWxMaSessionUrl(),sessionParaMap);
         logger.info("WxMinaServiceImpl.queryMaSession.result:{}",resultJson);
@@ -57,6 +58,9 @@ public class WxMaServiceImpl implements IWxMaService {
                 String result = AesCbcUtil.decrypt(encryptedData, sessionKey, iv, "UTF-8");
                 if (StringUtils.isNotEmpty(result)) {
                     JSONObject userInfoJSON = JSONObject.parseObject(result);
+                    if(StringUtils.isBlank(userInfoJSON.getString("openId"))){
+                        throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
+                    }
                     UserInfoVo userInfoVo = new UserInfoVo();
                     userInfoVo.setOpenId(userInfoJSON.getString("openId"));
                     userInfoVo.setHeadimgurl(userInfoJSON.getString("avatarUrl"));

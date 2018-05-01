@@ -74,18 +74,18 @@ public interface IUserService {
 
     /**
      * 查询用户钱包
-     * @param openId
+     * @param user
      * @return
      */
-    UserWalletVo queryUserWallet(String openId);
+    UserWalletVo queryUserWallet(User user);
 
     /**
      * 用户提现
      * 提现金额 = 余额+押金
-     * @param openId
+     * @param user
      * @param smsCode
      */
-    int walletWithdraw(String openId, String smsCode);
+    int walletWithdraw(User user, String smsCode);
 
     /**
      * 用户退款失败回滚
@@ -113,8 +113,8 @@ public interface IUserService {
 
     /**
      * 发送用户提现短信验证码
-     * @param openId
+     * @param user
      * @param mobile
      */
-    void sendWithdrawSmsCode(String openId, String mobile);
+    void sendWithdrawSmsCode(User user, String mobile);
 }

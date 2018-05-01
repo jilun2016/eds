@@ -47,11 +47,6 @@ public class WxRefundPayServiceImpl implements IWxRefundPayService {
     private SysConfig sysConfig;
 
     @Autowired
-    private IUserService userService;
-
-
-
-    @Autowired
     private BaseDaoSupport dao;
     @Override
     public void submiteRefund(PayOrder payOrder,BigDecimal tkFee){

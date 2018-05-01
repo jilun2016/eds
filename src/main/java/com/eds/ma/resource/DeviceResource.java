@@ -7,6 +7,7 @@ import com.eds.ma.bis.device.vo.DeviceInfoVo;
 import com.eds.ma.config.SysConfig;
 import com.eds.ma.resource.request.DeviceDepositPrePayRequest;
 import com.eds.ma.resource.request.DeviceRentRequest;
+import com.eds.ma.resource.request.DeviceReturnRequest;
 import com.eds.ma.resource.request.SearchDeviceRequest;
 import com.eds.ma.util.DistanceUtil;
 import com.xcrm.log.Logger;
@@ -86,6 +87,20 @@ public class DeviceResource extends BaseAuthedResource{
 	public Response deviceRent(@Valid DeviceRentRequest request) {
 		logger.debug("WxMaResource.deviceRent({},{})",super.getOpenId(), request);
         deviceService.deviceRent(request.getDeviceId(),super.getOpenId(),request.getUserLat(),request.getUserLng());
+		return Response.status(Response.Status.CREATED).build();
+	}
+
+	/**
+	 * 租借设备
+	 * @param request
+	 */
+	@POST
+	@Path("/device/return")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response deviceReturn(@Valid DeviceReturnRequest request) {
+		logger.debug("WxMaResource.deviceReturn({},{},{})",super.getOpenId(),super.getUser(), request);
+		deviceService.deviceReturn(request.getDeviceId(),super.getUser(),request.getUserLat(),request.getUserLng());
 		return Response.status(Response.Status.CREATED).build();
 	}
 

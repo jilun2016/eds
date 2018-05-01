@@ -4,6 +4,7 @@ import com.eds.ma.bis.order.entity.FinanceIncome;
 import com.eds.ma.bis.order.entity.Order;
 import com.eds.ma.bis.order.entity.PayOrder;
 import com.eds.ma.bis.order.vo.OrderDetailVo;
+import com.eds.ma.bis.user.entity.User;
 import com.xcrm.common.page.Pagination;
 
 import java.math.BigDecimal;
@@ -74,27 +75,27 @@ public interface IOrderService {
     /**
      * 查询订单列表
      * @param orderStatus
-     * @param openId
-     * @param pageSize
+     * @param user
      * @param pageNo
+     * @param pageSize
      * @return
      */
-    Pagination queryOrders(String orderStatus, String openId, Integer pageNo, Integer pageSize);
+    Pagination queryOrders(String orderStatus, User user, Integer pageNo, Integer pageSize);
 
     /**
      * 查询订单详情
      *
-     * @param openId
+     * @param user
      * @param orderId
      * @return
      */
-    OrderDetailVo queryOrderDetail(String openId, Long orderId);
+    OrderDetailVo queryOrderDetail(User user, Long orderId);
 
     /**
      * 查询最新的使用中的订单id
-     * @param openId
+     * @param user
      * @return
      */
-    Long queryLatestOrderId(String openId);
+    Long queryLatestOrderId(User user);
 
 }

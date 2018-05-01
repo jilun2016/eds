@@ -26,6 +26,16 @@ public class DeviceRentDetailVo {
     private String deviceStatus;
 
     /**
+     * 用户id
+     */
+    private Long userId;
+
+    /**
+     * 订单id
+     */
+    private Long orderId;
+
+    /**
      * 设备精度
      */
     private BigDecimal deviceLng;
@@ -59,6 +69,22 @@ public class DeviceRentDetailVo {
         this.deviceStatus = deviceStatus;
     }
 
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
+    }
+
     public BigDecimal getDeviceLng() {
         return deviceLng;
     }
@@ -81,6 +107,8 @@ public class DeviceRentDetailVo {
         sb.append("deviceId=").append(deviceId);
         sb.append(", spId=").append(spId);
         sb.append(", deviceStatus='").append(deviceStatus).append('\'');
+        sb.append(", userId=").append(userId);
+        sb.append(", orderId=").append(orderId);
         sb.append(", deviceLng=").append(deviceLng);
         sb.append(", deviceLat=").append(deviceLat);
         sb.append('}');

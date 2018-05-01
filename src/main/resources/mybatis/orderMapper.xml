@@ -47,5 +47,12 @@
         WHERE o.userId = #{userId} AND o.orderStatus = 'S_DDZT_JXZ' AND o.dataStatus = 1
     </select>
 
+    <update id="updateOrder">
+        UPDATE t_eds_order o
+        SET o.rentEndTime=#{rentEndTime},o.returnSpId =#{spId},
+            o.orderStatus = 'S_DDZT_YJS',o.balance = #{balance},o.totalFee = #{totalFee}
+        WHERE o.id=#{orderId} AND o.deviceId = #{deviceId} and o.userId = #{userId} and o.orderStatus = 'S_DDZT_JXZ'
+    </update>
+
 
 </mapper>

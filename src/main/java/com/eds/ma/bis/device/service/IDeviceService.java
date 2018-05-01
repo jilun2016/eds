@@ -2,8 +2,8 @@ package com.eds.ma.bis.device.service;
 
 import com.eds.ma.bis.device.entity.Device;
 import com.eds.ma.bis.device.entity.UserDeviceRecord;
-import com.eds.ma.bis.device.vo.DeviceInfoVo;
-import com.eds.ma.bis.device.vo.DeviceRentDetailVo;
+import com.eds.ma.bis.device.vo.*;
+import com.eds.ma.bis.user.entity.User;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -23,6 +23,18 @@ public interface IDeviceService {
     Device queryDeviceById(Long deviceId);
 
     /**
+     * 查询店铺所属的空闲设备信息
+     * @param spId 店铺id
+     */
+    List<IdleDeviceVo> queryIdleDeviceListBySpId(Long spId);
+
+    /**
+     * 通过用户id查询用户使用中的设备
+     * @param userId 用户id
+     */
+    List<UserDeviceVo> queryUserDeviceList(Long userId);
+
+    /**
      * 查询用户使用中的设备
      * @param userId
      * @return
@@ -40,8 +52,9 @@ public interface IDeviceService {
     /**
      * 查询待租借设备信息
      * @param deviceId
+     * @param userId
      */
-    DeviceRentDetailVo queryRentDeviceById(Long deviceId);
+    DeviceRentDetailVo queryRentDeviceById(Long deviceId, Long userId);
 
     /**
      * 查询指定范围附近的设备
@@ -54,6 +67,15 @@ public interface IDeviceService {
     List<DeviceInfoVo.DeviceDetailVo> queryNearbyDevices(double minUserLat, double maxUserLat, double minUserLng, double maxUserLng);
 
     /**
+     * 查询指定坐标下指定范围内的附近的店铺信息
+     * @param userLat   用户纬度
+     * @param userLng   用户精度
+     * @param nearbyDistance 指定范围
+     * @return
+     */
+    SpDetailVo queryNearestbySpByCoordinate(double userLat, double userLng,Integer nearbyDistance);
+
+    /**
      * 租借设备
      * @param deviceId
      * @param openId
@@ -61,6 +83,15 @@ public interface IDeviceService {
      * @param userLng
      */
     void deviceRent(Long deviceId, String openId, BigDecimal userLat, BigDecimal userLng);
+
+    /**
+     * 归还设备
+     * @param deviceId
+     * @param user
+     * @param userLat
+     * @param userLng
+     */
+    void deviceReturn(Long deviceId, User user, BigDecimal userLat, BigDecimal userLng);
 
     /**
      * 设备押金支付
@@ -73,4 +104,5 @@ public interface IDeviceService {
      * @param userDeviceRecord
      */
     void saveUserDeviceRecord(UserDeviceRecord userDeviceRecord);
+
 }

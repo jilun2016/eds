@@ -6,8 +6,7 @@ import com.eds.ma.bis.device.DeviceStatusEnum;
 import com.eds.ma.bis.device.OrderStatusEnum;
 import com.eds.ma.bis.device.entity.Device;
 import com.eds.ma.bis.device.entity.UserDeviceRecord;
-import com.eds.ma.bis.device.vo.DeviceInfoVo;
-import com.eds.ma.bis.device.vo.DeviceRentDetailVo;
+import com.eds.ma.bis.device.vo.*;
 import com.eds.ma.bis.order.OrderCodeCreater;
 import com.eds.ma.bis.order.TransTypeEnum;
 import com.eds.ma.bis.order.entity.Order;
@@ -62,6 +61,19 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
+    public List<IdleDeviceVo> queryIdleDeviceListBySpId(Long spId) {
+        Ssqb queryDeviceSqb = Ssqb.create("com.eds.device.queryIdleDeviceListBySpId")
+                .setParam("spId",spId);
+        return dao.findForList(queryDeviceSqb,IdleDeviceVo.class);
+    }
+
+    @Override
+    public List<UserDeviceVo> queryUserDeviceList(Long userId) {
+        Ssqb queryDeviceSqb = Ssqb.create("com.eds.device.queryUserDeviceList");
+        return dao.findForList(queryDeviceSqb,UserDeviceVo.class);
+    }
+
+    @Override
     public int queryUserRentingDeviceCount(Long userId) {
         Ssqb queryDeviceCountSqb = Ssqb.create("com.eds.device.queryUserRentingDeviceCount")
                 .setParam("userId",userId);
@@ -78,9 +90,10 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
-    public DeviceRentDetailVo queryRentDeviceById(Long deviceId) {
+    public DeviceRentDetailVo queryRentDeviceById(Long deviceId, Long userId) {
         Ssqb queryDeviceSqb = Ssqb.create("com.eds.device.queryRentDeviceById")
-                .setParam("deviceId",deviceId);
+                .setParam("deviceId",deviceId)
+                .setParam("userId",userId);
         return dao.findForObj(queryDeviceSqb,DeviceRentDetailVo.class);
     }
 
@@ -95,9 +108,18 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
+    public SpDetailVo queryNearestbySpByCoordinate(double userLat, double userLng, Integer nearbyDistance) {
+        Ssqb queryDeviceSqb = Ssqb.create("com.eds.device.queryNearbySpByCoordinate")
+                .setParam("userLat",userLat)
+                .setParam("userLng",userLng)
+                .setParam("nearbyDistance",nearbyDistance);
+        return dao.findForObj(queryDeviceSqb,SpDetailVo.class);
+    }
+
+    @Override
     public void deviceRent(Long deviceId, String openId, BigDecimal userLat, BigDecimal userLng) {
         //查询设备信息进行校验
-        DeviceRentDetailVo deviceRentDetailVo = queryRentDeviceById(deviceId);
+        DeviceRentDetailVo deviceRentDetailVo = queryRentDeviceById(deviceId, null);
         if(Objects.isNull(deviceRentDetailVo)){
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_NOT_EXIST_ERROR);
         }
@@ -112,7 +134,7 @@ public class DeviceServiceImpl implements IDeviceService {
                 ,deviceRentDetailVo.getDeviceLat().doubleValue()
                 ,userLat.doubleValue(), userLng.doubleValue());
         if(checkDistance >edsConfig.getValidDistance()){
-            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_OUT_RANGE);
+            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RENT_OUT_RANGE);
         }
 
         //对用户信息,钱包进行校验
@@ -153,8 +175,98 @@ public class DeviceServiceImpl implements IDeviceService {
         userDeviceRecord.setOpTime(now);
         userDeviceRecord.setOrderId(order.getId());
         userDeviceRecord.setUserId(userId);
+        userDeviceRecord.setSpId(deviceRentDetailVo.getSpId());
         userDeviceRecord.setUserLat(userLat);
         userDeviceRecord.setUserLng(userLng);
+        saveUserDeviceRecord(userDeviceRecord);
+    }
+
+    @Override
+    public void deviceReturn(Long deviceId, User user, BigDecimal userLat, BigDecimal userLng) {
+        //校验用户信息
+        Long userId = user.getId();
+
+        //查询设备信息进行校验 设备状态是否租借中
+        DeviceRentDetailVo deviceRentDetailVo = queryRentDeviceById(deviceId,userId);
+        if(Objects.isNull(deviceRentDetailVo)){
+            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_NOT_EXIST_ERROR);
+        }
+
+        if(Objects.isNull(deviceRentDetailVo.getOrderId())){
+            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_ORDER_ID_NOT_EXIST_ERROR);
+        }
+
+        if(!Objects.equals(deviceRentDetailVo.getDeviceStatus(), DeviceStatusEnum.S_SPZT_SYZ.value())){
+            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_ON_RETURN_STATUS_ERROR);
+        }
+
+        EdsConfig edsConfig = edsConfigService.queryEdsConfig();
+
+
+        //获取设备的位置信息和用户的位置信息是否在有效距离内
+        //设备,用户位置校验
+        double checkDistance = DistanceUtil.getDistance(deviceRentDetailVo.getDeviceLng().doubleValue()
+                ,deviceRentDetailVo.getDeviceLat().doubleValue()
+                ,userLat.doubleValue(), userLng.doubleValue());
+        if(checkDistance >edsConfig.getValidDistance()){
+            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_OUT_RANGE);
+        }
+
+        //获取设备的位置信息和店铺的位置是否在有效距离内(硬件指令获取硬件位置)
+        BigDecimal deviceLng = BigDecimal.ZERO;
+
+        BigDecimal deviceLat = BigDecimal.ZERO;
+
+        //用户的位置和店铺的位置是否在有效距离内
+        SpDetailVo spDetailVo = queryNearestbySpByCoordinate(userLat.doubleValue(), userLng.doubleValue(), edsConfig.getNearbyDistance());
+        if(Objects.isNull(spDetailVo)){
+            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_SP_NOT_EXIST);
+        }
+        //验证成功,更新订单,归还设备,更新设备位置信息,设备状态
+        Date now = DateFormatUtils.getNow();
+        //计算金额
+        BigDecimal orderMoney = BigDecimal.ZERO;
+        BigDecimal totalFee = BigDecimal.ZERO;
+        //更新订单
+        Ssqb updateOrderSqb = Ssqb.create("com.eds.device.updateOrder")
+                .setParam("orderId",deviceRentDetailVo.getOrderId())
+                .setParam("deviceId",deviceRentDetailVo.getDeviceId())
+                .setParam("userId",userId)
+                .setParam("spId",spDetailVo.getSpId())
+                .setParam("orderMoney",orderMoney)
+                .setParam("totalFee",totalFee)
+                .setParam("rentEndTime",now);
+        int updateOrderResult =  dao.updateByMybatis(updateOrderSqb);
+
+        if(updateOrderResult <= 0){
+            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_ORDER_NOT_EXIST_ERROR);
+        }
+
+        //更新设备位置信息,及设备状态
+        Ssqb updateDeviceSqb = Ssqb.create("com.eds.device.updateReturnDevice")
+                .setParam("orderId",deviceRentDetailVo.getOrderId())
+                .setParam("deviceId",deviceRentDetailVo.getDeviceId())
+                .setParam("userId",userId)
+                .setParam("spId",spDetailVo.getSpId());
+        int updateDeviceResult = dao.updateByMybatis(updateDeviceSqb);
+        if(updateDeviceResult<= 0){
+            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_ORDER_NOT_EXIST_ERROR);
+        }
+
+        //保存租借记录
+        //生成设备租借记录
+        UserDeviceRecord userDeviceRecord = new UserDeviceRecord();
+        userDeviceRecord.setCreated(now);
+        userDeviceRecord.setDeviceId(deviceId);
+        userDeviceRecord.setDeviceLat(deviceLat);
+        userDeviceRecord.setDeviceLng(deviceLng);
+        userDeviceRecord.setDeviceStatus(DeviceStatusEnum.S_SPZT_DZJ.value());
+        userDeviceRecord.setOpTime(now);
+        userDeviceRecord.setOrderId(deviceRentDetailVo.getOrderId());
+        userDeviceRecord.setUserId(userId);
+        userDeviceRecord.setUserLat(userLat);
+        userDeviceRecord.setUserLng(userLng);
+        userDeviceRecord.setSpId(spDetailVo.getSpId());
         saveUserDeviceRecord(userDeviceRecord);
     }
 
