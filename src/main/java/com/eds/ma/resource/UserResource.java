@@ -1,13 +1,17 @@
 package com.eds.ma.resource;
 
+import com.eds.ma.bis.common.service.IEdsConfigService;
 import com.eds.ma.bis.device.service.IDeviceService;
 import com.eds.ma.bis.device.vo.UserDeviceVo;
+import com.eds.ma.bis.order.TransTypeEnum;
 import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.bis.user.vo.UserInfoVo;
 import com.eds.ma.bis.user.vo.UserWalletVo;
+import com.eds.ma.bis.wx.service.IWxPayService;
 import com.eds.ma.config.SysConfig;
 import com.eds.ma.exception.BizCoreRuntimeException;
+import com.eds.ma.resource.request.BalancePayRequest;
 import com.eds.ma.resource.request.SendSmsCodeRequest;
 import com.eds.ma.resource.request.UserWithdrawRequest;
 import com.eds.ma.rest.common.BizErrorConstants;
@@ -16,7 +20,6 @@ import com.eds.ma.rest.integration.annotation.NoAuth;
 import com.eds.ma.util.CookieUtils;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.TaskExecutor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,8 +28,9 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -44,6 +48,12 @@ public class UserResource extends BaseAuthedResource{
 
     @Autowired
     private IDeviceService deviceService;
+
+    @Autowired
+    private IWxPayService wxPayService;
+
+    @Autowired
+    private IEdsConfigService edsConfigService;
 
     @Autowired
     private SysConfig sysConfig;

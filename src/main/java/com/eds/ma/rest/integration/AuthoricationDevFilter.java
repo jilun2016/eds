@@ -2,14 +2,10 @@ package com.eds.ma.rest.integration;
 
 import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.service.IUserService;
-import com.eds.ma.config.SysConfig;
-import com.eds.ma.exception.BizCoreRuntimeException;
-import com.eds.ma.rest.common.BizErrorConstants;
 import com.eds.ma.rest.common.CommonConstants;
 import com.eds.ma.rest.common.ErrorMessage;
 import com.eds.ma.rest.common.RestErrorCode;
 import com.eds.ma.util.CookieUtils;
-import com.eds.ma.util.ErrorCodeMessageUtil;
 import com.xcrm.log.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,30 +25,23 @@ import java.util.Objects;
  * @Author gaoyan
  * @Date: 2018/2/10
  */
-public class AuthoricationFilter implements ContainerRequestFilter,ContainerResponseFilter {
+public class AuthoricationDevFilter implements ContainerRequestFilter,ContainerResponseFilter {
 	
-	private static Logger logger = Logger.getLogger(AuthoricationFilter.class);
+	private static Logger logger = Logger.getLogger(AuthoricationDevFilter.class);
 
     @Autowired
     private IUserService userService;
 
 	@Override
 	public void filter(ContainerRequestContext requestContext) {
-
-        Cookie cookieFromOpenId = CookieUtils.getCookie(requestContext.getCookies(), CommonConstants.WX_OPEN_ID_COOKIE);
-        //cookie中没有openid,需要重新认证处理
-        if (Objects.isNull(cookieFromOpenId) || StringUtils.isBlank(cookieFromOpenId.getValue())) {
-            requestContext.abortWith(buildErrorMessageResponse(RestErrorCode.WX_AUTH_USER_INFO_ERROR));
-            return;
-        }
-
-        User user = userService.queryUserByOpenId(cookieFromOpenId.getValue());
+       String openId = "oiyZc5Qn8pe8wnO_BDl142Ozj6eE";
+        User user = userService.queryUserByOpenId(openId);
         if (Objects.isNull(user) || Objects.isNull(user.getId())) {
             requestContext.abortWith(buildErrorMessageResponse(RestErrorCode.WX_AUTH_USER_INFO_ERROR));
             return;
         }
         requestContext.setProperty(CommonConstants.EDS_USER, user);
-        requestContext.setProperty(CommonConstants.WX_OPEN_ID_COOKIE, cookieFromOpenId.getValue());
+        requestContext.setProperty(CommonConstants.WX_OPEN_ID_COOKIE, openId);
 	}
 
 	@Override

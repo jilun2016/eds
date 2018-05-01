@@ -94,12 +94,6 @@ public interface IDeviceService {
     void deviceReturn(Long deviceId, User user, BigDecimal userLat, BigDecimal userLng);
 
     /**
-     * 设备押金支付
-     * @param openId
-     */
-    Map<String, Object> deviceDepositPrepay(String openId);
-
-    /**
      * 保存设备租借记录
      * @param userDeviceRecord
      */

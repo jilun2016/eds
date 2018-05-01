@@ -7,8 +7,8 @@
         FROM t_eds_sp es
         LEFT JOIN t_eds_device ed ON es.id = ed.spId
         WHERE es.dataStatus = 1 AND ed.dataStatus = 1 AND ed.deviceStatus = 'S_SPZT_DZJ'
-            AND es.spLat &gt;= #{minUserLat} and es.spLat &lt;= #{maxUserLat}
-            AND es.spLng &gt;= #{minUserLng} and es.spLng &lt;= #{maxUserLng}
+            AND es.spLat &gt;= #{minDeviceLat} and es.spLat &lt;= #{maxDeviceLat}
+            AND es.spLng &gt;= #{minDeviceLng} and es.spLng &lt;= #{maxDeviceLng}
     </select>
 
     <select id="queryNearbySpByCoordinate" resultType="com.eds.ma.bis.device.vo.SpDetailVo">

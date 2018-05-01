@@ -18,7 +18,6 @@ import com.eds.ma.bis.wx.sdk.pay.payment.bean.UnifiedOrderResponse;
 import com.eds.ma.bis.wx.sdk.pay.util.SignatureUtil;
 import com.eds.ma.bis.wx.service.IWxPayService;
 import com.eds.ma.config.SysConfig;
-import com.xcrm.cloud.database.db.BaseDaoSupport;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.log.Logger;
 import org.apache.commons.lang.RandomStringUtils;
@@ -65,9 +64,6 @@ public class WxPayServiceImpl implements IWxPayService {
 
     @Autowired
     private IOrderService orderService;
-
-    @Autowired
-    private BaseDaoSupport dao;
 
     /**
      * 获取支付订单编号

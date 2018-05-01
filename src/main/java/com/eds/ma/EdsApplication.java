@@ -6,6 +6,7 @@ import org.glassfish.jersey.servlet.ServletProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +31,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @ComponentScan(basePackages = {"com.eds.ma", "com.xcrm.cloud.database"})
 @EnableScheduling
 @EnableAsync
+@ServletComponentScan
 public class EdsApplication extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {

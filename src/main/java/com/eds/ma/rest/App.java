@@ -29,7 +29,6 @@ public class App extends ResourceConfig {
     private void scan(String... packages) {
         for (String pack : packages) {
             Reflections reflections = new Reflections(pack);
-            reflections.getTypesAnnotatedWith(Provider.class).parallelStream().forEach(this::register);
             reflections.getTypesAnnotatedWith(Path.class).parallelStream().forEach(this::register);
         }
     }

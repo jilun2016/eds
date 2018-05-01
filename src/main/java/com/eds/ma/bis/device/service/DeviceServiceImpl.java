@@ -46,9 +46,6 @@ public class DeviceServiceImpl implements IDeviceService {
     private IUserService userService;
 
     @Autowired
-    private IWxPayService wxPayService;
-
-    @Autowired
     private IOrderService orderService;
 
     @Autowired
@@ -268,13 +265,6 @@ public class DeviceServiceImpl implements IDeviceService {
         userDeviceRecord.setUserLng(userLng);
         userDeviceRecord.setSpId(spDetailVo.getSpId());
         saveUserDeviceRecord(userDeviceRecord);
-    }
-
-    @Override
-    public Map<String, Object> deviceDepositPrepay(String openId) {
-        //计算押金
-        BigDecimal defaultUnitDeposit = edsConfigService.queryEdsConfigDeposit();
-        return wxPayService.prepay(openId, TransTypeEnum.S_JYLX_YJCZ.value(),defaultUnitDeposit,"支付押金");
     }
 
     @Override

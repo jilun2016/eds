@@ -38,9 +38,6 @@ public class DeviceResource extends BaseAuthedResource{
 	@Autowired
 	private IEdsConfigService edsConfigService;
 
-	@Autowired
-	private SysConfig sysConfig;
-
 	/**
 	 * 查询指定范围的设备
 	 * @param request 查询条件
@@ -48,7 +45,7 @@ public class DeviceResource extends BaseAuthedResource{
 	@GET
 	@Path("/nearby/devices")
 	@Produces(MediaType.APPLICATION_JSON)
-	public DeviceInfoVo queryNearbyDevices(@BeanParam SearchDeviceRequest request) {
+	public DeviceInfoVo queryNearbyDevices(@Valid @BeanParam SearchDeviceRequest request) {
 		logger.debug("----DeviceResource.queryNearbyDevices({})----", request);
 		if(Objects.isNull(request.getDistance())){
 			EdsConfig edsConfig = edsConfigService.queryEdsConfig();
@@ -62,19 +59,6 @@ public class DeviceResource extends BaseAuthedResource{
         deviceInfoVo.setDeviceDetailVoList(deviceDetailVos);
         return deviceInfoVo;
 	}
-
-    /**
-     * 微信押金支付
-     */
-    @POST
-    @Path("/deposit/pay")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response deviceDepositPrepay(){
-        logger.debug("WxMaResource.depositPrepay({})",super.getOpenId());
-        Map<String, Object> paySignMap = deviceService.deviceDepositPrepay(super.getOpenId());
-        return Response.ok(paySignMap).build();
-    }
 
 	/**
 	 * 租借设备

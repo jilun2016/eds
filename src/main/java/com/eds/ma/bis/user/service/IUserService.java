@@ -7,6 +7,7 @@ import com.eds.ma.bis.user.vo.UserWalletVo;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户接口
@@ -117,4 +118,5 @@ public interface IUserService {
      * @param mobile
      */
     void sendWithdrawSmsCode(User user, String mobile);
+
 }

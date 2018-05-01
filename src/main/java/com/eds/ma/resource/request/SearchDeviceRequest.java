@@ -3,6 +3,7 @@ package com.eds.ma.resource.request;
 import org.hibernate.validator.constraints.Range;
 
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.QueryParam;
 import java.math.BigDecimal;
 
 /**
@@ -15,12 +16,14 @@ public class SearchDeviceRequest{
     /**
      * 用户精度
      */
+    @QueryParam("userLng")
     @NotNull(message = "用户精度不允许为空")
     private BigDecimal userLng;
 
     /**
      * 用户纬度
      */
+    @QueryParam("userLat")
     @NotNull(message = "用户纬度不允许为空")
     private BigDecimal userLat;
 
@@ -28,6 +31,7 @@ public class SearchDeviceRequest{
      * 设备距离范围 单位 米 m
      * 默认5km
      */
+    @QueryParam("distance")
     @Range(min=0,message = "设备距离范围参数无效")
     private Integer distance;
 

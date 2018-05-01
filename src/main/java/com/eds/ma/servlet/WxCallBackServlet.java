@@ -18,7 +18,7 @@ import java.io.IOException;
  * @Author gaoyan
  * @Date: 2018/4/5
  */
-@WebServlet(urlPatterns="/v1/pay/callback")
+@WebServlet(urlPatterns="/v1/wx/pay/callback")
 public class WxCallBackServlet extends HttpServlet {
 
     private static final long serialVersionUID = -8685285401859800066L;
