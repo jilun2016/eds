@@ -105,14 +105,6 @@ public interface IUserService {
     void asyncSaveOpenId(String openId, String nickname, String headimgurl, String rawData);
 
     /**
-     * 异步退款处理
-     * @param refundPayOrderPool
-     * @param toRefundMoney
-     * @return 退款部分失败 0 退款成功 :1
-     */
-    int asyncPayRefund(List<PayOrder> refundPayOrderPool, BigDecimal toRefundMoney);
-
-    /**
      * 发送用户提现短信验证码
      * @param user
      * @param mobile

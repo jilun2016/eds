@@ -1,19 +1,16 @@
 package com.eds.ma.bis.user.service;
 
-import com.eds.ma.bis.common.service.IEdsConfigService;
 import com.eds.ma.bis.message.TmplEvent;
 import com.eds.ma.bis.message.service.IMessageService;
 import com.eds.ma.bis.message.vo.SmsMessageContent;
 import com.eds.ma.bis.order.TransTypeEnum;
 import com.eds.ma.bis.order.entity.PayOrder;
 import com.eds.ma.bis.order.service.IOrderService;
+import com.eds.ma.bis.thread.BusinessAsyncProcess;
 import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.entity.UserWallet;
-import com.eds.ma.bis.user.vo.PayRefundVo;
 import com.eds.ma.bis.user.vo.UserWalletVo;
 import com.eds.ma.bis.wx.PayStatusEnum;
-import com.eds.ma.bis.wx.service.IWxPayService;
-import com.eds.ma.bis.wx.service.IWxRefundPayService;
 import com.eds.ma.exception.BizCoreRuntimeException;
 import com.eds.ma.rest.common.BizErrorConstants;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
@@ -22,22 +19,21 @@ import com.xcrm.cloud.database.db.query.Ssqb;
 import com.xcrm.cloud.database.db.query.expression.Restrictions;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.common.util.ListUtil;
-import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -46,8 +42,8 @@ import java.util.stream.Collectors;
  * @Author gaoyan
  * @Date: 2018/2/10
  */
-@Service
 @Transactional
+@Service
 public class UserServiceImpl implements IUserService {
 
     protected Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
@@ -59,13 +55,10 @@ public class UserServiceImpl implements IUserService {
     private IOrderService orderService;
 
     @Autowired
-    private IWxRefundPayService wxRefundPayService;
+    private BusinessAsyncProcess businessAsyncProcess;
 
     @Autowired
     private IMessageService messageService;
-
-    @Autowired
-    private TaskExecutor taskExecutor;
 
     @Override
     public void saveUser(User user) {
@@ -237,11 +230,11 @@ public class UserServiceImpl implements IUserService {
             //发起多笔支付退款
             //押金退款
             if (ListUtil.isNotEmpty(depositPayOrderList)) {
-                result = asyncPayRefund(depositPayOrderList, deposit);
+                businessAsyncProcess.asyncPayRefund(depositPayOrderList, deposit);
             }
             //余额退款
             if (ListUtil.isNotEmpty(balancePayOrderList)) {
-                result = asyncPayRefund(balancePayOrderList, balance);
+                businessAsyncProcess.asyncPayRefund(balancePayOrderList, balance);
             }
         } else {
             throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_ZERO_ERROR);
@@ -261,7 +254,7 @@ public class UserServiceImpl implements IUserService {
                 PayOrder updatePayOrder = new PayOrder();
                 updatePayOrder.setPayStatus(PayStatusEnum.TRADE_SUCCESS.value());
                 QueryBuilder updateQb = QueryBuilder.where(Restrictions.eq("id", revertPayOrder.getId()))
-                        .and(Restrictions.eq("userId", updatePayOrder.getUserId()))
+                        .and(Restrictions.eq("userId", revertPayOrder.getUserId()))
                         .and(Restrictions.eq("payStatus", PayStatusEnum.TRADE_FINISHED.value()));
                 dao.updateByQuery(updatePayOrder, updateQb);
 
@@ -313,58 +306,58 @@ public class UserServiceImpl implements IUserService {
         }
     }
 
-    /**
-     * 异步退款处理
-     * @param refundPayOrderPool
-     * @param toRefundMoney
-     * @return 退款部分失败 0 退款成功 :1
-     */
-    @Override
-    public int asyncPayRefund(List<PayOrder> refundPayOrderPool, BigDecimal toRefundMoney) {
-        List<Integer> resultList = new ArrayList<>();
-        CompletableFuture[] cfs = null;
-        List<PayRefundVo> payRefundVos = new ArrayList<>();
-        BigDecimal leftToRefundMoney = toRefundMoney;
-        for (PayOrder payOrder : refundPayOrderPool) {
-            if (leftToRefundMoney.compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal payOrderMoney = payOrder.getPayMoney();
-                BigDecimal refundMoney = null;
-                if (leftToRefundMoney.compareTo(payOrderMoney) > 0) {
-                    refundMoney = payOrderMoney;
-                    leftToRefundMoney = leftToRefundMoney.subtract(payOrderMoney);
-                } else {
-                    refundMoney = leftToRefundMoney;
-                    leftToRefundMoney = BigDecimal.ZERO;
-                }
-                PayRefundVo payRefundVo = new PayRefundVo();
-                payRefundVo.setPayOrder(payOrder);
-                payRefundVo.setRefundMoney(refundMoney);
-                payRefundVos.add(payRefundVo);
-            } else {
-                break;
-            }
-        }
-
-        if(ListUtil.isNotEmpty(payRefundVos)){
-            cfs = payRefundVos.stream()
-                    .map(payRefundVo-> CompletableFuture.supplyAsync(()->{
-                        try {
-                            wxRefundPayService.submiteRefund(payRefundVo.getPayOrder(), payRefundVo.getRefundMoney());
-                            return 1;
-                        }catch (Exception e){
-                            revertRefundFailedRecord(payRefundVo.getPayOrder());
-                            return 0;
-                        }
-                    }, taskExecutor)
-                            .whenComplete((v, e) -> {//如需获取任务完成先手顺序，此处代码即可
-                                resultList.add(v);
-                            }))
-                    .toArray(CompletableFuture[]::new);
-            CompletableFuture.allOf(cfs).join();//封装后无返回值，必须自己whenComplete()获取
-        }
-
-        return BooleanUtils.toInteger(resultList.stream().noneMatch(result -> result == 0));
-    }
+//    /**
+//     * 异步退款处理
+//     * @param refundPayOrderPool
+//     * @param toRefundMoney
+//     * @return 退款部分失败 0 退款成功 :1
+//     */
+//    @Deprecated
+//    public int asyncPayRefund(List<PayOrder> refundPayOrderPool, BigDecimal toRefundMoney) {
+//        List<Integer> resultList = new ArrayList<>();
+//        CompletableFuture[] cfs = null;
+//        List<PayRefundVo> payRefundVos = new ArrayList<>();
+//        BigDecimal leftToRefundMoney = toRefundMoney;
+//        for (PayOrder payOrder : refundPayOrderPool) {
+//            if (leftToRefundMoney.compareTo(BigDecimal.ZERO) > 0) {
+//                BigDecimal payOrderMoney = payOrder.getPayMoney();
+//                BigDecimal refundMoney = null;
+//                if (leftToRefundMoney.compareTo(payOrderMoney) > 0) {
+//                    refundMoney = payOrderMoney;
+//                    leftToRefundMoney = leftToRefundMoney.subtract(payOrderMoney);
+//                } else {
+//                    refundMoney = leftToRefundMoney;
+//                    leftToRefundMoney = BigDecimal.ZERO;
+//                }
+//                PayRefundVo payRefundVo = new PayRefundVo();
+//                payRefundVo.setPayOrder(payOrder);
+//                payRefundVo.setRefundMoney(refundMoney);
+//                payRefundVos.add(payRefundVo);
+//            } else {
+//                break;
+//            }
+//        }
+//
+//        if(ListUtil.isNotEmpty(payRefundVos)){
+//            cfs = payRefundVos.stream()
+//                    .map(payRefundVo-> CompletableFuture.supplyAsync(()->{
+//                        try {
+//                            wxRefundPayService.submiteRefund(payRefundVo.getPayOrder(), payRefundVo.getRefundMoney());
+//                            return 1;
+//                        }catch (Exception e){
+//                            revertRefundFailedRecord(payRefundVo.getPayOrder());
+//                            return 0;
+//                        }
+//                    }, taskExecutor)
+//                            .whenComplete((v, e) -> {//如需获取任务完成先手顺序，此处代码即可
+//                                resultList.add(v);
+//                            }))
+//                    .toArray(CompletableFuture[]::new);
+//            CompletableFuture.allOf(cfs).join();//封装后无返回值，必须自己whenComplete()获取
+//        }
+//
+//        return BooleanUtils.toInteger(resultList.stream().noneMatch(result -> result == 0));
+//    }
 
     @Override
     public void sendWithdrawSmsCode(User user, String mobile) {

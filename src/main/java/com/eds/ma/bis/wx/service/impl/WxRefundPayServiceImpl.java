@@ -21,6 +21,7 @@ import com.xcrm.cloud.database.db.query.QueryBuilder;
 import com.xcrm.cloud.database.db.query.expression.Restrictions;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -48,6 +49,8 @@ public class WxRefundPayServiceImpl implements IWxRefundPayService {
 
     @Autowired
     private BaseDaoSupport dao;
+
+
     @Override
     public void submiteRefund(PayOrder payOrder,BigDecimal tkFee){
 
