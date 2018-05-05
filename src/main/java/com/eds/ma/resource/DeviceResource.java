@@ -65,7 +65,7 @@ public class DeviceResource extends BaseAuthedResource{
 	 * @param request
 	 */
 	@POST
-	@Path("/device/rent")
+	@Path("/rent")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deviceRent(@Valid DeviceRentRequest request) {
@@ -75,11 +75,11 @@ public class DeviceResource extends BaseAuthedResource{
 	}
 
 	/**
-	 * 租借设备
+	 * 归还设备
 	 * @param request
 	 */
 	@POST
-	@Path("/device/return")
+	@Path("/return")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deviceReturn(@Valid DeviceReturnRequest request) {

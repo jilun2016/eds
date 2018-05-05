@@ -93,7 +93,7 @@ public class OrderServiceImpl implements IOrderService {
                 .setParam("orderStatus", orderStatus)
                 .setParam("userId", user.getId())
                 .setParam("pageNo", pageNo)
-                .setParam("pageSize", pageSize);
+                .setParam("pageSize", pageSize);queryOrderListSqb.setIncludeTotalCount(true);
         return dao.findForPage(queryOrderListSqb);
     }
 
@@ -102,7 +102,7 @@ public class OrderServiceImpl implements IOrderService {
         //通过openId查询userId
         Ssqb queryOrderDetailSqb = Ssqb.create("com.eds.order.queryOrderDetail")
                 .setParam("userId", user.getId())
-                .setParam("id", orderId);
+                .setParam("orderId", orderId);
         return dao.findForObj(queryOrderDetailSqb,OrderDetailVo.class);
     }
 

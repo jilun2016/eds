@@ -1,6 +1,8 @@
 package com.eds.ma.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.xcrm.cloud.database.db.mybatis.PageInterceptor;
+import org.apache.ibatis.plugin.Interceptor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +14,7 @@ import javax.sql.DataSource;
  * @Author gaoyan
  * @Date: 2017/5/18
  */
-//@Configuration
+@Configuration
 public class DruidDataSourceConfig {
 
 	@Bean
@@ -20,6 +22,11 @@ public class DruidDataSourceConfig {
 	public DataSource druidDataSource() {
 		DruidDataSource druidDataSource = new DruidDataSource();
 		return druidDataSource;
+	}
+
+	@Bean
+	public Interceptor getInterceptor(){
+		return new PageInterceptor();
 	}
 
 }

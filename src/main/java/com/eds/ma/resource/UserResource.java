@@ -125,7 +125,7 @@ public class UserResource extends BaseAuthedResource{
         if(result == 0){
             throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_PART_ERROR);
         }
-        return Response.ok().build();
+        return Response.status(Response.Status.CREATED).build();
     }
 
     /**
@@ -140,6 +140,6 @@ public class UserResource extends BaseAuthedResource{
     public Response sendWithdrawSmsCode(@Valid SendSmsCodeRequest request){
         logger.debug("UserResource.sendWithdrawSmsCode({},{},{})",super.getOpenId(),super.getUser(),request);
         userService.sendWithdrawSmsCode(super.getUser(),request.getMobile());
-        return Response.ok().build();
+        return Response.status(Response.Status.CREATED).build();
     }
 }

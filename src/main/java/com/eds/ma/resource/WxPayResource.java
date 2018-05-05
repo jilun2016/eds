@@ -41,10 +41,9 @@ public class WxPayResource extends BaseAuthedResource{
     @Path("/balance")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response userBalancePrepay(@Valid BalancePayRequest request){
+    public Map<String, Object> userBalancePrepay(@Valid BalancePayRequest request){
         logger.debug("UserResource.userBalancePrepay({},{})",super.getOpenId(),request);
-        Map<String, Object> paySignMap = wxPayService.prepay(super.getOpenId(),TransTypeEnum.S_JYLX_YECZ.value(),request.getBalance(),"余额充值");
-        return Response.ok(paySignMap).build();
+        return wxPayService.prepay(super.getOpenId(),TransTypeEnum.S_JYLX_YECZ.value(),request.getBalance(),"余额充值");
     }
 
     /**
@@ -54,12 +53,11 @@ public class WxPayResource extends BaseAuthedResource{
     @Path("/deposit")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response userDepositPrepay(){
+    public Map<String, Object> userDepositPrepay(){
         logger.debug("UserResource.userDepositPrepay({})",super.getOpenId());
         //计算押金
         BigDecimal defaultUnitDeposit = edsConfigService.queryEdsConfigDeposit();
-        Map<String, Object> paySignMap = wxPayService.prepay(super.getOpenId(), TransTypeEnum.S_JYLX_YJCZ.value(),defaultUnitDeposit,"支付押金");
-        return Response.ok(paySignMap).build();
+        return wxPayService.prepay(super.getOpenId(), TransTypeEnum.S_JYLX_YJCZ.value(),defaultUnitDeposit,"支付押金");
     }
 
 }

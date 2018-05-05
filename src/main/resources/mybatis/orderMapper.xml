@@ -7,18 +7,18 @@
         <result property="orderCode" column="orderCode"/>
         <result property="orderStatus" column="orderStatus"/>
         <result property="orderStatusDesc" column="orderStatusDesc"/>
-        <result property="rentStartTime" column="rentStartTime"/>
+        <result property="rentTime" column="rentTime"/>
         <result property="rentSpId" column="rentSpId"/>
-        <result property="spName" column="rentSpName"/>
-        <result property="spLat" column="rentSpLat"/>
-        <result property="spLng" column="rentSpLng"/>
+        <result property="rentSpName" column="spName"/>
+        <result property="rentSpLat" column="spLat"/>
+        <result property="rentSpLng" column="spLng"/>
         <result property="deviceId" column="deviceId"/>
         <result property="userId" column="userId"/>
         <result property="totalFee" column="totalFee"/>
     </resultMap>
 
     <select id="queryOrders" resultMap="orderMap">
-        SELECT o.id,o.orderCode,o.orderStatus,sc.sysName AS orderStatusDesc,o.rentStartTime,
+        SELECT o.id,o.orderCode,o.orderStatus,sc.sysName AS orderStatusDesc,o.rentTime,
                o.rentSpId,o.deviceId,o.userId,o.totalFee,s.spName,s.spLat,s.spLng
         FROM t_eds_order o
         LEFT JOIN t_eds_sp s ON o.rentSpId = s.id
@@ -29,7 +29,7 @@
     </select>
 
     <select id="queryOrderDetail" resultType="com.eds.ma.bis.order.vo.OrderDetailVo">
-        SELECT o.id,o.orderCode,o.orderStatus,sc.sysName AS orderStatusDesc,o.rentStartTime,o.rentEndTime,
+        SELECT o.id AS orderId,o.orderCode,o.orderStatus,sc.sysName AS orderStatusDesc,o.rentTime,o.returnTime,
                o.rentSpId,s1.spName AS rentSpName,s1.spLat AS rentSpLat,s1.spLng AS rentSpLng,
                o.rentSpId,s1.spName AS rentSpName,s1.spLat AS rentSpLat,s1.spLng AS rentSpLng,
                o.returnSpId,s2.spName AS returnSpName,s2.spLat AS returnSpLat,s2.spLng AS returnSpLng,
@@ -49,7 +49,7 @@
 
     <update id="updateOrder">
         UPDATE t_eds_order o
-        SET o.rentEndTime=#{rentEndTime},o.returnSpId =#{spId},
+        SET o.returnTime=#{returnTime},o.returnSpId =#{spId},
             o.orderStatus = 'S_DDZT_YJS',o.balance = #{balance},o.totalFee = #{totalFee}
         WHERE o.id=#{orderId} AND o.deviceId = #{deviceId} and o.userId = #{userId} and o.orderStatus = 'S_DDZT_JXZ'
     </update>

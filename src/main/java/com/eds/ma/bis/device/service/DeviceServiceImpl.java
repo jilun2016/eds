@@ -129,7 +129,7 @@ public class DeviceServiceImpl implements IDeviceService {
         //设备,用户位置校验
         double checkDistance = DistanceUtil.getDistance(deviceRentDetailVo.getDeviceLng().doubleValue()
                 ,deviceRentDetailVo.getDeviceLat().doubleValue()
-                ,userLat.doubleValue(), userLng.doubleValue());
+                ,userLng.doubleValue(), userLat.doubleValue());
         if(checkDistance >edsConfig.getValidDistance()){
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RENT_OUT_RANGE);
         }
@@ -155,8 +155,8 @@ public class DeviceServiceImpl implements IDeviceService {
         order.setDeviceId(deviceId);
         order.setOrderCode(OrderCodeCreater.createTradeNO());
         order.setOrderStatus(OrderStatusEnum.S_DDZT_JXZ.value());
-        order.setRentStartTime(now);
-        order.setSpId(deviceRentDetailVo.getSpId());
+        order.setRentTime(now);
+        order.setRentSpId(deviceRentDetailVo.getSpId());
         order.setUserId(userId);
         orderService.saveOrder(order);
         //更新设备状态使用中
@@ -204,7 +204,7 @@ public class DeviceServiceImpl implements IDeviceService {
         //设备,用户位置校验
         double checkDistance = DistanceUtil.getDistance(deviceRentDetailVo.getDeviceLng().doubleValue()
                 ,deviceRentDetailVo.getDeviceLat().doubleValue()
-                ,userLat.doubleValue(), userLng.doubleValue());
+                ,userLng.doubleValue(), userLat.doubleValue());
         if(checkDistance >edsConfig.getValidDistance()){
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_OUT_RANGE);
         }
@@ -225,14 +225,14 @@ public class DeviceServiceImpl implements IDeviceService {
         BigDecimal orderMoney = BigDecimal.ZERO;
         BigDecimal totalFee = BigDecimal.ZERO;
         //更新订单
-        Ssqb updateOrderSqb = Ssqb.create("com.eds.device.updateOrder")
+        Ssqb updateOrderSqb = Ssqb.create("com.eds.order.updateOrder")
                 .setParam("orderId",deviceRentDetailVo.getOrderId())
                 .setParam("deviceId",deviceRentDetailVo.getDeviceId())
                 .setParam("userId",userId)
                 .setParam("spId",spDetailVo.getSpId())
                 .setParam("orderMoney",orderMoney)
                 .setParam("totalFee",totalFee)
-                .setParam("rentEndTime",now);
+                .setParam("returnTime",now);
         int updateOrderResult =  dao.updateByMybatis(updateOrderSqb);
 
         if(updateOrderResult <= 0){

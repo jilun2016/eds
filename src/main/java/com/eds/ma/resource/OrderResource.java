@@ -10,6 +10,7 @@ import com.eds.ma.resource.request.PageRequest;
 import com.eds.ma.rest.integration.annotation.NoAuth;
 import com.xcrm.common.page.Pagination;
 import com.xcrm.log.Logger;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.constraints.NotNull;
@@ -33,9 +34,6 @@ public class OrderResource extends BaseAuthedResource {
 	@Autowired
 	private IOrderService orderService;
 
-	@Autowired
-	private SysConfig sysConfig;
-
 	/**
 	 * 查询用户订单列表
 	 * @param orderStatus
@@ -44,7 +42,7 @@ public class OrderResource extends BaseAuthedResource {
 	@GET
 	@Path("/orders")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Pagination queryOrders(@QueryParam("orderStatus") String orderStatus, @BeanParam PageRequest pageRequest) {
+	public Pagination queryOrders(@NotEmpty(message="订单状态不允许为空") @QueryParam("orderStatus") String orderStatus, @BeanParam PageRequest pageRequest) {
 		logger.debug("----OrderResource.queryOrders({},{})",orderStatus,super.getOpenId());
 		return orderService.queryOrders(orderStatus,super.getUser(),pageRequest.getPageNo(),pageRequest.getPageSize());
 	}
