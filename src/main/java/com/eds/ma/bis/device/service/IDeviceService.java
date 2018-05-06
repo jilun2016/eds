@@ -7,7 +7,6 @@ import com.eds.ma.bis.user.entity.User;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 设备service
@@ -33,13 +32,6 @@ public interface IDeviceService {
      * @param userId 用户id
      */
     List<UserDeviceVo> queryUserDeviceList(Long userId);
-
-    /**
-     * 查询用户使用中的设备
-     * @param userId
-     * @return
-     */
-    int queryUserRentingDeviceCount(Long userId);
 
     /**
      * 租借发起-->更新租借设备
@@ -78,11 +70,11 @@ public interface IDeviceService {
     /**
      * 租借设备
      * @param deviceId
-     * @param openId
+     * @param userId
      * @param userLat
      * @param userLng
      */
-    void deviceRent(Long deviceId, String openId, BigDecimal userLat, BigDecimal userLng);
+    void deviceRent(Long deviceId, Long userId, BigDecimal userLat, BigDecimal userLng);
 
     /**
      * 归还设备

@@ -8,13 +8,10 @@ import com.eds.ma.bis.device.entity.Device;
 import com.eds.ma.bis.device.entity.UserDeviceRecord;
 import com.eds.ma.bis.device.vo.*;
 import com.eds.ma.bis.order.OrderCodeCreater;
-import com.eds.ma.bis.order.TransTypeEnum;
 import com.eds.ma.bis.order.entity.Order;
 import com.eds.ma.bis.order.service.IOrderService;
 import com.eds.ma.bis.user.entity.User;
-import com.eds.ma.bis.user.entity.UserWallet;
 import com.eds.ma.bis.user.service.IUserService;
-import com.eds.ma.bis.wx.service.IWxPayService;
 import com.eds.ma.exception.BizCoreRuntimeException;
 import com.eds.ma.rest.common.BizErrorConstants;
 import com.eds.ma.util.DistanceUtil;
@@ -30,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -71,13 +67,6 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
-    public int queryUserRentingDeviceCount(Long userId) {
-        Ssqb queryDeviceCountSqb = Ssqb.create("com.eds.device.queryUserRentingDeviceCount")
-                .setParam("userId",userId);
-        return dao.findForObj(queryDeviceCountSqb,Integer.class);
-    }
-
-    @Override
     public void updateRentDevice(Long deviceId, Long userId, Long orderId) {
         Ssqb updateDeviceSqb = Ssqb.create("com.eds.device.updateRentDevice")
                 .setParam("orderId",orderId)
@@ -114,7 +103,7 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
-    public void deviceRent(Long deviceId, String openId, BigDecimal userLat, BigDecimal userLng) {
+    public void deviceRent(Long deviceId, Long userId, BigDecimal userLat, BigDecimal userLng) {
         //查询设备信息进行校验
         DeviceRentDetailVo deviceRentDetailVo = queryRentDeviceById(deviceId, null);
         if(Objects.isNull(deviceRentDetailVo)){
@@ -135,15 +124,9 @@ public class DeviceServiceImpl implements IDeviceService {
         }
 
         //对用户信息,钱包进行校验
-        User user = userService.checkUserExist(openId);
-        Long userId = user.getId();
-        UserWallet userWallet = userService.queryUserWalletByUserIdWithLock(userId);
-
         //押金不足校验
-        BigDecimal defaultUnitDeposit = edsConfigService.queryEdsConfigDeposit();
-        BigDecimal defaultCurrentDeposit = caculateCurrentDeposit(userId,defaultUnitDeposit);
-        BigDecimal allNeedDeposit = defaultCurrentDeposit.add(defaultUnitDeposit);
-        if(allNeedDeposit.compareTo(userWallet.getDeposit())>0){
+        boolean isValid = userService.checkUserRentDepositValid(userId);
+        if(!isValid){
             throw new BizCoreRuntimeException(BizErrorConstants.USER_DEPOSIT_NOT_ENOUGH_ERROR);
         }
 
@@ -272,10 +255,7 @@ public class DeviceServiceImpl implements IDeviceService {
         dao.save(userDeviceRecord);
     }
 
-    private BigDecimal caculateCurrentDeposit(Long userId,BigDecimal defaultUnitDeposit){
-        int userDeviceCount = queryUserRentingDeviceCount(userId);
-        return defaultUnitDeposit.multiply(BigDecimal.valueOf(userDeviceCount));
-    }
+
 
 
 }

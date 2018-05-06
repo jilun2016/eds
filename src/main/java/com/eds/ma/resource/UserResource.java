@@ -79,6 +79,20 @@ public class UserResource extends BaseAuthedResource{
         return userInfoVo;
     }
 
+    /**
+     * 校验用户的押金是否满足租借条件
+     */
+    @GET
+    @Path("/deposit/valid")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response checkUserDeposit() {
+        logger.debug("UserResource.checkUserDeposit({},{})", super.getOpenId(),super.getUser());
+        Boolean isRentDepositValid = userService.checkUserRentDepositValid(super.getUser().getId());
+        Map<String,Boolean> resultMap = new HashMap<>(1);
+        resultMap.put("isRentDepositValid",isRentDepositValid);
+        return Response.ok(resultMap).build();
+    }
+
 	/**
 	 * 查询用户的租借中的设备信息
 	 */

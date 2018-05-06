@@ -73,6 +73,28 @@ public interface IUserService {
     User checkUserExist(String openId);
 
     /**
+     * 计算当前用户的押金
+     * @param userId
+     * @param defaultUnitDeposit
+     * @return
+     */
+    BigDecimal caculateCurrentDeposit(Long userId,BigDecimal defaultUnitDeposit);
+
+    /**
+     * 查询用户使用中的设备
+     * @param userId
+     * @return
+     */
+    int queryUserRentingDeviceCount(Long userId);
+
+    /**
+     * 校验用户押金是否满足租借条件
+     * @param userId
+     * @return
+     */
+    Boolean checkUserRentDepositValid(Long userId);
+
+    /**
      * 查询用户钱包
      * @param user
      * @return

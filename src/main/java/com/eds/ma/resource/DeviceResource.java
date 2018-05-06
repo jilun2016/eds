@@ -70,7 +70,7 @@ public class DeviceResource extends BaseAuthedResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deviceRent(@Valid DeviceRentRequest request) {
 		logger.debug("WxMaResource.deviceRent({},{})",super.getOpenId(), request);
-        deviceService.deviceRent(request.getDeviceId(),super.getOpenId(),request.getUserLat(),request.getUserLng());
+        deviceService.deviceRent(request.getDeviceId(),super.getUser().getId(),request.getUserLat(),request.getUserLng());
 		return Response.status(Response.Status.CREATED).build();
 	}
 

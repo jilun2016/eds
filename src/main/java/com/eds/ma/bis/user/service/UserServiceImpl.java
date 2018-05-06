@@ -1,5 +1,6 @@
 package com.eds.ma.bis.user.service;
 
+import com.eds.ma.bis.common.service.IEdsConfigService;
 import com.eds.ma.bis.message.TmplEvent;
 import com.eds.ma.bis.message.service.IMessageService;
 import com.eds.ma.bis.message.vo.SmsMessageContent;
@@ -59,6 +60,10 @@ public class UserServiceImpl implements IUserService {
 
     @Autowired
     private IMessageService messageService;
+
+    @Autowired
+    private IEdsConfigService edsConfigService;
+
 
     @Override
     public void saveUser(User user) {
@@ -134,6 +139,31 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    public BigDecimal caculateCurrentDeposit(Long userId,BigDecimal defaultUnitDeposit){
+        int userDeviceCount = queryUserRentingDeviceCount(userId);
+        return defaultUnitDeposit.multiply(BigDecimal.valueOf(userDeviceCount));
+    }
+
+    @Override
+    public int queryUserRentingDeviceCount(Long userId) {
+        Ssqb queryDeviceCountSqb = Ssqb.create("com.eds.device.queryUserRentingDeviceCount")
+                .setParam("userId",userId);
+        return dao.findForObj(queryDeviceCountSqb,Integer.class);
+    }
+
+
+    @Override
+    public Boolean checkUserRentDepositValid(Long userId) {
+        UserWallet userWallet = queryUserWalletByUserIdWithLock(userId);
+
+        //押金不足校验
+        BigDecimal defaultUnitDeposit = edsConfigService.queryEdsConfigDeposit();
+        BigDecimal defaultCurrentDeposit = caculateCurrentDeposit(userId,defaultUnitDeposit);
+        BigDecimal allNeedDeposit = defaultCurrentDeposit.add(defaultUnitDeposit);
+        return allNeedDeposit.compareTo(userWallet.getDeposit())<=0;
+    }
+
+    @Override
     public UserWalletVo queryUserWallet(User user) {
         UserWallet userWallet = queryUserWalletByUserId(user.getId());
         UserWalletVo userWalletVo = new UserWalletVo();
@@ -147,6 +177,11 @@ public class UserServiceImpl implements IUserService {
     public int walletWithdraw(User user, Boolean isNeedSms, String smsCode) {
         int result = 1;
         Long userId = user.getId();
+        //用户如果有租借设备,那么不能进行体现
+        int userDeviceCount = queryUserRentingDeviceCount(userId);
+        if(userDeviceCount > 0){
+            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RENT_WITHDRAW_ERROR);
+        }
         UserWallet userWallet = queryUserWalletByUserIdWithLock(userId);
         if(Objects.isNull(user.getMobile())){
             throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_MOBILE_EMPTY);

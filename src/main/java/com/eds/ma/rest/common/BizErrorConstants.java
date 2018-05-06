@@ -121,5 +121,10 @@ public interface BizErrorConstants {
 	 */
 	String WALLET_WITHDRAW_MOBILE_EMPTY = "E10022";
 
+	/**
+	 * 您当前正在租借设备,请归还设备后再进行提现
+	 */
+	String DEVICE_RENT_WITHDRAW_ERROR = "E10023";
+
 
 }

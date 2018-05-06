@@ -37,7 +37,7 @@
     <select id="queryUserRentingDeviceCount" resultType="java.lang.Integer">
         SELECT COUNT(1)
         FROM t_eds_device ed
-        WHERE  ed.userId = #{userId} AND ed.deviceStatus = #{S_SPZT_SYZ} AND ed.dataStatus = 1
+        WHERE  ed.userId = #{userId} AND ed.deviceStatus = 'S_SPZT_SYZ' AND ed.dataStatus = 1
         FOR UPDATE
     </select>
 
