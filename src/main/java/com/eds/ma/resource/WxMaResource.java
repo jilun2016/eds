@@ -3,6 +3,10 @@ package com.eds.ma.resource;
 import com.eds.ma.bis.user.vo.UserInfoVo;
 import com.eds.ma.bis.wx.service.IWxMaService;
 import com.eds.ma.config.SysConfig;
+import com.eds.ma.exception.BizCoreRuntimeException;
+import com.eds.ma.resource.request.UserPhoneRequest;
+import com.eds.ma.resource.request.UserWithdrawRequest;
+import com.eds.ma.rest.common.BizErrorConstants;
 import com.eds.ma.rest.common.CommonConstants;
 import com.eds.ma.rest.integration.annotation.NoAuth;
 import com.eds.ma.util.CookieUtils;
@@ -11,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -51,6 +56,19 @@ public class WxMaResource extends BaseAuthedResource {
 		CookieUtils.addCookie(request,response,  CommonConstants.WX_OPEN_ID_COOKIE, userInfoVo.getOpenId(),
 				null, sysConfig.getEdsCookieHost());
 		return userInfoVo;
+	}
+
+	/**
+	 * 保存用户手机号
+	 */
+	@POST
+	@Path("/user/phone")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response saveUserPhone(@Valid UserPhoneRequest request){
+		logger.debug("WxMaResource.saveUserPhone({},{},{})",super.getOpenId(),super.getUser(),request);
+		wxMaService.saveUserPhone(super.getUser(),request.getCode(),request.getEncryptedData(),request.getIv());
+		return Response.status(Response.Status.CREATED).build();
 	}
 
 

@@ -1,5 +1,6 @@
 package com.eds.ma.bis.wx.service;
 
+import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.vo.UserInfoVo;
 
 import java.math.BigDecimal;
@@ -20,5 +21,13 @@ public interface IWxMaService {
      */
     UserInfoVo queryMaUserInfo(String code, String encryptedData, String iv);
 
+    /**
+     * 保存小程序手机号
+     * @param user
+     * @param code
+     * @param encryptedData
+     * @param iv
+     */
+    void saveUserPhone(User user, String code, String encryptedData, String iv);
 }
 

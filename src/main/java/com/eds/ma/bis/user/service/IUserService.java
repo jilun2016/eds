@@ -5,9 +5,8 @@ import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.entity.UserWallet;
 import com.eds.ma.bis.user.vo.UserWalletVo;
 
+import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 用户接口
@@ -84,9 +83,10 @@ public interface IUserService {
      * 用户提现
      * 提现金额 = 余额+押金
      * @param user
+     * @param isNeedSms
      * @param smsCode
      */
-    int walletWithdraw(User user, String smsCode);
+    int walletWithdraw(User user, Boolean isNeedSms, String smsCode);
 
     /**
      * 用户退款失败回滚
@@ -110,5 +110,4 @@ public interface IUserService {
      * @param mobile
      */
     void sendWithdrawSmsCode(User user, String mobile);
-
 }

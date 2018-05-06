@@ -144,10 +144,13 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public int walletWithdraw(User user, String smsCode) {
+    public int walletWithdraw(User user, Boolean isNeedSms, String smsCode) {
         int result = 1;
         Long userId = user.getId();
         UserWallet userWallet = queryUserWalletByUserIdWithLock(userId);
+        if(Objects.isNull(user.getMobile())){
+            throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_MOBILE_EMPTY);
+        }
         BigDecimal balance = userWallet.getBalance();
         BigDecimal deposit = userWallet.getDeposit();
         //校验总金额大于0 ,可以进行提现
@@ -156,22 +159,25 @@ public class UserServiceImpl implements IUserService {
             throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_ZERO_ERROR);
         }
 
-//        //验证码校验
-//        String dbSmsCode = userWallet.getSmsCode();
-//        long now = System.currentTimeMillis();
-//        Date activeExpired = userWallet.getSmsExpired();
+//        if(isNeedSms){
+//            //验证码校验
+//            String dbSmsCode = userWallet.getSmsCode();
+//            long now = System.currentTimeMillis();
+//            Date activeExpired = userWallet.getSmsExpired();
 //
-//        if(StringUtils.isEmpty(dbSmsCode)) {
-//            //验证码错误
-//            throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_ERROR);
+//            if(StringUtils.isEmpty(dbSmsCode)) {
+//                //验证码错误
+//                throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_ERROR);
+//            }
+//            if(!dbSmsCode.equals(smsCode)) {
+//                //验证码错误
+//                throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_ERROR);
+//            } else if(activeExpired != null && activeExpired.getTime() < now) {
+//                //已过期
+//                throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_EXPIRED);
+//            }
 //        }
-//        if(!dbSmsCode.equals(smsCode)) {
-//            //验证码错误
-//            throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_ERROR);
-//        } else if(activeExpired != null && activeExpired.getTime() < now) {
-//            //已过期
-//            throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_EXPIRED);
-//        }
+
 
         List<PayOrder> payOrderList = orderService.queryToRefundPayOrder(user.getOpenId());
         if (ListUtil.isNotEmpty(payOrderList)) {
@@ -370,6 +376,12 @@ public class UserServiceImpl implements IUserService {
         if (allRefundMoney.compareTo(BigDecimal.ZERO) <= 0) {
             throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_ZERO_ERROR);
         }
+
+        //更新用户的手机号
+        User updateUser = new User();
+        updateUser.setId(userId);
+        updateUser.setMobile(mobile);
+        dao.update(updateUser);
 
         //验证短信的发送频率不能小于30秒
         Date smsExpired = userWallet.getSmsExpired();

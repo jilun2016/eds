@@ -116,7 +116,10 @@ public interface BizErrorConstants {
      */
     String DEVICE_RETURN_ORDER_NOT_EXIST_ERROR = "E10021";
 
-
+	/**
+	 * 提现验证失败,请重新提现
+	 */
+	String WALLET_WITHDRAW_MOBILE_EMPTY = "E10022";
 
 
 }
