@@ -9,6 +9,7 @@ import com.eds.ma.resource.request.DeviceDepositPrePayRequest;
 import com.eds.ma.resource.request.DeviceRentRequest;
 import com.eds.ma.resource.request.DeviceReturnRequest;
 import com.eds.ma.resource.request.SearchDeviceRequest;
+import com.eds.ma.rest.integration.annotation.NoAuth;
 import com.eds.ma.util.DistanceUtil;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,7 @@ public class DeviceResource extends BaseAuthedResource{
 	@GET
 	@Path("/nearby/devices")
 	@Produces(MediaType.APPLICATION_JSON)
+	@NoAuth
 	public DeviceInfoVo queryNearbyDevices(@Valid @BeanParam SearchDeviceRequest request) {
 		logger.debug("----DeviceResource.queryNearbyDevices({})----", request);
 		if(Objects.isNull(request.getDistance())){
