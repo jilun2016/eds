@@ -42,7 +42,7 @@ public class OrderResource extends BaseAuthedResource {
 	@GET
 	@Path("/orders")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Pagination queryOrders(@NotEmpty(message="订单状态不允许为空") @QueryParam("orderStatus") String orderStatus, @BeanParam PageRequest pageRequest) {
+	public Pagination queryOrders(@QueryParam("orderStatus") String orderStatus, @BeanParam PageRequest pageRequest) {
 		logger.debug("----OrderResource.queryOrders({},{})",orderStatus,super.getOpenId());
 		return orderService.queryOrders(orderStatus,super.getUser(),pageRequest.getPageNo(),pageRequest.getPageSize());
 	}

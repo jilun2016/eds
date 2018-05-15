@@ -23,8 +23,11 @@
         FROM t_eds_order o
         LEFT JOIN t_eds_sp s ON o.rentSpId = s.id
         LEFT JOIN t_b_sys_code sc ON o.orderStatus = sc.sysCode
-        WHERE o.orderStatus = #{orderStatus} AND o.userId = #{userId} AND o.dataStatus = 1
-        ORDER BY o.created DESC
+        WHERE  o.userId = #{userId} AND o.dataStatus = 1
+            <if test="orderStatus != null">
+                and o.orderStatus = #{orderStatus}
+            </if>
+        ORDER BY o.orderStatus desc,o.created DESC
         LIMIT #{start}, #{pageSize}
     </select>
 
