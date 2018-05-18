@@ -61,8 +61,10 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
-    public List<UserDeviceVo> queryUserDeviceList(Long userId) {
-        Ssqb queryDeviceSqb = Ssqb.create("com.eds.device.queryUserDeviceList");
+    public List<UserDeviceVo> queryUserDeviceList(Long userId, Long spId) {
+        Ssqb queryDeviceSqb = Ssqb.create("com.eds.device.queryUserDeviceList")
+                .setParam("userId",userId)
+                .setParam("spId",spId);
         return dao.findForList(queryDeviceSqb,UserDeviceVo.class);
     }
 

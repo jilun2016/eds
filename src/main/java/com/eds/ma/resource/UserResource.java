@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -95,14 +96,15 @@ public class UserResource extends BaseAuthedResource{
 
 	/**
 	 * 查询用户的租借中的设备信息
+     * 店铺id
 	 */
 	@GET
 	@Path("/devices")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<UserDeviceVo> queryUserDeviceList() {
-		logger.debug("UserResource.queryUserWallet({},{})", super.getOpenId(),super.getUser());
+	public List<UserDeviceVo> queryUserDeviceList(@QueryParam("spId") Long spId) {
+		logger.debug("UserResource.queryUserDeviceList({},{},{})",spId, super.getOpenId(),super.getUser());
         User user = super.getUser();
-		return deviceService.queryUserDeviceList(user.getId());
+		return deviceService.queryUserDeviceList(user.getId(),spId);
 	}
 
     /**

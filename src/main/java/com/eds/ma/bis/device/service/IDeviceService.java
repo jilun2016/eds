@@ -30,8 +30,9 @@ public interface IDeviceService {
     /**
      * 通过用户id查询用户使用中的设备
      * @param userId 用户id
+     * @param spId
      */
-    List<UserDeviceVo> queryUserDeviceList(Long userId);
+    List<UserDeviceVo> queryUserDeviceList(Long userId, Long spId);
 
     /**
      * 租借发起-->更新租借设备

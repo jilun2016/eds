@@ -51,6 +51,9 @@
         SELECT ed.id as deviceId, ed.deviceCode,ed.borrowTimes
         FROM t_eds_device ed
         WHERE  ed.userId = #{userId} AND ed.deviceStatus = 'S_SPZT_SYZ' AND ed.dataStatus = 1
+        <if test="spId != null">
+            and ed.spId = #{spId}
+        </if>
     </select>
 
     <update id="updateRentDevice">
