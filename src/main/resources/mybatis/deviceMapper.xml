@@ -3,12 +3,14 @@
 <mapper namespace="com.eds.device" >
 
     <select id="queryNearbyDevices" resultType="com.eds.ma.bis.device.vo.DeviceInfoVo$DeviceDetailVo">
-        SELECT ed.id AS deviceId,es.spName,es.spAddress,es.spBusinessTime,es.spImage,es.spLat,es.spLng,ed.borrowTimes
+        SELECT ed.id AS deviceId,es.spName,es.spAddress,es.spBusinessTime,es.spImage,es.spLat,es.spLng,ed.borrowTimes,
+               if(count(ed.id)>0,'待租借','租借中') as spDeviceStatus
         FROM t_eds_sp es
         LEFT JOIN t_eds_device ed ON es.id = ed.spId
         WHERE es.dataStatus = 1 AND ed.dataStatus = 1 AND ed.deviceStatus = 'S_SPZT_DZJ'
             AND es.spLat &gt;= #{minDeviceLat} and es.spLat &lt;= #{maxDeviceLat}
             AND es.spLng &gt;= #{minDeviceLng} and es.spLng &lt;= #{maxDeviceLng}
+        group by es.id
     </select>
 
     <select id="queryNearbySpByCoordinate" resultType="com.eds.ma.bis.device.vo.SpDetailVo">

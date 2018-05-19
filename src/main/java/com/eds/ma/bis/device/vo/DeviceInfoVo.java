@@ -63,6 +63,11 @@ public class DeviceInfoVo {
         private BigDecimal spLat;
 
         /**
+         * 商家设备状态
+         */
+        private String spDeviceStatus;
+
+        /**
          * 设备借次数
          */
         private Integer borrowTimes;
@@ -131,9 +136,17 @@ public class DeviceInfoVo {
             this.borrowTimes = borrowTimes;
         }
 
+        public String getSpDeviceStatus() {
+            return spDeviceStatus;
+        }
+
+        public void setSpDeviceStatus(String spDeviceStatus) {
+            this.spDeviceStatus = spDeviceStatus;
+        }
+
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder("DeviceInfoVo{");
+            final StringBuilder sb = new StringBuilder("DeviceDetailVo{");
             sb.append("deviceId=").append(deviceId);
             sb.append(", spName='").append(spName).append('\'');
             sb.append(", spAddress='").append(spAddress).append('\'');
@@ -141,6 +154,7 @@ public class DeviceInfoVo {
             sb.append(", spImage='").append(spImage).append('\'');
             sb.append(", spLng=").append(spLng);
             sb.append(", spLat=").append(spLat);
+            sb.append(", spDeviceStatus='").append(spDeviceStatus).append('\'');
             sb.append(", borrowTimes=").append(borrowTimes);
             sb.append('}');
             return sb.toString();
