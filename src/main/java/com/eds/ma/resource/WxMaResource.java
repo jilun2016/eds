@@ -21,6 +21,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 微信小程序处理
@@ -56,6 +58,26 @@ public class WxMaResource extends BaseAuthedResource {
 		CookieUtils.addCookie(request,response,  CommonConstants.WX_OPEN_ID_COOKIE, userInfoVo.getOpenId(),
 				null, sysConfig.getEdsCookieHost());
 		return userInfoVo;
+	}
+
+	/**
+	 * 获取小程序用户openid
+	 * @param code 登陆code
+	 */
+	@GET
+	@Path("/{code}/openid")
+	@Produces(MediaType.APPLICATION_JSON)
+	@NoAuth
+	public Response queryMaUserOpenId(@NotNull(message = "登录code不允许为空") @PathParam("code") String code,
+								 @Context HttpServletRequest request, @Context HttpServletResponse response) {
+
+		logger.debug("----WxMaResource.queryMaSession({},{},{})",code);
+		String openId = wxMaService.queryMaUserOpenId(code);
+		CookieUtils.addCookie(request,response,  CommonConstants.WX_OPEN_ID_COOKIE, openId,
+				null, sysConfig.getEdsCookieHost());
+		Map<String,String> resultMap = new HashMap<>(1);
+		resultMap.put("openId",openId);
+		return Response.ok(resultMap).build();
 	}
 
 	/**

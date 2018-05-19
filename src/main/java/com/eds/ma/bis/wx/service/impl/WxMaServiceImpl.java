@@ -74,6 +74,25 @@ public class WxMaServiceImpl implements IWxMaService {
     }
 
     @Override
+    public String queryMaUserOpenId(String code) {
+        Map<String,String> sessionMap = getWxMaSessionKey(code);
+        String openId = MapUtils.getString(sessionMap,"openId");
+        String resultJson = MapUtils.getString(sessionMap,"resultJson");
+        if(StringUtils.isBlank(openId)){
+            logger.error("queryMaUserOpenId.parse user info failed.resultJson:{}",resultJson);
+            throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
+        }
+        try {
+            //异步保存用户信息
+            userService.asyncSaveOpenId(openId,null,null,null);
+        } catch (Exception e) {
+            logger.error("queryMaUserOpenId.parse user info failed.resultJson:{}",resultJson);
+            throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
+        }
+        return openId;
+    }
+
+    @Override
     public void saveUserPhone(User user, String code, String encryptedData, String iv) {
         Map<String,String> sessionMap = getWxMaSessionKey(code);
         String sessionKey = MapUtils.getString(sessionMap,"sessionKey");
@@ -121,7 +140,13 @@ public class WxMaServiceImpl implements IWxMaService {
         if(StringUtils.isBlank(sessionKey)){
             throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
         }
+
+        String openId = MapUtils.getString(resultJsonMap,"openid");
+        if(StringUtils.isBlank(openId)){
+            throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
+        }
         result.put("resultJson",resultJson);
+        result.put("openId",openId);
         result.put("sessionKey",sessionKey);
         return result;
     }

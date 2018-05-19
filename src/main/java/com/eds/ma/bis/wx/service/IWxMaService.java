@@ -22,6 +22,13 @@ public interface IWxMaService {
     UserInfoVo queryMaUserInfo(String code, String encryptedData, String iv);
 
     /**
+     * 获取小程序 openId
+     * @param code
+     * @return
+     */
+    String queryMaUserOpenId(String code);
+
+    /**
      * 保存小程序手机号
      * @param user
      * @param code

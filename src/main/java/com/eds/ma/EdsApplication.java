@@ -42,6 +42,7 @@ public class EdsApplication extends SpringBootServletInitializer {
 	protected SpringApplicationBuilder configure(
 			SpringApplicationBuilder application) {
 		return application.sources(EdsApplication.class);
+
 	}
 
 	/**
