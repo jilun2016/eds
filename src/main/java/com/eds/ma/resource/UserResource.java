@@ -13,6 +13,7 @@ import com.eds.ma.resource.request.UserWithdrawRequest;
 import com.eds.ma.rest.common.BizErrorConstants;
 import com.eds.ma.rest.common.CommonConstants;
 import com.eds.ma.rest.integration.annotation.NoAuth;
+import com.eds.ma.socket.SessionMap;
 import com.eds.ma.util.CookieUtils;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,21 +48,13 @@ public class UserResource extends BaseAuthedResource{
     @Autowired
     private IDeviceService deviceService;
 
-    @Autowired
-    private SysConfig sysConfig;
-
 
 	@GET
 	@Path("/test")
 	@Produces(MediaType.APPLICATION_JSON)
     @NoAuth
-	public Response test(@Context HttpServletRequest request, @Context HttpServletResponse response) throws InterruptedException, ExecutionException {
-	    UserInfoVo userInfoVo = new UserInfoVo();
-	    userInfoVo.setHeadimgurl("https://wx.qlogo.cn/mmopen/vi_32/DYAIOgq83epwsY5aWbnrFNJh7JZNLG9KGyRgYczicuiavQaU6BkkpdKm5lEb3MHiarUQDnGGZdyrgj94tdJ8EtwLA/0");
-        userInfoVo.setNickName("高岩");
-        userInfoVo.setOpenId("oiyZc5Qn8pe8wnO_BDl142Ozj6eE");
-        CookieUtils.addCookie(request,response,  CommonConstants.WX_OPEN_ID_COOKIE, userInfoVo.getOpenId(),
-                null, sysConfig.getEdsCookieHost());
+	public Response test(@QueryParam("message") String  message) {
+        SessionMap.newInstance().sendMessage(new String[]{"9000"},message);
         return Response.ok().build();
 	}
 

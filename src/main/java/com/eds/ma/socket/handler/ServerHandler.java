@@ -41,7 +41,7 @@ public class ServerHandler extends IoHandlerAdapter {
 
 		  //保存客户端的会话session
 		  SessionMap sessionMap = SessionMap.newInstance();
-		  sessionMap.addSession(carPark_id, session);
+		  sessionMap.addSession("9000", session);
 	  
 	 }
 	 @Override
