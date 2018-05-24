@@ -164,7 +164,7 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
-    public void deviceReturn(Long deviceId, User user, BigDecimal userLat, BigDecimal userLng) {
+    public Long deviceReturn(Long deviceId, User user, BigDecimal userLat, BigDecimal userLng) {
         //校验用户信息
         Long userId = user.getId();
 
@@ -174,7 +174,8 @@ public class DeviceServiceImpl implements IDeviceService {
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_NOT_EXIST_ERROR);
         }
 
-        if(Objects.isNull(deviceRentDetailVo.getOrderId())){
+        Long orderId = deviceRentDetailVo.getOrderId();
+        if(Objects.isNull(orderId)){
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_ORDER_ID_NOT_EXIST_ERROR);
         }
 
@@ -250,6 +251,7 @@ public class DeviceServiceImpl implements IDeviceService {
         userDeviceRecord.setUserLng(userLng);
         userDeviceRecord.setSpId(spDetailVo.getSpId());
         saveUserDeviceRecord(userDeviceRecord);
+        return orderId;
     }
 
     @Override

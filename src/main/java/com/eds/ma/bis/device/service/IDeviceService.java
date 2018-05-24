@@ -84,7 +84,7 @@ public interface IDeviceService {
      * @param userLat
      * @param userLng
      */
-    void deviceReturn(Long deviceId, User user, BigDecimal userLat, BigDecimal userLng);
+    Long deviceReturn(Long deviceId, User user, BigDecimal userLat, BigDecimal userLng);
 
     /**
      * 保存设备租借记录

@@ -19,6 +19,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -86,8 +87,10 @@ public class DeviceResource extends BaseAuthedResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deviceReturn(@Valid DeviceReturnRequest request) {
 		logger.debug("WxMaResource.deviceReturn({},{},{})",super.getOpenId(),super.getUser(), request);
-		deviceService.deviceReturn(request.getDeviceId(),super.getUser(),request.getUserLat(),request.getUserLng());
-		return Response.status(Response.Status.CREATED).build();
+		Long orderId = deviceService.deviceReturn(request.getDeviceId(),super.getUser(),request.getUserLat(),request.getUserLng());
+		Map<String,Long> resultMap = new HashMap<>(1);
+		resultMap.put("orderId",orderId);
+		return Response.status(Response.Status.CREATED).entity(resultMap).build();
 	}
 
 }
