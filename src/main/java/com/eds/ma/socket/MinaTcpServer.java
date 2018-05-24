@@ -36,6 +36,7 @@ public class MinaTcpServer {
     public NioSocketAcceptor nioSocketAcceptor() {
         NioSocketAcceptor nioSocketAcceptor = new NioSocketAcceptor();
         nioSocketAcceptor.setDefaultLocalAddress(new InetSocketAddress(9000));
+        nioSocketAcceptor.setReuseAddress(true);
         nioSocketAcceptor.setHandler(serviceHandler());
         nioSocketAcceptor.setFilterChainBuilder(filterChainBuilder());
         return nioSocketAcceptor;
