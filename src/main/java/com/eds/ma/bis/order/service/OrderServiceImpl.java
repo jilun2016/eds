@@ -1,5 +1,6 @@
 package com.eds.ma.bis.order.service;
 
+import com.eds.ma.bis.device.OrderStatusEnum;
 import com.eds.ma.bis.order.entity.FinanceIncome;
 import com.eds.ma.bis.order.entity.Order;
 import com.eds.ma.bis.order.entity.PayOrder;
@@ -10,6 +11,7 @@ import com.eds.ma.bis.wx.PayStatusEnum;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
 import com.xcrm.cloud.database.db.query.Ssqb;
 import com.xcrm.common.page.Pagination;
+import com.xcrm.common.util.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -103,7 +107,12 @@ public class OrderServiceImpl implements IOrderService {
         Ssqb queryOrderDetailSqb = Ssqb.create("com.eds.order.queryOrderDetail")
                 .setParam("userId", user.getId())
                 .setParam("orderId", orderId);
-        return dao.findForObj(queryOrderDetailSqb,OrderDetailVo.class);
+        OrderDetailVo orderDetailVo = dao.findForObj(queryOrderDetailSqb,OrderDetailVo.class);
+        if(Objects.nonNull(orderDetailVo) && Objects.equals(orderDetailVo.getOrderStatus(),OrderStatusEnum.S_DDZT_JXZ.value())){
+            BigDecimal rentMoney =  caculateRentFee(orderDetailVo.getRentTime());
+            orderDetailVo.setTotalFee(rentMoney);
+        }
+        return orderDetailVo;
     }
 
     @Override
@@ -112,5 +121,21 @@ public class OrderServiceImpl implements IOrderService {
         Ssqb queryOrderIdSqb = Ssqb.create("com.eds.order.queryLatestOrderId")
                 .setParam("userId", user.getId());
         return dao.findForObj(queryOrderIdSqb,Long.class);
+    }
+
+    @Override
+    public BigDecimal caculateRentFee(Date rentTime){
+        //4小时内收费58元,每1小时累加10元
+        Date now = DateFormatUtils.getNow();
+        BigDecimal baseRentFee = BigDecimal.valueOf(58);
+        long interval=(now.getTime()-rentTime.getTime())/1000;//秒
+        long diffHour=interval%(24*3600)/3600;//小时
+        if(diffHour <= 4){
+            return BigDecimal.valueOf(58);
+        }else{
+            BigDecimal stepMoney = BigDecimal.valueOf((diffHour -4)*10);
+            return baseRentFee.add(stepMoney);
+        }
+
     }
 }

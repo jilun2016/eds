@@ -25,9 +25,10 @@
     </select>
 
     <select id="queryRentDeviceById" resultType="com.eds.ma.bis.device.vo.DeviceRentDetailVo">
-        SELECT ed.id AS deviceId,es.spLng AS deviceLng,es.spLat AS deviceLat,ed.deviceStatus,ed.spId,ed.orderId,ed.userId
+        SELECT ed.id AS deviceId,es.spLng AS deviceLng,es.spLat AS deviceLat,ed.deviceStatus,ed.spId,ed.orderId,ed.userId,eo.rentTime,eo.orderStatus
         FROM t_eds_device ed
         LEFT JOIN t_eds_sp es ON ed.spId = es.id
+        left join t_eds_order eo on eo.id = ed.orderId
         WHERE  ed.id = #{deviceId} AND es.dataStatus = 1 AND ed.dataStatus = 1
             <if test="userId != null">
                 and ed.userId = #{userId}

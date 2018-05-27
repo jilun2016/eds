@@ -8,6 +8,7 @@ import com.eds.ma.bis.user.entity.User;
 import com.xcrm.common.page.Pagination;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -97,5 +98,12 @@ public interface IOrderService {
      * @return
      */
     Long queryLatestOrderId(User user);
+
+    /**
+     * 计算租金金额
+     * @param rentTime
+     * @return
+     */
+    BigDecimal caculateRentFee(Date rentTime);
 
 }

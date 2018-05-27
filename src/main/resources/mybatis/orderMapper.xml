@@ -52,7 +52,7 @@
 
     <update id="updateOrder">
         UPDATE t_eds_order o
-        SET o.returnTime=#{returnTime},o.returnSpId =#{spId},
+        SET o.returnTime=#{returnTime},o.returnSpId =#{spId},o.rentFee = #{rentFee},
             o.orderStatus = 'S_DDZT_YJS',o.balance = #{balance},o.totalFee = #{totalFee}
         WHERE o.id=#{orderId} AND o.deviceId = #{deviceId} and o.userId = #{userId} and o.orderStatus = 'S_DDZT_JXZ'
     </update>

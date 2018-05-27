@@ -11,6 +11,7 @@ import com.eds.ma.bis.order.OrderCodeCreater;
 import com.eds.ma.bis.order.entity.Order;
 import com.eds.ma.bis.order.service.IOrderService;
 import com.eds.ma.bis.user.entity.User;
+import com.eds.ma.bis.user.entity.UserWallet;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.exception.BizCoreRuntimeException;
 import com.eds.ma.rest.common.BizErrorConstants;
@@ -179,7 +180,8 @@ public class DeviceServiceImpl implements IDeviceService {
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_ORDER_ID_NOT_EXIST_ERROR);
         }
 
-        if(!Objects.equals(deviceRentDetailVo.getDeviceStatus(), DeviceStatusEnum.S_SPZT_SYZ.value())){
+        if((!Objects.equals(deviceRentDetailVo.getDeviceStatus(), DeviceStatusEnum.S_SPZT_SYZ.value()))
+                ||(!Objects.equals(deviceRentDetailVo.getOrderStatus(), OrderStatusEnum.S_DDZT_JXZ.value()))){
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_ON_RETURN_STATUS_ERROR);
         }
 
@@ -205,10 +207,29 @@ public class DeviceServiceImpl implements IDeviceService {
         if(Objects.isNull(spDetailVo)){
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_SP_NOT_EXIST);
         }
-        //验证成功,更新订单,归还设备,更新设备位置信息,设备状态
+        //验证成功,更新订单,归还设备,更新设备位置信息,设备状态,钱包扣除金额
         Date now = DateFormatUtils.getNow();
         //计算金额
-        BigDecimal orderMoney = BigDecimal.ZERO;
+        BigDecimal rentFee = orderService.caculateRentFee(now);
+
+        //更新钱包状态
+        UserWallet userWallet = userService.queryUserWalletByUserIdWithLock(userId);
+        //计算租借金额
+        BigDecimal balanceFee = BigDecimal.ZERO;
+        if(userWallet.getBalance().compareTo(BigDecimal.ZERO)>0){
+            if(userWallet.getBalance().compareTo(rentFee) > 0){
+                balanceFee = rentFee;
+            }else {
+                balanceFee = userWallet.getBalance();
+            }
+        }
+        BigDecimal  depositFee = rentFee.subtract(balanceFee);
+        if(userWallet.getDeposit().compareTo(depositFee)<=0){
+            depositFee = userWallet.getDeposit();
+        }
+        userService.updateUserWallet(userId,depositFee.negate(),balanceFee.negate());
+
+
         BigDecimal totalFee = BigDecimal.ZERO;
         //更新订单
         Ssqb updateOrderSqb = Ssqb.create("com.eds.order.updateOrder")
@@ -216,7 +237,7 @@ public class DeviceServiceImpl implements IDeviceService {
                 .setParam("deviceId",deviceRentDetailVo.getDeviceId())
                 .setParam("userId",userId)
                 .setParam("spId",spDetailVo.getSpId())
-                .setParam("orderMoney",orderMoney)
+                .setParam("rentFee",rentFee)
                 .setParam("totalFee",totalFee)
                 .setParam("returnTime",now);
         int updateOrderResult =  dao.updateByMybatis(updateOrderSqb);
@@ -235,6 +256,9 @@ public class DeviceServiceImpl implements IDeviceService {
         if(updateDeviceResult<= 0){
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_ORDER_NOT_EXIST_ERROR);
         }
+
+
+
 
         //保存租借记录
         //生成设备租借记录
