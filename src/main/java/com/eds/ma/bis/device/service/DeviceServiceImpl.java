@@ -230,7 +230,7 @@ public class DeviceServiceImpl implements IDeviceService {
         userService.updateUserWallet(userId,depositFee.negate(),balanceFee.negate());
 
 
-        BigDecimal totalFee = BigDecimal.ZERO;
+        BigDecimal totalFee = depositFee.add(balanceFee);
         //更新订单
         Ssqb updateOrderSqb = Ssqb.create("com.eds.order.updateOrder")
                 .setParam("orderId",deviceRentDetailVo.getOrderId())
@@ -256,9 +256,6 @@ public class DeviceServiceImpl implements IDeviceService {
         if(updateDeviceResult<= 0){
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_ORDER_NOT_EXIST_ERROR);
         }
-
-
-
 
         //保存租借记录
         //生成设备租借记录
