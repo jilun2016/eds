@@ -6,6 +6,8 @@ import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 
+import java.net.InetSocketAddress;
+
 
 /**
  * @Description: mina服务端业务处理类
@@ -37,11 +39,11 @@ public class ServerHandler extends IoHandlerAdapter {
 		  String key = message.toString();
 		  String carPark_id = key.substring(key.indexOf("=") + 1);
 		 logger.debug("messageReceived({})",message);
-		  
+
 
 		  //保存客户端的会话session
 		  SessionMap sessionMap = SessionMap.newInstance();
-		  sessionMap.addSession("9000", session);
+		  sessionMap.addSession(String.valueOf(((InetSocketAddress)session.getLocalAddress()).getPort()), session);
 	  
 	 }
 	 @Override
