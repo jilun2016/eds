@@ -48,6 +48,8 @@
         SELECT o.id
         FROM t_eds_order o
         WHERE o.userId = #{userId} AND o.orderStatus = 'S_DDZT_JXZ' AND o.dataStatus = 1
+        order by o.created desc
+        limit 1
     </select>
 
     <update id="updateOrder">
