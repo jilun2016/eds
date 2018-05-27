@@ -19,7 +19,7 @@ public class MinaTcpClient extends IoHandlerAdapter {
 	public MinaTcpClient() {
 		connector = new NioSocketConnector();
 		connector.setHandler(this);
-		ConnectFuture connFuture = connector.connect(new InetSocketAddress("localhost", 9001));
+		ConnectFuture connFuture = connector.connect(new InetSocketAddress("39.108.172.70", 9001));
 		connFuture.awaitUninterruptibly();
 		session = connFuture.getSession();
 		System.out.println("TCP 客户端启动");

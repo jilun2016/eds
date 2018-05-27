@@ -59,6 +59,7 @@ public class OrderResource extends BaseAuthedResource {
         logger.debug("OrderResource.queryOrderDetail({},{})",super.getOpenId(), orderId);
 
         OrderDetailVo orderDetailVO = orderService.queryOrderDetail(super.getUser(),orderId);
+        logger.debug("OrderResource.queryOrderDetail result:[{}]",orderDetailVO);
         if(orderDetailVO == null) {
             throw new NotFoundException("未查询到该订单详情");
         } else {
