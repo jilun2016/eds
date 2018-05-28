@@ -3,6 +3,8 @@ package com.eds.ma.socket;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 
+import com.eds.ma.resource.DeviceResource;
+import com.xcrm.log.Logger;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
@@ -15,6 +17,8 @@ import org.apache.mina.filter.codec.ProtocolDecoderOutput;
  *
  */
 public class HDecoder extends CumulativeProtocolDecoder {
+	private static Logger logger = Logger.getLogger(DeviceResource.class);
+
 	private final Charset charset;
 
 	public HDecoder(Charset charset) {
@@ -23,10 +27,11 @@ public class HDecoder extends CumulativeProtocolDecoder {
 
 	public boolean doDecode(IoSession session, IoBuffer in,
 			ProtocolDecoderOutput out) throws Exception {
-		
-		//System.out.println("-------doDecode----------");
+
+		logger.debug("HDecoder.hexMessage:{}",in.getHexDump());
 		
 		CharsetDecoder cd = charset.newDecoder();
+
 		String mes = in.getString(cd);
 		out.write(mes);
 		return true;
