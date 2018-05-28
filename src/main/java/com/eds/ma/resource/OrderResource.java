@@ -82,6 +82,18 @@ public class OrderResource extends BaseAuthedResource {
         return Response.ok(resultMap).build();
     }
 
+    /**
+     * 查询最近的使用中订单详情
+     * @return  OrderDetailVo   订单详情
+     */
+    @GET
+    @Path("/finance")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Pagination queryTrnasFinanceIncome(@BeanParam PageRequest pageRequest) {
+        logger.debug("OrderResource.queryTrnasFinanceIncome({},{})",super.getOpenId(),pageRequest);
+        return orderService.queryTrnasFinanceIncome(super.getUser().getId(),pageRequest.getPageNo(),pageRequest.getPageSize());
+    }
+
 
 
 }

@@ -14,7 +14,11 @@ public enum TransTypeEnum {
 	/**
 	 * 余额充值
 	 */
-	S_JYLX_YECZ("S_JYLX_YECZ");
+	S_JYLX_YECZ("S_JYLX_YECZ"),
+	/**
+	 * 提现
+	 */
+	S_JYLX_TX("S_JYLX_TX");
 
 	private final String value;
 

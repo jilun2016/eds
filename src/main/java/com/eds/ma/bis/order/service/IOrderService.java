@@ -106,4 +106,11 @@ public interface IOrderService {
      */
     BigDecimal caculateRentFee(Date rentTime);
 
+    /**
+     * 查询用户的交易流水
+     * @param userId
+     * @param pageNo
+     * @param pageSize
+     */
+    Pagination queryTrnasFinanceIncome(Long userId, Integer pageNo, Integer pageSize);
 }

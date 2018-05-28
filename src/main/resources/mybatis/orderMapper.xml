@@ -59,5 +59,20 @@
         WHERE o.id=#{orderId} AND o.deviceId = #{deviceId} and o.userId = #{userId} and o.orderStatus = 'S_DDZT_JXZ'
     </update>
 
+    <select id="queryTrnasFinanceIncome" resultType="java.util.Map">
+        SELECT if(fi.transType = 'S_JYLX_YJCZ','押金充值',if(fi.transType = 'S_JYLX_YECZ','余额充值','提现')) transType,
+               if(fi.transType = 'S_JYLX_TX',0 - fi.money,fi.money) as money,fi.transTime
+        FROM t_eds_finance_income fi
+        WHERE fi.dataStatus = 1
+        AND   fi.userId = #{userId}
+        ORDER BY fi.transTime DESC
+        <if test="start != null and start >= 0 and pageSize != null and pageSize >= 0">
+            LIMIT #{start}, #{pageSize}
+        </if>
+        <if test="pageSize != null and pageSize > 0 and start == null">
+            LIMIT #{pageSize}
+        </if>
+    </select>
+
 
 </mapper>

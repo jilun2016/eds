@@ -138,4 +138,14 @@ public class OrderServiceImpl implements IOrderService {
         }
 
     }
+
+    @Override
+    public Pagination queryTrnasFinanceIncome(Long userId, Integer pageNo, Integer pageSize) {
+        //通过openId查询userId
+        Ssqb queryFinanceIncomeSqb = Ssqb.create("com.eds.order.queryTrnasFinanceIncome")
+                .setParam("userId", userId)
+                .setParam("pageNo", pageNo)
+                .setParam("pageSize", pageSize);
+        return dao.findForPage(queryFinanceIncomeSqb);
+    }
 }

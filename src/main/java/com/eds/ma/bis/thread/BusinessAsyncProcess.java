@@ -1,11 +1,16 @@
 package com.eds.ma.bis.thread;
 
 import com.alibaba.fastjson.JSON;
+import com.eds.ma.bis.order.OrderCodeCreater;
+import com.eds.ma.bis.order.TransTypeEnum;
+import com.eds.ma.bis.order.entity.FinanceIncome;
 import com.eds.ma.bis.order.entity.PayOrder;
+import com.eds.ma.bis.order.service.IOrderService;
 import com.eds.ma.bis.user.vo.PayRefundVo;
 import com.eds.ma.bis.wx.service.IWxRefundPayService;
 import com.eds.ma.email.SendMailUtil;
 import com.xcrm.cloud.database.db.util.StringUtil;
+import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.common.util.ListUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +34,9 @@ public class BusinessAsyncProcess {
 
 	@Autowired
 	private IWxRefundPayService wxRefundPayService;
+
+	@Autowired
+	private IOrderService orderService;
 
 	/**
 	 * 异步退款处理
@@ -63,6 +71,17 @@ public class BusinessAsyncProcess {
 			payRefundVos.forEach(payRefundVo -> {
 				try {
 					wxRefundPayService.submiteRefund(payRefundVo.getPayOrder(), payRefundVo.getRefundMoney());
+					//保存提现交易记录
+					FinanceIncome financeIncome = new FinanceIncome();
+					financeIncome.setTransCode(OrderCodeCreater.createTradeNO());
+					financeIncome.setContent("提现");
+					financeIncome.setUserId(payRefundVo.getPayOrder().getUserId());
+					financeIncome.setOpenId(payRefundVo.getPayOrder().getBuyerId());
+					financeIncome.setTransType(TransTypeEnum.S_JYLX_TX.value());
+					financeIncome.setTransTime(DateFormatUtils.getNow());
+					financeIncome.setMoney(payRefundVo.getRefundMoney());
+					financeIncome.setOrderCode(payRefundVo.getPayOrder().getOrderCode());
+					orderService.saveFinanceIncome(financeIncome);
 				}catch (Exception e){
 					//退款失败,发送系统bug邮件提醒
 					String text = "###############params###############" + System.getProperty("line.separator")
