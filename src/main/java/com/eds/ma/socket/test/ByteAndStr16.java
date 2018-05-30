@@ -36,5 +36,11 @@ public class ByteAndStr16 {
             b[i] = (byte) ((parse(c0) << 4) | parse(c1));  
         }  
         return b;  
-    }  
+    }
+
+    public static void main(String[] args){
+
+
+        System.out.println(HexString2Bytes("00b78fd0"));
+    }
 }  

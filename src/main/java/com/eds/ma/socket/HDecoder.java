@@ -28,12 +28,12 @@ public class HDecoder extends CumulativeProtocolDecoder {
 	public boolean doDecode(IoSession session, IoBuffer in,
 			ProtocolDecoderOutput out) throws Exception {
 
-		logger.debug("HDecoder.hexMessage:{}",in.getHexDump());
-		
-		CharsetDecoder cd = charset.newDecoder();
-
-		String mes = in.getString(cd);
-		out.write(mes);
+//		logger.debug("HDecoder.hexMessage:{}",in.getHexDump());
+//
+//		CharsetDecoder cd = charset.newDecoder();
+//
+//		String mes = in.getString(cd);
+//		out.write(mes);
 		return true;
 		
 		
