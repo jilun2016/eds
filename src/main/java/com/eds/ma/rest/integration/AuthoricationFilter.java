@@ -41,12 +41,15 @@ public class AuthoricationFilter implements ContainerRequestFilter,ContainerResp
 
         Cookie cookieFromOpenId = CookieUtils.getCookie(requestContext.getCookies(), CommonConstants.WX_OPEN_ID_COOKIE);
         //cookie中没有openid,需要重新认证处理
+
         if (Objects.isNull(cookieFromOpenId) || StringUtils.isBlank(cookieFromOpenId.getValue())) {
+            logger.debug("AuthoricationFilter.cookieFromOpenId is null");
             requestContext.abortWith(buildErrorMessageResponse(RestErrorCode.WX_AUTH_USER_INFO_ERROR));
             return;
         }
-
+        logger.debug("AuthoricationFilter.cookieFromOpenId({})",cookieFromOpenId.getValue());
         User user = userService.queryUserByOpenId(cookieFromOpenId.getValue());
+        logger.debug("AuthoricationFilter.user({})",user);
         if (Objects.isNull(user) || Objects.isNull(user.getId())) {
             requestContext.abortWith(buildErrorMessageResponse(RestErrorCode.WX_AUTH_USER_INFO_ERROR));
             return;
