@@ -132,4 +132,11 @@ public interface IUserService {
      * @param mobile
      */
     void sendWithdrawSmsCode(User user, String mobile);
+
+    /**
+     * 查询用户租借次数
+     * @param id
+     * @return
+     */
+    Integer queryUserRentTimes(Long userId);
 }

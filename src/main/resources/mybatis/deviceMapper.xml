@@ -21,7 +21,8 @@
         WHERE es.dataStatus = 1 and
         (6378137 * ACOS(COS( RADIANS(#{userLat})) * COS( RADIANS( es.spLat ) ) * COS( RADIANS(es.spLng ) - RADIANS(#{userLng}) )
             + SIN( RADIANS(#{userLat}) ) * SIN( RADIANS( es.spLat ) ) ) ) &lt;= #{nearbyDistance}
-        order by spDistance desc
+        order by spDistance asc
+        limit 1
     </select>
 
     <select id="queryRentDeviceById" resultType="com.eds.ma.bis.device.vo.DeviceRentDetailVo">

@@ -87,6 +87,20 @@ public class UserResource extends BaseAuthedResource{
         return Response.ok(resultMap).build();
     }
 
+    /**
+     * 查询用户租借次数
+     */
+    @GET
+    @Path("/rent/times")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response queryUserRentTimes() {
+        logger.debug("UserResource.queryUserRentTimes({},{})", super.getOpenId(),super.getUser());
+        Integer rentTimes = userService.queryUserRentTimes(super.getUser().getId());
+        Map<String,Integer> rentResult = new HashMap<>(1);
+        rentResult.put("rentTimes",rentTimes);
+        return Response.ok(rentResult).build();
+    }
+
 	/**
 	 * 查询用户的租借中的设备信息
      * 店铺id

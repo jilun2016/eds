@@ -1,6 +1,7 @@
 package com.eds.ma.bis.user.service;
 
 import com.eds.ma.bis.common.service.IEdsConfigService;
+import com.eds.ma.bis.device.vo.SpDetailVo;
 import com.eds.ma.bis.message.TmplEvent;
 import com.eds.ma.bis.message.service.IMessageService;
 import com.eds.ma.bis.message.vo.SmsMessageContent;
@@ -449,5 +450,12 @@ public class UserServiceImpl implements IUserService {
         smsMessageContent.setMobile(mobile);
         smsMessageContent.setSmsParams(new String[]{smsCode});
         messageService.pushSmsMessage(smsMessageContent);
+    }
+
+    @Override
+    public Integer queryUserRentTimes(Long userId) {
+        Ssqb queryDeviceSqb = Ssqb.create("com.eds.user.queryUserRentTimes")
+                .setParam("userId",userId);
+        return dao.findForInt(queryDeviceSqb);
     }
 }

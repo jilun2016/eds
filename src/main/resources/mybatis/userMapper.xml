@@ -20,4 +20,11 @@
         FOR UPDATE
     </select>
 
+    <select id="queryUserRentTimes" resultType="java.lang.Integer">
+        SELECT count(*)
+        FROM t_eds_order euw
+        WHERE  euw.userId = #{userId} and euw.orderStatus = 'S_DDZT_YJS' and euw.dataStatus = 1
+        FOR UPDATE
+    </select>
+
 </mapper>
