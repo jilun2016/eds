@@ -111,7 +111,7 @@ public class UserResource extends BaseAuthedResource{
 	public List<UserDeviceVo> queryUserDeviceList(@QueryParam("spId") Long spId) {
 		logger.debug("UserResource.queryUserDeviceList({},{},{})",spId, super.getOpenId(),super.getUser());
         User user = super.getUser();
-		return deviceService.queryUserDeviceList(user.getId(),spId);
+		return deviceService.queryUserDeviceList(user.getId(),null);
 	}
 
     /**
