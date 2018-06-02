@@ -168,6 +168,9 @@ public class DeviceServiceImpl implements IDeviceService {
     public Long deviceReturn(Long deviceId, User user, BigDecimal userLat, BigDecimal userLng) {
         //校验用户信息
         Long userId = user.getId();
+        EdsConfig edsConfig = edsConfigService.queryEdsConfig();
+        //用户的位置和店铺的位置是否在有效距离内
+        SpDetailVo spDetailVo = queryNearestbySpByCoordinate(userLat.doubleValue(), userLng.doubleValue(), edsConfig.getNearbyDistance());
 
         //查询设备信息进行校验 设备状态是否租借中
         DeviceRentDetailVo deviceRentDetailVo = queryRentDeviceById(deviceId,userId);
@@ -185,13 +188,10 @@ public class DeviceServiceImpl implements IDeviceService {
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_ON_RETURN_STATUS_ERROR);
         }
 
-        EdsConfig edsConfig = edsConfigService.queryEdsConfig();
-
-
         //获取设备的位置信息和用户的位置信息是否在有效距离内
         //设备,用户位置校验
-        double checkDistance = DistanceUtil.getDistance(deviceRentDetailVo.getDeviceLng().doubleValue()
-                ,deviceRentDetailVo.getDeviceLat().doubleValue()
+        double checkDistance = DistanceUtil.getDistance(spDetailVo.getSpLng().doubleValue()
+                ,spDetailVo.getSpLat().doubleValue()
                 ,userLng.doubleValue(), userLat.doubleValue());
         if(checkDistance >edsConfig.getValidDistance()){
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_OUT_RANGE);
@@ -202,8 +202,7 @@ public class DeviceServiceImpl implements IDeviceService {
 
         BigDecimal deviceLat = BigDecimal.ZERO;
 
-        //用户的位置和店铺的位置是否在有效距离内
-        SpDetailVo spDetailVo = queryNearestbySpByCoordinate(userLat.doubleValue(), userLng.doubleValue(), edsConfig.getNearbyDistance());
+
         if(Objects.isNull(spDetailVo)){
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_SP_NOT_EXIST);
         }
@@ -279,8 +278,6 @@ public class DeviceServiceImpl implements IDeviceService {
     public void saveUserDeviceRecord(UserDeviceRecord userDeviceRecord) {
         dao.save(userDeviceRecord);
     }
-
-
 
 
 }

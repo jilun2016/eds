@@ -14,7 +14,7 @@
     </select>
 
     <select id="queryNearbySpByCoordinate" resultType="com.eds.ma.bis.device.vo.SpDetailVo">
-        SELECT es.id AS spId,
+        SELECT es.id AS spId,es.spLng,es.spLat,
             (6378137 * ACOS(COS( RADIANS(#{userLat})) * COS( RADIANS( es.spLat ) ) * COS( RADIANS(es.spLng ) - RADIANS(#{userLng}) )
                             + SIN( RADIANS(#{userLat}) ) * SIN( RADIANS( es.spLat ) ) ) ) AS spDistance
         FROM t_eds_sp es
