@@ -280,4 +280,14 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
 
+    public static void main(String[] args) {
+        double checkDistance = DistanceUtil.getDistance(118.15416902303694
+                ,24.47982914445067
+                ,118.15432739257812, 24.47968864440918);
+        System.out.println(checkDistance);
+    }
+
+
+
+
 }

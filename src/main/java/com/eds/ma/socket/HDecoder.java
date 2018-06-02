@@ -36,7 +36,7 @@ public class HDecoder extends CumulativeProtocolDecoder {
 //		out.write(mes);
 		return true;
 		
-		
+
 		/*
 		if (in.remaining() > 4) {// 有数据时，读取字节判断消息长度
 			in.mark();// 标记当前位置，以便reset
@@ -52,13 +52,13 @@ public class HDecoder extends CumulativeProtocolDecoder {
 				// 拿到客户端发过来的数据组装成基础包写出去
 				in.get(bytes, 0, size - 4);
 				//in.get(bytes, size - 4, size);
-				
+
 				PackageBeanFactory beanFactory = (PackageBeanFactory) session
 						.getAttribute(ServerHandler.BEAN_FACTORY);
 				//out.write(beanFactory.getPackage(protocol, size, bytes));
-				
+
 				String mes = in.getString(cd);
-				
+
 				out.write(mes);
 				// 如果读取内容后还粘了包，就让父类再给读取进行下次解析
 				if (in.remaining() > 0) {
@@ -66,10 +66,10 @@ public class HDecoder extends CumulativeProtocolDecoder {
 				}
 			}
 		}
-		
+
 		return false;// 处理成功，让父类进行接收下个包
-*/	
-		
-	
+*/
+
+
 	}
 }

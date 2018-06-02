@@ -2,6 +2,7 @@ package com.eds.ma.socket.handler;
 
 import com.eds.ma.socket.SessionMap;
 import com.eds.ma.socket.test.ByteAndStr16;
+import com.eds.ma.util.NumberUtil;
 import com.xcrm.log.Logger;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.service.IoHandlerAdapter;
@@ -36,14 +37,11 @@ public class ServerHandler extends IoHandlerAdapter {
 	 public void messageReceived(IoSession session, Object message)
 	   throws Exception {
 		 logger.debug("messageReceived({})",message);
-		
-		  //获取客户端发过来的key
-		 IoBuffer bbuf = (IoBuffer) message;
-		 byte[] byten = new byte[bbuf.limit()];
-		 bbuf.get(byten, bbuf.position(), bbuf.limit());
-		 System.out.println("收到消息：" + ByteAndStr16.Bytes2HexString(byten));
 
-		 logger.debug("messageReceived({})",message);
+		 byte[] bbuf = (byte[]) message;
+
+
+		 logger.debug("messageReceived({})",bbuf);
 
 
 		  //保存客户端的会话session

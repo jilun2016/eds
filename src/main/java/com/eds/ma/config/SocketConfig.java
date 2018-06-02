@@ -1,10 +1,12 @@
 package com.eds.ma.config;
 
+import com.eds.ma.socket.ByteArrayCodecFactory;
 import com.eds.ma.socket.HCoderFactory;
 import com.eds.ma.socket.handler.ServerHandler;
 import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
 import org.apache.mina.core.filterchain.IoFilter;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.filter.executor.ExecutorFilter;
 import org.apache.mina.filter.logging.LoggingFilter;
 import org.apache.mina.filter.logging.MdcInjectionFilter;
@@ -20,6 +22,7 @@ import java.beans.PropertyEditor;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.nio.charset.Charset;
 import java.util.*;
 
 /**
@@ -59,7 +62,7 @@ public class SocketConfig {
 
     @Bean
     public ProtocolCodecFilter protocolCodecFilter() {
-        return new ProtocolCodecFilter(new HCoderFactory());
+        return new ProtocolCodecFilter(new ByteArrayCodecFactory());
     }
 
     @Bean

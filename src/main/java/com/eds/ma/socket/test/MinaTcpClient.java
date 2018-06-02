@@ -1,11 +1,16 @@
 package com.eds.ma.socket.test;
 import java.net.InetSocketAddress;
+import java.nio.charset.Charset;
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.service.IoConnector;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.filter.codec.textline.LineDelimiter;
+import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 /**
  * @说明 Mina TCP客户端
@@ -20,18 +25,23 @@ public class MinaTcpClient extends IoHandlerAdapter {
 		connector = new NioSocketConnector();
 		connector.setHandler(this);
 		ConnectFuture connFuture = connector.connect(new InetSocketAddress("localhost", 9000));
+		connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(new TextLineCodecFactory(Charset.forName("UTF-8"), LineDelimiter.WINDOWS.getValue(),LineDelimiter.WINDOWS.getValue())));
 		connFuture.awaitUninterruptibly();
 		session = connFuture.getSession();
 		System.out.println("TCP 客户端启动");
 	}
 	public static void main(String[] args) throws Exception {
 		MinaTcpClient client = new MinaTcpClient();
-		for(int j=0;j<2;j++){ // 发送两遍
-			byte[] bts = new byte[20];
-			for (int i = 0; i < 20; i++) {
-				bts[i] = (byte) i;
-			}
-			IoBuffer buffer = IoBuffer.allocate(20);
+		for(int j=0;j<1;j++){ // 发送两遍
+//			byte[] bts = new byte[11];
+//			for (int i = 0; i < 11; i++) {
+//				bts[i] = (byte) i;
+//			}
+			byte[] bts = new byte[3];
+			bts[0] =  (byte) 0x18;
+			bts[1] =  (byte) 0x01;
+			bts[2] =  (byte) 0x11;
+			IoBuffer buffer = IoBuffer.allocate(3);
 			// 自动扩容
 			buffer.setAutoExpand(true);
 			// 自动收缩
@@ -41,6 +51,28 @@ public class MinaTcpClient extends IoHandlerAdapter {
 			session.write(buffer);
 			Thread.sleep(2000);
 		}
+		// 关闭会话，待所有线程处理结束后
+//		client.connector.dispose(true);
+	}
+
+	public static void main22(String[] args) throws InterruptedException {
+		MinaTcpClient client = new MinaTcpClient();
+//		byte[] temp = new byte[] { (byte) 0x18, (byte) 0x01, (byte) 0x11 };
+		byte[] temp = new byte[3];
+		temp[0] =  (byte) 0x18;
+		temp[1] =  (byte) 0x01;
+		temp[2] =  (byte) 0x11;
+
+
+		IoBuffer buffer = IoBuffer.allocate(3);
+		// 自动扩容
+		buffer.setAutoExpand(true);
+		// 自动收缩
+		buffer.setAutoShrink(true);
+		buffer.put(temp);
+		buffer.flip();
+		session.write(buffer);
+		Thread.sleep(2000);
 		// 关闭会话，待所有线程处理结束后
 		client.connector.dispose(true);
 	}
