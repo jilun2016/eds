@@ -14,7 +14,7 @@ public class ByteArrayDecoder extends CumulativeProtocolDecoder {
 
 	public boolean doDecode(IoSession session, IoBuffer in,
 			ProtocolDecoderOutput out) throws Exception {
-//		// TODO Auto-generated method stub
+//		// TODO Auto-generated method stubz
 //		if (in.remaining() > 0) {
 //			// 有数据时，读取 4 字节判断消息长度
 //			byte[] sizeBytes = new byte[4];

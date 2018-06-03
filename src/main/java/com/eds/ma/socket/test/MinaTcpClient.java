@@ -25,7 +25,7 @@ public class MinaTcpClient extends IoHandlerAdapter {
 		connector = new NioSocketConnector();
 		connector.setHandler(this);
 		ConnectFuture connFuture = connector.connect(new InetSocketAddress("localhost", 9000));
-		connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(new TextLineCodecFactory(Charset.forName("UTF-8"), LineDelimiter.WINDOWS.getValue(),LineDelimiter.WINDOWS.getValue())));
+//		connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(new TextLineCodecFactory(Charset.forName("UTF-8"), LineDelimiter.WINDOWS.getValue(),LineDelimiter.WINDOWS.getValue())));
 		connFuture.awaitUninterruptibly();
 		session = connFuture.getSession();
 		System.out.println("TCP 客户端启动");
@@ -37,11 +37,15 @@ public class MinaTcpClient extends IoHandlerAdapter {
 //			for (int i = 0; i < 11; i++) {
 //				bts[i] = (byte) i;
 //			}
-			byte[] bts = new byte[3];
+			byte[] bts = new byte[7];
 			bts[0] =  (byte) 0x18;
 			bts[1] =  (byte) 0x01;
 			bts[2] =  (byte) 0x11;
-			IoBuffer buffer = IoBuffer.allocate(3);
+			bts[3] =  (byte) 0x00;
+			bts[4] =  (byte) 0xbc;
+			bts[5] =  (byte) 0x61;
+			bts[6] =  (byte) 0x4e;
+			IoBuffer buffer = IoBuffer.allocate(7);
 			// 自动扩容
 			buffer.setAutoExpand(true);
 			// 自动收缩

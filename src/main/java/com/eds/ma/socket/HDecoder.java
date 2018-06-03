@@ -29,6 +29,11 @@ public class HDecoder extends CumulativeProtocolDecoder {
 			ProtocolDecoderOutput out) throws Exception {
 
 //		logger.debug("HDecoder.hexMessage:{}",in.getHexDump());
+
+		byte[] dataBytes = new byte[in.remaining()];
+		in.get(dataBytes, 0, in.remaining());
+		out.write(dataBytes);
+
 //
 //		CharsetDecoder cd = charset.newDecoder();
 //

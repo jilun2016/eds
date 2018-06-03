@@ -13,63 +13,80 @@ import java.net.InetSocketAddress;
 
 
 /**
- * @Description: mina服务端业务处理类
  * @author whl
+ * @Description: mina服务端业务处理类
  * @date 2014-9-30 下午12:36:28
- *
  */
 public class ServerHandler extends IoHandlerAdapter {
 
 
-	private static Logger logger = Logger.getLogger(ServerHandler.class);
-	
-	
-	 public ServerHandler() {
-	  // TODO Auto-generated constructor stub
-	 }
-	 @Override
-	 public void exceptionCaught(IoSession session, Throwable cause)
-	   throws Exception {
-	 }
-	 
-	 
-	 @Override
-	 public void messageReceived(IoSession session, Object message)
-	   throws Exception {
-		 logger.debug("messageReceived({})",message);
-
-		 byte[] bbuf = (byte[]) message;
+    private static Logger logger = Logger.getLogger(ServerHandler.class);
 
 
-		 logger.debug("messageReceived({})",bbuf);
+    public ServerHandler() {
+        // TODO Auto-generated constructor stub
+    }
+
+    @Override
+    public void exceptionCaught(IoSession session, Throwable cause)
+            throws Exception {
+    }
 
 
-		  //保存客户端的会话session
-		  SessionMap sessionMap = SessionMap.newInstance();
-		  sessionMap.addSession(String.valueOf(((InetSocketAddress)session.getLocalAddress()).getPort()), session);
-	  
-	 }
-	 @Override
-	 public void messageSent(IoSession session, Object message) throws Exception {
-		 logger.debug("------------服务端发消息到客户端---");
-	 }
-	 @Override
-	 public void sessionClosed(IoSession session) throws Exception {
-	  // TODO Auto-generated method stub
-		 logger.debug("远程session关闭了一个..." + session.getRemoteAddress().toString());
-	 }
-	 @Override
-	 public void sessionCreated(IoSession session) throws Exception {
-		 logger.debug(session.getRemoteAddress().toString() +"----------------------create");
-	 }
-	 @Override
-	 public void sessionIdle(IoSession session, IdleStatus status)
-	   throws Exception {
-		 logger.debug(session.getServiceAddress() +"IDS");
-	 }
-	 @Override
-	 public void sessionOpened(IoSession session) throws Exception {
-		 logger.debug("连接打开："+session.getLocalAddress());
-	 }
+    @Override
+    public void messageReceived(IoSession session, Object message)
+            throws Exception {
+        logger.debug("messageReceived({})", message);
 
-	}
+        //获取客户端发过来的key
+        IoBuffer bbuf = (IoBuffer) message;
+        System.out.println("收到消息：" + bbuf.getHexDump());
+        String[] mesasgeArray = bbuf.getHexDump().split(" ");
+        if((mesasgeArray.length == 22) && (Long.parseLong(mesasgeArray[0],16) == 24)){
+            //        Integer x = Long.parseLong("bc614e",16);
+
+
+            //保存客户端的会话session
+            SessionMap sessionMap = SessionMap.newInstance();
+            sessionMap.addSession(String.valueOf(((InetSocketAddress) session.getLocalAddress()).getPort()), session);
+        }
+    }
+
+    @Override
+    public void messageSent(IoSession session, Object message) throws Exception {
+        logger.debug("------------服务端发消息到客户端---");
+    }
+
+    @Override
+    public void sessionClosed(IoSession session) throws Exception {
+        // TODO Auto-generated method stub
+        logger.debug("远程session关闭了一个..." + session.getRemoteAddress().toString());
+    }
+
+    @Override
+    public void sessionCreated(IoSession session) throws Exception {
+        logger.debug(session.getRemoteAddress().toString() + "----------------------create");
+    }
+
+    @Override
+    public void sessionIdle(IoSession session, IdleStatus status)
+            throws Exception {
+        logger.debug(session.getServiceAddress() + "IDS");
+    }
+
+    @Override
+    public void sessionOpened(IoSession session) throws Exception {
+        logger.debug("连接打开：" + session.getLocalAddress());
+    }
+
+    public static void main(String[] args) {
+        byte[] bytes = new byte[4];
+        bytes[0] = 0;
+        bytes[1] = -68;
+        bytes[2] = 97;
+        bytes[3] = 78;
+        NumberUtil.bytes2int(bytes);
+
+    }
+
+}

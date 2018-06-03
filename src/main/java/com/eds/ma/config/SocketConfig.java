@@ -60,10 +60,10 @@ public class SocketConfig {
         return new MdcInjectionFilter(MdcInjectionFilter.MdcKey.remoteAddress);
     }
 
-    @Bean
-    public ProtocolCodecFilter protocolCodecFilter() {
-        return new ProtocolCodecFilter(new ByteArrayCodecFactory());
-    }
+//    @Bean
+//    public ProtocolCodecFilter protocolCodecFilter() {
+//        return new ProtocolCodecFilter(new HCoderFactory());
+//    }
 
     @Bean
     public ServerHandler serviceHandler() {
@@ -74,7 +74,7 @@ public class SocketConfig {
     public DefaultIoFilterChainBuilder filterChainBuilder() {
         DefaultIoFilterChainBuilder defaultIoFilterChainBuilder = new DefaultIoFilterChainBuilder();
         Map<String,IoFilter> filters = new LinkedHashMap<>();
-        filters.put("codec",protocolCodecFilter());
+//        filters.put("codec",protocolCodecFilter());
         filters.put("logger",loggingFilter());
         filters.put("executor",executorFilter());
         filters.put("mdcInjectionFilter",mdcInjectionFilter());
