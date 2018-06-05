@@ -1,5 +1,6 @@
 package com.eds.ma.socket.handler;
 
+import com.eds.ma.socket.DeviceCodeConstant;
 import com.eds.ma.socket.SessionMap;
 import com.eds.ma.socket.test.ByteAndStr16;
 import com.eds.ma.util.NumberUtil;
@@ -10,6 +11,7 @@ import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 
 import java.net.InetSocketAddress;
+import java.util.Objects;
 
 
 /**
@@ -42,8 +44,38 @@ public class ServerHandler extends IoHandlerAdapter {
         IoBuffer bbuf = (IoBuffer) message;
         System.out.println("收到消息：" + bbuf.getHexDump());
         String[] mesasgeArray = bbuf.getHexDump().split(" ");
-        if((mesasgeArray.length == 22) && (Long.parseLong(mesasgeArray[0],16) == 24)){
-            //        Integer x = Long.parseLong("bc614e",16);
+        if((mesasgeArray.length >= 22)
+                && (Objects.equals(Long.parseLong(mesasgeArray[0],16) , DeviceCodeConstant.DEVICE_ORDER_START_FLAG))
+                && (Objects.equals(Long.parseLong(mesasgeArray[21],16) , DeviceCodeConstant.DEVICE_ORDER_END_FLAG))){
+            Long deviceOriginId = Long.parseLong(mesasgeArray[3]+mesasgeArray[4]+mesasgeArray[5]+mesasgeArray[6],16);
+            Long deviceLng = Long.parseLong(mesasgeArray[12]+mesasgeArray[13]+mesasgeArray[14]+mesasgeArray[15],16);;
+            Long deviceLat = Long.parseLong(mesasgeArray[16]+mesasgeArray[17]+mesasgeArray[18]+mesasgeArray[19],16);;
+            Long deviceCode = Long.parseLong(mesasgeArray[7],16);
+            //仪表状态 归位未借 1
+            if(Objects.equals(deviceCode,DeviceCodeConstant.DEVICE_STATUS_DZJ)){
+
+            }
+
+            //仪表状态 租借中 2
+            if(Objects.equals(deviceCode,DeviceCodeConstant.DEVICE_STATUS_SYZ)){
+
+            }
+
+            //仪表状态 已锁定 3
+            if(Objects.equals(deviceCode,DeviceCodeConstant.DEVICE_STATUS_YSD)){
+
+            }
+
+            //仪表状态 测量中 4
+            if(Objects.equals(deviceCode,DeviceCodeConstant.DEVICE_STATUS_CLZ)){
+
+            }
+
+            //仪表状态 本次测量报告 5
+            if(Objects.equals(deviceCode,DeviceCodeConstant.DEVICE_STATUS_REPORT)){
+                Long deviceReport = Long.parseLong(mesasgeArray[10]+mesasgeArray[11],16);
+            }
+
 
 
             //保存客户端的会话session
