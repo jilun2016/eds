@@ -1,5 +1,6 @@
 package com.eds.ma.config;
 
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.PropertySource;
  * @Author gaoyan
  * @Date: 2017/5/23
  */
+@Data
 @Configuration
 @PropertySource({"classpath:sys-config.properties","classpath:sys-common-config.properties"})
 public class SysConfig {
@@ -132,164 +134,4 @@ public class SysConfig {
      */
     @Value("${edsCookieHost}")
     private String edsCookieHost;
-
-    public String getProjectProfile() {
-        return projectProfile;
-    }
-
-    public void setProjectProfile(String projectProfile) {
-        this.projectProfile = projectProfile;
-    }
-
-    public String getAccessKeyId() {
-        return accessKeyId;
-    }
-
-    public void setAccessKeyId(String accessKeyId) {
-        this.accessKeyId = accessKeyId;
-    }
-
-    public String getAccessKeySecret() {
-        return accessKeySecret;
-    }
-
-    public void setAccessKeySecret(String accessKeySecret) {
-        this.accessKeySecret = accessKeySecret;
-    }
-
-    public String getBucketName() {
-        return bucketName;
-    }
-
-    public void setBucketName(String bucketName) {
-        this.bucketName = bucketName;
-    }
-
-    public String getWxAuthUrl() {
-        return wxAuthUrl;
-    }
-
-    public void setWxAuthUrl(String wxAuthUrl) {
-        this.wxAuthUrl = wxAuthUrl;
-    }
-
-    public String getWxAppId() {
-        return wxAppId;
-    }
-
-    public void setWxAppId(String wxAppId) {
-        this.wxAppId = wxAppId;
-    }
-
-    public String getWxAppSecret() {
-        return wxAppSecret;
-    }
-
-    public void setWxAppSecret(String wxAppSecret) {
-        this.wxAppSecret = wxAppSecret;
-    }
-
-    public String getWxCallbackUrl() {
-        return wxCallbackUrl;
-    }
-
-    public void setWxCallbackUrl(String wxCallbackUrl) {
-        this.wxCallbackUrl = wxCallbackUrl;
-    }
-
-    public String getWxAuthTokenUrl() {
-        return wxAuthTokenUrl;
-    }
-
-    public void setWxAuthTokenUrl(String wxAuthTokenUrl) {
-        this.wxAuthTokenUrl = wxAuthTokenUrl;
-    }
-
-    public String getWxRedirectUrl() {
-        return wxRedirectUrl;
-    }
-
-    public void setWxRedirectUrl(String wxRedirectUrl) {
-        this.wxRedirectUrl = wxRedirectUrl;
-    }
-
-    public String getWxUserInfoUrl() {
-        return wxUserInfoUrl;
-    }
-
-    public void setWxUserInfoUrl(String wxUserInfoUrl) {
-        this.wxUserInfoUrl = wxUserInfoUrl;
-    }
-
-    public String getWxAccessTokenUrl() {
-        return wxAccessTokenUrl;
-    }
-
-    public void setWxAccessTokenUrl(String wxAccessTokenUrl) {
-        this.wxAccessTokenUrl = wxAccessTokenUrl;
-    }
-
-    public String getJsSdkTicketUrl() {
-        return jsSdkTicketUrl;
-    }
-
-    public void setJsSdkTicketUrl(String jsSdkTicketUrl) {
-        this.jsSdkTicketUrl = jsSdkTicketUrl;
-    }
-
-    public String getWxMaSessionUrl() {
-        return wxMaSessionUrl;
-    }
-
-    public void setWxMaSessionUrl(String wxMaSessionUrl) {
-        this.wxMaSessionUrl = wxMaSessionUrl;
-    }
-
-    public String getWxMaAppId() {
-        return wxMaAppId;
-    }
-
-    public void setWxMaAppId(String wxMaAppId) {
-        this.wxMaAppId = wxMaAppId;
-    }
-
-    public String getWxMaAppSecret() {
-        return wxMaAppSecret;
-    }
-
-    public void setWxMaAppSecret(String wxMaAppSecret) {
-        this.wxMaAppSecret = wxMaAppSecret;
-    }
-
-    public String getEdsCookieHost() {
-        return edsCookieHost;
-    }
-
-    public void setEdsCookieHost(String edsCookieHost) {
-        this.edsCookieHost = edsCookieHost;
-    }
-
-    public String getWxPayCallbackUrl() {
-        return wxPayCallbackUrl;
-    }
-
-    public void setWxPayCallbackUrl(String wxPayCallbackUrl) {
-        this.wxPayCallbackUrl = wxPayCallbackUrl;
-    }
-
-    public String getWxMchId() {
-        return wxMchId;
-    }
-
-    public void setWxMchId(String wxMchId) {
-        this.wxMchId = wxMchId;
-    }
-
-    public String getWxMerchantKey() {
-        return wxMerchantKey;
-    }
-
-    public void setWxMerchantKey(String wxMerchantKey) {
-        this.wxMerchantKey = wxMerchantKey;
-    }
 }

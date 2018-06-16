@@ -8,6 +8,7 @@ import com.eds.ma.bis.user.vo.UserInfoVo;
 import com.eds.ma.bis.user.vo.UserWalletVo;
 import com.eds.ma.config.SysConfig;
 import com.eds.ma.exception.BizCoreRuntimeException;
+import com.eds.ma.redis.RedisDaoSupport;
 import com.eds.ma.resource.request.SendSmsCodeRequest;
 import com.eds.ma.resource.request.UserWithdrawRequest;
 import com.eds.ma.rest.common.BizErrorConstants;
@@ -48,14 +49,19 @@ public class UserResource extends BaseAuthedResource{
     @Autowired
     private IDeviceService deviceService;
 
+    @Autowired
+    private RedisDaoSupport redisDaoSupport;
+
 
 	@GET
 	@Path("/test")
 	@Produces(MediaType.APPLICATION_JSON)
     @NoAuth
 	public Response test(@QueryParam("message") String  message) {
-        SessionMap.newInstance().sendMessage(new String[]{"9000"},message);
+//        SessionMap.newInstance().sendMessage(new String[]{"9000"},message);
+        System.out.println(redisDaoSupport.get("ca_9150344668"));
         return Response.ok().build();
+
 	}
 
     /**

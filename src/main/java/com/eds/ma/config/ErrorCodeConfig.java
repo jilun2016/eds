@@ -26,6 +26,6 @@ public class ErrorCodeConfig {
     }
 
     public void setErrorMsg(Map<String, String> errorMsg) {
-        this.errorMsg = errorMsg;
+        ErrorCodeConfig.errorMsg = errorMsg;
     }
 }
