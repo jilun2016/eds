@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  * @Author gaoyan
  * @Date: 2017/7/16
  */
-@Component
+//@Component
 public class RedisDaoSupport {
 
 	@Autowired

@@ -8,6 +8,7 @@ import com.eds.ma.bis.user.vo.UserInfoVo;
 import com.eds.ma.bis.user.vo.UserWalletVo;
 import com.eds.ma.config.SysConfig;
 import com.eds.ma.exception.BizCoreRuntimeException;
+import com.eds.ma.mongodb.MongoDbDaoSupport;
 import com.eds.ma.redis.RedisDaoSupport;
 import com.eds.ma.resource.request.SendSmsCodeRequest;
 import com.eds.ma.resource.request.UserWithdrawRequest;
@@ -18,6 +19,7 @@ import com.eds.ma.socket.SessionMap;
 import com.eds.ma.util.CookieUtils;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -50,7 +52,7 @@ public class UserResource extends BaseAuthedResource{
     private IDeviceService deviceService;
 
     @Autowired
-    private RedisDaoSupport redisDaoSupport;
+    private MongoDbDaoSupport mongoDbDaoSupport;
 
 
 	@GET
@@ -59,9 +61,8 @@ public class UserResource extends BaseAuthedResource{
     @NoAuth
 	public Response test(@QueryParam("message") String  message) {
 //        SessionMap.newInstance().sendMessage(new String[]{"9000"},message);
-        System.out.println(redisDaoSupport.get("ca_9150344668"));
-        return Response.ok().build();
 
+        return Response.ok().build();
 	}
 
     /**

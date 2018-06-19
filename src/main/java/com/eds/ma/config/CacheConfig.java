@@ -22,8 +22,8 @@ import java.lang.reflect.Method;
  *
  * @author Administrator
  */
-@Configuration
-@EnableCaching
+//@Configuration
+//@EnableCaching
 public class CacheConfig extends CachingConfigurerSupport {
 
     /**
