@@ -2,6 +2,7 @@ package com.eds.ma.resource;
 
 import com.eds.ma.bis.device.service.IDeviceService;
 import com.eds.ma.bis.device.vo.UserDeviceVo;
+import com.eds.ma.bis.order.OrderCodeCreater;
 import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.bis.user.vo.UserInfoVo;
@@ -17,6 +18,7 @@ import com.eds.ma.rest.common.CommonConstants;
 import com.eds.ma.rest.integration.annotation.NoAuth;
 import com.eds.ma.socket.SessionMap;
 import com.eds.ma.util.CookieUtils;
+import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -50,10 +52,6 @@ public class UserResource extends BaseAuthedResource{
 
     @Autowired
     private IDeviceService deviceService;
-
-    @Autowired
-    private MongoDbDaoSupport mongoDbDaoSupport;
-
 
 	@GET
 	@Path("/test")
@@ -159,7 +157,10 @@ public class UserResource extends BaseAuthedResource{
         if(result == 0){
             throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_PART_ERROR);
         }
-        return Response.status(Response.Status.CREATED).build();
+        Map<String,Object> resultMap = new HashMap<>();
+        resultMap.put("transCode", OrderCodeCreater.createTradeNO());
+        resultMap.put("transTime",DateFormatUtils.getNow());
+        return Response.status(Response.Status.CREATED).entity(resultMap).build();
     }
 
     /**
@@ -176,7 +177,10 @@ public class UserResource extends BaseAuthedResource{
         if(result == 0){
             throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_PART_ERROR);
         }
-        return Response.status(Response.Status.CREATED).build();
+        Map<String,Object> resultMap = new HashMap<>();
+        resultMap.put("transCode", OrderCodeCreater.createTradeNO());
+        resultMap.put("transTime",DateFormatUtils.getNow());
+        return Response.status(Response.Status.CREATED).entity(resultMap).build();
     }
 
     /**
@@ -191,6 +195,9 @@ public class UserResource extends BaseAuthedResource{
     public Response sendWithdrawSmsCode(@Valid SendSmsCodeRequest request){
         logger.debug("UserResource.sendWithdrawSmsCode({},{},{})",super.getOpenId(),super.getUser(),request);
         userService.sendWithdrawSmsCode(super.getUser(),request.getMobile());
-        return Response.status(Response.Status.CREATED).build();
+        Map<String,Object> resultMap = new HashMap<>();
+        resultMap.put("transCode", OrderCodeCreater.createTradeNO());
+        resultMap.put("transTime",DateFormatUtils.getNow());
+        return Response.status(Response.Status.CREATED).entity(resultMap).build();
     }
 }

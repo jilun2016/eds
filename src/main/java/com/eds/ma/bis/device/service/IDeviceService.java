@@ -1,9 +1,12 @@
 package com.eds.ma.bis.device.service;
 
 import com.eds.ma.bis.device.entity.Device;
+import com.eds.ma.bis.device.entity.DeviceRelation;
 import com.eds.ma.bis.device.entity.UserDeviceRecord;
 import com.eds.ma.bis.device.vo.*;
 import com.eds.ma.bis.user.entity.User;
+import com.eds.ma.socket.vo.DeviceDataVo;
+import org.springframework.scheduling.annotation.Async;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -91,5 +94,32 @@ public interface IDeviceService {
      * @param userDeviceRecord
      */
     void saveUserDeviceRecord(UserDeviceRecord userDeviceRecord);
+
+    /**
+     * 根据设备id查询硬件设备信息
+     * @param deviceId
+     * @return
+     */
+    DeviceRelation queryDeviceRelationByDeviceId(Long deviceId);
+
+    /**
+     * 发送设备锁定消息到客户端
+     * @param deviceId 设备id
+     * @param lockStatus 锁定状态 {@link com.eds.ma.socket.SocketConstants}
+     */
+    void sendDevcieStatusMessage(Long deviceId,Integer lockStatus);
+
+    /**
+     * 异步保存消息
+     * @param deviceDataVo
+     */
+    void asyncSaveMessage(DeviceDataVo deviceDataVo);
+
+    /**
+     * 异步更新设备锁定状态
+     * @param deviceId
+     * @param lockStatus
+     */
+    void asyncUpdateDeviceStatus(Long deviceId,Integer lockStatus);
 
 }

@@ -5,6 +5,7 @@ import com.eds.ma.bis.common.service.IEdsConfigService;
 import com.eds.ma.bis.device.DeviceStatusEnum;
 import com.eds.ma.bis.device.OrderStatusEnum;
 import com.eds.ma.bis.device.entity.Device;
+import com.eds.ma.bis.device.entity.DeviceRelation;
 import com.eds.ma.bis.device.entity.UserDeviceRecord;
 import com.eds.ma.bis.device.vo.*;
 import com.eds.ma.bis.order.OrderCodeCreater;
@@ -14,14 +15,21 @@ import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.entity.UserWallet;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.exception.BizCoreRuntimeException;
+import com.eds.ma.mongodb.MongoDbDaoSupport;
 import com.eds.ma.rest.common.BizErrorConstants;
+import com.eds.ma.socket.SessionMap;
+import com.eds.ma.socket.SocketConstants;
+import com.eds.ma.socket.vo.DeviceDataVo;
 import com.eds.ma.util.DistanceUtil;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
+import com.xcrm.cloud.database.db.query.QueryBuilder;
 import com.xcrm.cloud.database.db.query.Ssqb;
+import com.xcrm.cloud.database.db.query.expression.Restrictions;
 import com.xcrm.common.util.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +55,9 @@ public class DeviceServiceImpl implements IDeviceService {
 
     @Autowired
     private IEdsConfigService edsConfigService;
+
+    @Autowired
+    private MongoDbDaoSupport mongoDbDaoSupport;
 
 
     @Override
@@ -162,6 +173,8 @@ public class DeviceServiceImpl implements IDeviceService {
         userDeviceRecord.setUserLat(userLat);
         userDeviceRecord.setUserLng(userLng);
         saveUserDeviceRecord(userDeviceRecord);
+        //硬件发送指令解锁
+        sendDevcieStatusMessage(deviceId,SocketConstants.DEVICE_LOCK_UNLOCK);
     }
 
     @Override
@@ -271,6 +284,8 @@ public class DeviceServiceImpl implements IDeviceService {
         userDeviceRecord.setUserLng(userLng);
         userDeviceRecord.setSpId(spDetailVo.getSpId());
         saveUserDeviceRecord(userDeviceRecord);
+        //硬件发送指令上锁
+        sendDevcieStatusMessage(deviceId,SocketConstants.DEVICE_LOCK_LOCK);
         return orderId;
     }
 
@@ -279,15 +294,41 @@ public class DeviceServiceImpl implements IDeviceService {
         dao.save(userDeviceRecord);
     }
 
-
-    public static void main(String[] args) {
-        double checkDistance = DistanceUtil.getDistance(118.15416902303694
-                ,24.47982914445067
-                ,118.15432739257812, 24.47968864440918);
-        System.out.println(checkDistance);
+    @Override
+    public DeviceRelation queryDeviceRelationByDeviceId(Long deviceId) {
+        QueryBuilder queryDeviceQb = QueryBuilder.where(Restrictions.eq("deviceId",deviceId))
+                .and(Restrictions.eq("dataStatus",1));
+        return dao.query(queryDeviceQb,DeviceRelation.class);
     }
 
+    @Override
+    public void sendDevcieStatusMessage(Long deviceId,Integer lockStatus) {
+        DeviceRelation deviceRelation = queryDeviceRelationByDeviceId(deviceId);
+        SessionMap sessionMap = SessionMap.newInstance();
+        DeviceDataVo deviceDataVo = sessionMap.sendDevcieStatusMessage(deviceRelation.getPort(),deviceRelation.getOriginDeviceId(),lockStatus);
+        //保存设备锁状态记录
+        if(Objects.nonNull(deviceDataVo)){
+            asyncSaveMessage(deviceDataVo);
+        }
+    }
 
+    /**
+     * 异步保存消息
+     * @param deviceDataVo
+     */
+    @Async
+    @Override
+    public void asyncSaveMessage(DeviceDataVo deviceDataVo) {
+        mongoDbDaoSupport.save(deviceDataVo);
+    }
+
+    @Override
+    public void asyncUpdateDeviceStatus(Long originDeviceId, Integer lockStatus) {
+        QueryBuilder updateDeviceStatusQb = QueryBuilder.where(Restrictions.eq("originDeviceId",originDeviceId));
+        DeviceRelation deviceRelation = new DeviceRelation();
+        deviceRelation.setLockStatus(lockStatus);
+        dao.updateByQuery(deviceRelation,updateDeviceStatusQb);
+    }
 
 
 }

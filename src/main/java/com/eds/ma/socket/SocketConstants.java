@@ -17,4 +17,15 @@ public interface SocketConstants {
 	 */
 	Integer DEVICE_FLOW_SERVER_SEND = 2;
 
+
+	/**
+	 * 指令 锁定仪表
+	 */
+	Integer DEVICE_LOCK_LOCK = 5;
+
+	/**
+	 * 指令 解锁仪表
+	 */
+	Integer DEVICE_LOCK_UNLOCK = 6;
+
 }
