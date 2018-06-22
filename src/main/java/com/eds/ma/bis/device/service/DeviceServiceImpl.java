@@ -304,11 +304,14 @@ public class DeviceServiceImpl implements IDeviceService {
     @Override
     public void sendDevcieStatusMessage(Long deviceId,Integer lockStatus) {
         DeviceRelation deviceRelation = queryDeviceRelationByDeviceId(deviceId);
-        SessionMap sessionMap = SessionMap.newInstance();
-        DeviceDataVo deviceDataVo = sessionMap.sendDevcieStatusMessage(deviceRelation.getPort(),deviceRelation.getOriginDeviceId(),lockStatus);
-        //保存设备锁状态记录
-        if(Objects.nonNull(deviceDataVo)){
-            asyncSaveMessage(deviceDataVo);
+        if(Objects.nonNull(deviceRelation)){
+            SessionMap sessionMap = SessionMap.newInstance();
+
+            DeviceDataVo deviceDataVo = sessionMap.sendDevcieStatusMessage(deviceRelation.getPort(),deviceRelation.getOriginDeviceId(),lockStatus);
+            //保存设备锁状态记录
+            if(Objects.nonNull(deviceDataVo)){
+                asyncSaveMessage(deviceDataVo);
+            }
         }
     }
 
