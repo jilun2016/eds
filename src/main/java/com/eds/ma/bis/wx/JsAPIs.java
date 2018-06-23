@@ -1,6 +1,5 @@
 package com.eds.ma.bis.wx;
 
-import com.eds.ma.rest.common.CommonConstants;
 import com.xcrm.common.http.*;
 import com.xcrm.common.http.parser.ResponseParser;
 import com.xcrm.common.http.utils.SafeUtils;
@@ -19,9 +18,13 @@ public class JsAPIs {
     private ServiceClient serviceClient;
     private String wxAccessTokenUrl;
     private String jsSdkTicketUrl;
+    private static JsAPIs jsAPIs;
 
     public static JsAPIs with(String wxAccessTokenUrl, String jsSdkTicketUrl) {
-        return new JsAPIs(wxAccessTokenUrl, jsSdkTicketUrl);
+        if(jsAPIs == null){
+            jsAPIs = new JsAPIs(wxAccessTokenUrl, jsSdkTicketUrl);
+        }
+        return jsAPIs;
     }
 
     private JsAPIs(String wxAccessTokenUrl, String jsSdkTicketUrl) {
@@ -56,7 +59,7 @@ public class JsAPIs {
             json = InputStreamUtils.InputStreamTOString(response.getContent(), "UTF-8");
             log.info("get weixin api server response ={}", json);
             Map result = ResponseParser.unmarshaller(json, Map.class);
-            if (result.containsKey(CommonConstants.ACCESS_TOKEN)) {
+            if (result.containsKey(WxTokenTypeEnum.ACCESS_TOKEN.value())) {
                 return result;
             } else {
                 log.warn("get weixin getWxAccessToken failed errcode={},errmsg={}"

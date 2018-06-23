@@ -28,12 +28,15 @@ public abstract class AccessTokenHolder {
     private String tokenUrl;
     private CloseableHttpClient httpClient;
 
-    public AccessTokenHolder(String tokenUrl, String clientId, String clientSecret) {
+    public AccessTokenHolder(String tokenUrl) {
         this.tokenUrl = tokenUrl;
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
-
         httpClient = HttpClients.createDefault();
+    }
+
+
+    public void init(String clientId, String clientSecret){
+        setClientId(clientId);
+        setClientSecret(clientSecret);
     }
 
     public void setClientId(String clientId) {
@@ -48,10 +51,11 @@ public abstract class AccessTokenHolder {
         this.tokenUrl = tokenUrl;
     }
 
+
     protected String fetchAccessToken() {
         logger.debug("[{}]:fetching a new access token.", clientId);
 
-        String url = String.format(this.tokenUrl, this.clientId, this.clientSecret);
+        String url = this.tokenUrl+"?appid=" + this.clientId + "&secret="+ this.clientSecret+"&grant_type=client_credential";
         HttpGet httpGet = new HttpGet(url);
 
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
@@ -80,14 +84,4 @@ public abstract class AccessTokenHolder {
      * @return
      */
     public abstract AccessToken getAccessToken();
-
-    /**
-     * 强制刷新
-     */
-    public abstract void refreshToken();
-
-    /**
-     * 强制设置token过期
-     */
-    public abstract void expireToken();
 }

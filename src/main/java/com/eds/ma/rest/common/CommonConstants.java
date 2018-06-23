@@ -17,9 +17,4 @@ public interface CommonConstants {
 	 */
 	String EDS_USER = "eds_user";
 
-	/**
-	 * access_token常量值
-	 */
-	String ACCESS_TOKEN = "access_token";
-
 }

@@ -1,5 +1,6 @@
 package com.eds.ma.bis.wx.sdk.jsapis;
 
+import com.eds.ma.bis.wx.WxTokenTypeEnum;
 import com.eds.ma.rest.common.CommonConstants;
 import com.xcrm.common.http.*;
 import com.xcrm.common.http.parser.ResponseParser;
@@ -56,7 +57,7 @@ public class JsAPIs {
             json = InputStreamUtils.InputStreamTOString(response.getContent(), "UTF-8");
             log.info("get weixin api server response ={}", json);
             Map result = ResponseParser.unmarshaller(json, Map.class);
-            if (result.containsKey(CommonConstants.ACCESS_TOKEN)) {
+            if (result.containsKey(WxTokenTypeEnum.ACCESS_TOKEN.value())) {
                 return result;
             } else {
                 log.warn("get weixin getWxAccessToken failed errcode={},errmsg={}"

@@ -5,33 +5,23 @@ package com.eds.ma.bis.wx.sdk.common;
  */
 public class DefaultAccessTokenHolder extends AccessTokenHolder {
 
-    private AccessToken accessToken;
+    private static DefaultAccessTokenHolder accessTokenHolder;
 
-    public DefaultAccessTokenHolder(String tokenUrl, String clientId, String clientSecret){
-        super(tokenUrl, clientId, clientSecret);
+    public static DefaultAccessTokenHolder with(String tokenUrl) {
+        if(accessTokenHolder == null){
+            accessTokenHolder = new DefaultAccessTokenHolder(tokenUrl);
+        }
+        return accessTokenHolder;
+    }
+
+    private DefaultAccessTokenHolder(String tokenUrl){
+        super(tokenUrl);
     }
 
     @Override
     public synchronized AccessToken getAccessToken() {
-        if (accessToken == null || accessToken.expired()) {
-            refreshToken();
-        }
-        return accessToken;
+        String content = fetchAccessToken();
+        return AccessToken.fromJson(content);
     }
-
-    @Override
-    public synchronized void refreshToken() {
-        if (accessToken == null || accessToken.expired()) {
-            String content = fetchAccessToken();
-            AccessToken accessToken = AccessToken.fromJson(content);
-            this.accessToken = accessToken;
-        }
-    }
-
-    @Override
-    public void expireToken() {
-        accessToken.setExpiresIn(-30);//强制设置为无效
-    }
-
 
 }
