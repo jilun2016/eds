@@ -6,6 +6,10 @@ import com.eds.ma.bis.message.entity.MessageRecord;
 import com.eds.ma.bis.message.entity.SysMessageTmpl;
 import com.eds.ma.bis.message.vo.SmsMessageContent;
 import com.eds.ma.bis.sdk.sms.YunpianSmsSender;
+import com.eds.ma.config.SysConfig;
+import com.eds.ma.exception.BizCoreRuntimeException;
+import com.eds.ma.rest.common.BizErrorConstants;
+import com.eds.ma.util.HTTPUtil;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
 import com.xcrm.cloud.database.db.query.QueryBuilder;
 import com.xcrm.cloud.database.db.query.expression.Restrictions;
@@ -23,16 +27,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @Transactional
 public class MessageServiceImpl implements IMessageService {
 
-    protected Logger log = LoggerFactory.getLogger(MessageServiceImpl.class);
+    protected Logger logger = LoggerFactory.getLogger(MessageServiceImpl.class);
 
     private static final Integer SUCCESS_STATUS_CODE = 0;
 
@@ -42,9 +43,28 @@ public class MessageServiceImpl implements IMessageService {
     @Autowired
     private BaseDaoSupport dao;
 
+    @Autowired
+    private SysConfig sysConfig;
+
     @Override
     public void pushWxMaMessage(String openId, String tmplEvent) {
         SysMessageTmpl sysMessageTmpl = querySysMessageTmpl(tmplEvent);
+
+        Map<String,String> result = new HashMap<>();
+        Map<String,Object> templateParaMap = new HashMap<>();
+        templateParaMap.put("touser",openId);
+        templateParaMap.put("template_id",sysMessageTmpl.getMaTmplShortId());
+        templateParaMap.put("form_id",123456);
+        templateParaMap.put("data",sysMessageTmpl.getMaWxTmpl());
+
+        String resultJson = HTTPUtil.sendGetString(sysConfig.getWxMaTemplateUrl(),templateParaMap);
+        logger.info("MessageServiceImpl.pushWxMaMessage.result:{}",resultJson);
+        Map<String,Object> resultJsonMap = HTTPUtil.Json2Map(resultJson);
+        int errorCode = MapUtils.getIntValue(resultJsonMap,"errcode",-1);
+        if(!Objects.equals(errorCode, -1)){
+            logger.error("MessageServiceImpl.pushWxMaMessage failed.result:{}",resultJson);
+            throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
+        }
 
     }
 
