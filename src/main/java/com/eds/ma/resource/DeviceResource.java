@@ -99,7 +99,7 @@ public class DeviceResource extends BaseAuthedResource{
 	@Path("/faq")
 	@Produces(MediaType.APPLICATION_JSON)
 	@NoAuth
-	public Pagination queryDeviceFaq(@Valid PageRequest request) {
+	public Pagination queryDeviceFaq(@Valid @BeanParam PageRequest request) {
 		logger.debug("----DeviceResource.queryDeviceFaq()----");
 		return deviceService.queryDeviceFaq(request.getPageNo(),request.getPageSize());
 	}
