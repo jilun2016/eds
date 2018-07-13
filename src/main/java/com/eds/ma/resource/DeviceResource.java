@@ -3,14 +3,13 @@ package com.eds.ma.resource;
 import com.eds.ma.bis.common.entity.EdsConfig;
 import com.eds.ma.bis.common.service.IEdsConfigService;
 import com.eds.ma.bis.device.service.IDeviceService;
+import com.eds.ma.bis.device.vo.DeviceFaqInfoVo;
 import com.eds.ma.bis.device.vo.DeviceInfoVo;
 import com.eds.ma.config.SysConfig;
-import com.eds.ma.resource.request.DeviceDepositPrePayRequest;
-import com.eds.ma.resource.request.DeviceRentRequest;
-import com.eds.ma.resource.request.DeviceReturnRequest;
-import com.eds.ma.resource.request.SearchDeviceRequest;
+import com.eds.ma.resource.request.*;
 import com.eds.ma.rest.integration.annotation.NoAuth;
 import com.eds.ma.util.DistanceUtil;
+import com.xcrm.common.page.Pagination;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -91,6 +90,18 @@ public class DeviceResource extends BaseAuthedResource{
 		Map<String,Long> resultMap = new HashMap<>(1);
 		resultMap.put("orderId",orderId);
 		return Response.status(Response.Status.CREATED).entity(resultMap).build();
+	}
+
+	/**
+	 * 查询设备常见问题
+	 */
+	@GET
+	@Path("/faq")
+	@Produces(MediaType.APPLICATION_JSON)
+	@NoAuth
+	public Pagination queryDeviceFaq(@Valid PageRequest request) {
+		logger.debug("----DeviceResource.queryDeviceFaq()----");
+		return deviceService.queryDeviceFaq(request.getPageNo(),request.getPageSize());
 	}
 
 }

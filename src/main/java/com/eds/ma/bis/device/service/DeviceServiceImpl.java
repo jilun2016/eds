@@ -25,6 +25,7 @@ import com.xcrm.cloud.database.db.BaseDaoSupport;
 import com.xcrm.cloud.database.db.query.QueryBuilder;
 import com.xcrm.cloud.database.db.query.Ssqb;
 import com.xcrm.cloud.database.db.query.expression.Restrictions;
+import com.xcrm.common.page.Pagination;
 import com.xcrm.common.util.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -331,6 +332,15 @@ public class DeviceServiceImpl implements IDeviceService {
         DeviceRelation deviceRelation = new DeviceRelation();
         deviceRelation.setLockStatus(lockStatus);
         dao.updateByQuery(deviceRelation,updateDeviceStatusQb);
+    }
+
+    @Override
+    public Pagination queryDeviceFaq(Integer pageNo, Integer pageSize) {
+        Ssqb queryOrderListSqb = Ssqb.create("com.eds.device.queryDeviceFaq")
+                .setParam("pageNo", pageNo)
+                .setParam("pageSize", pageSize);
+        queryOrderListSqb.setIncludeTotalCount(true);
+        return dao.findForPage(queryOrderListSqb);
     }
 
 

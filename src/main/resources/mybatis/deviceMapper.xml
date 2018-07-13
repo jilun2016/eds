@@ -72,6 +72,20 @@
         WHERE id=#{deviceId} and orderId = #{orderId} and userId = #{userId} and dataStatus = 1
     </update>
 
+    <select id="queryDeviceFaq" resultType="com.eds.ma.bis.device.vo.DeviceFaqInfoVo">
+        SELECT df.title,df.detail
+        FROM t_eds_device_faq df
+        WHERE  df.dataStatus = 1
+        order by priority desc
+        <if test="start != null and start >= 0 and pageSize != null and pageSize >= 0">
+            LIMIT #{start}, #{pageSize}
+        </if>
+        <if test="pageSize != null and pageSize > 0 and start == null">
+            LIMIT #{pageSize}
+        </if>
+    </select>
+
+
 
 
 </mapper>

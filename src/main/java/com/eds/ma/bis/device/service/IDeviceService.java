@@ -6,6 +6,7 @@ import com.eds.ma.bis.device.entity.UserDeviceRecord;
 import com.eds.ma.bis.device.vo.*;
 import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.socket.vo.DeviceDataVo;
+import com.xcrm.common.page.Pagination;
 import org.springframework.scheduling.annotation.Async;
 
 import java.math.BigDecimal;
@@ -122,4 +123,11 @@ public interface IDeviceService {
      */
     void asyncUpdateDeviceStatus(Long deviceId,Integer lockStatus);
 
+    /**
+     * 查询设备常见问题
+     * @param pageNo 页码
+     * @param pageSize 页大小
+     * @return
+     */
+    Pagination queryDeviceFaq(Integer pageNo, Integer pageSize);
 }

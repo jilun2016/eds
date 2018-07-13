@@ -71,7 +71,7 @@ public class WxMaResource extends BaseAuthedResource {
 	public Response queryMaUserOpenId(@NotNull(message = "登录code不允许为空") @PathParam("code") String code,
 								 @Context HttpServletRequest request, @Context HttpServletResponse response) {
 
-		logger.debug("----WxMaResource.queryMaSession({},{},{})",code);
+		logger.debug("----WxMaResource.queryMaSession({})",code);
 		String openId = wxMaService.queryMaUserOpenId(code);
 		CookieUtils.addCookie(request,response,  CommonConstants.WX_OPEN_ID_COOKIE, openId,
 				null, sysConfig.getEdsCookieHost());
