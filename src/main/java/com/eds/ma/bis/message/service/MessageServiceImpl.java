@@ -6,6 +6,7 @@ import com.eds.ma.bis.message.entity.MessageRecord;
 import com.eds.ma.bis.message.entity.SysMessageTmpl;
 import com.eds.ma.bis.message.vo.SmsMessageContent;
 import com.eds.ma.bis.sdk.sms.YunpianSmsSender;
+import com.eds.ma.bis.wx.entity.WxAccessToken;
 import com.eds.ma.config.SysConfig;
 import com.eds.ma.exception.BizCoreRuntimeException;
 import com.eds.ma.rest.common.BizErrorConstants;
@@ -57,7 +58,11 @@ public class MessageServiceImpl implements IMessageService {
         templateParaMap.put("form_id",123456);
         templateParaMap.put("data",sysMessageTmpl.getMaWxTmpl());
 
-        String resultJson = HTTPUtil.sendGetString(sysConfig.getWxMaTemplateUrl(),templateParaMap);
+        //查询token
+        QueryBuilder queryWxAccessTokenQb = QueryBuilder.where(Restrictions.eq("appId",sysConfig.getWxMaAppId()))
+                .and(Restrictions.eq("dataStatus",1));
+        WxAccessToken wxAccessToken = dao.query(queryWxAccessTokenQb,WxAccessToken.class);
+        String resultJson = HTTPUtil.sendGetString(sysConfig.getWxMaTemplateUrl()+wxAccessToken.getToken(),templateParaMap);
         logger.info("MessageServiceImpl.pushWxMaMessage.result:{}",resultJson);
         Map<String,Object> resultJsonMap = HTTPUtil.Json2Map(resultJson);
         int errorCode = MapUtils.getIntValue(resultJsonMap,"errcode",-1);
