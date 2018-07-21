@@ -12,7 +12,7 @@ import org.springframework.context.annotation.PropertySource;
  */
 @Data
 @Configuration
-@PropertySource({"classpath:sys-config.properties","classpath:sys-common-config.properties"})
+@PropertySource({"classpath:commonConfig.properties","classpath:systemConfig.properties"})
 public class SysConfig {
 
     /**
@@ -140,4 +140,28 @@ public class SysConfig {
      */
     @Value("${edsCookieHost}")
     private String edsCookieHost;
+
+    /**
+     * 阿里小程序appid
+     */
+    @Value("${aliMaAppId}")
+    private String aliMaAppId;
+
+    /**
+     * 阿里网关密钥
+     */
+    @Value("${aliGatewayPrivateKey}")
+    private String aliGatewayPrivateKey;
+
+    /**
+     * 阿里网关公钥
+     */
+    @Value("${aliGatewayPublicKey}")
+    private String aliGatewayPublicKey;
+
+    /**
+     * 阿里网关url
+     */
+    @Value("${aliGatewayUrl}")
+    private String aliGatewayUrl;
 }

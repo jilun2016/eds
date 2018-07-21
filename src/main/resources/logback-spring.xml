@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <configuration>
-    <property name="logstash.path" value="/root/logs/eds/ms"/>
+    <property name="logstash.path" value="/root/logs/eds/ma"/>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
-            <Pattern>[EDS] %d{HH:mm:ss.SSS} %-5level %logger{80} - %msg%n</Pattern>
+            <Pattern>[eds] %d{HH:mm:ss.SSS} %-5level %logger{80} - %msg%n</Pattern>
         </layout>
     </appender>
 
@@ -27,8 +27,8 @@
     </appender>
 
     <root>
-        <level value="DEBUG"/>
-        <appender-ref ref="FILE"/>
+        <level value="${log.level}"/>
+        <appender-ref ref="${log.output}"/>
     </root>
 
     <logger name="org.springframework" level="WARN"/>

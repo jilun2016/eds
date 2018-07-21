@@ -28,3 +28,4 @@ nbdist/
 /src/main/resources/sys-common-config.properties
 /src/main/resources/application.properties
 /src/main/resources/apiclient_cert.p12
+/src/main/resources/systemConfig.properties

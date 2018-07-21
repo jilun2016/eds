@@ -18,11 +18,11 @@ public class WxEndpoint {
         if (endpoints == null) {
             try {
                 Properties properties = new Properties();
-                InputStream inputStream = WxEndpoint.class.getClassLoader().getResourceAsStream("wx-pay-endpoint.properties");
+                InputStream inputStream = WxEndpoint.class.getClassLoader().getResourceAsStream("commonConfig.properties");
                 properties.load(inputStream);
                 endpoints = properties;
             } catch (IOException e) {
-                throw new WxRuntimeException(999, "cannot find resource wx-pay-endpoint.properties from classpath.");
+                throw new WxRuntimeException(999, "cannot find resource commonConfig.properties from classpath.");
             }
         }
     }
