@@ -1,7 +1,6 @@
 package com.eds.ma.bis.wx.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.eds.ma.bis.device.service.IDeviceService;
 import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.bis.user.vo.UserInfoVo;
@@ -10,7 +9,6 @@ import com.eds.ma.config.SysConfig;
 import com.eds.ma.exception.BizCoreRuntimeException;
 import com.eds.ma.rest.common.BizErrorConstants;
 import com.eds.ma.util.AesCbcUtil;
-import com.eds.ma.util.CookieUtils;
 import com.eds.ma.util.HTTPUtil;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
 import com.xcrm.log.Logger;
@@ -61,7 +59,7 @@ public class WxMaServiceImpl implements IWxMaService {
                 userInfoVo.setHeadimgurl(userInfoJSON.getString("avatarUrl"));
                 userInfoVo.setNickName(userInfoJSON.getString("nickName"));
                 //异步保存用户信息
-                userService.asyncSaveOpenId(userInfoVo.getOpenId(),userInfoVo.getNickName(),userInfoVo.getHeadimgurl(),userInfoJSON.toJSONString());
+                userService.asyncSaveOpenId(userInfoJSON.getString("unionId"),userInfoVo.getOpenId(),userInfoVo.getNickName(),userInfoVo.getHeadimgurl(),userInfoJSON.toJSONString());
                 return userInfoVo;
             }else{
                 logger.error("WxMinaServiceImpl.parse user info failed.resultJson:{}",resultJson);
@@ -84,7 +82,7 @@ public class WxMaServiceImpl implements IWxMaService {
         }
         try {
             //异步保存用户信息
-            userService.asyncSaveOpenId(openId,null,null,null);
+            userService.asyncSaveOpenId(null, openId,null,null,null);
         } catch (Exception e) {
             logger.error("queryMaUserOpenId.parse user info failed.resultJson:{}",resultJson);
             throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);

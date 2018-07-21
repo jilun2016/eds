@@ -1,7 +1,6 @@
 package com.eds.ma.bis.user.service;
 
 import com.eds.ma.bis.common.service.IEdsConfigService;
-import com.eds.ma.bis.device.vo.SpDetailVo;
 import com.eds.ma.bis.message.TmplEvent;
 import com.eds.ma.bis.message.service.IMessageService;
 import com.eds.ma.bis.message.vo.SmsMessageContent;
@@ -79,6 +78,12 @@ public class UserServiceImpl implements IUserService {
     @Override
     public User queryUserByOpenId(String openId) {
         QueryBuilder queryUserQb = QueryBuilder.where(Restrictions.eq("openId", openId));
+        return dao.query(queryUserQb, User.class);
+    }
+
+    @Override
+    public User queryUserByUnionId(String unionId) {
+        QueryBuilder queryUserQb = QueryBuilder.where(Restrictions.eq("unionId", unionId));
         return dao.query(queryUserQb, User.class);
     }
 
@@ -315,6 +320,7 @@ public class UserServiceImpl implements IUserService {
     /**
      * 保存微信用户信息
      *
+     * @param unionId
      * @param openId
      * @param nickname
      * @param headimgurl
@@ -322,13 +328,14 @@ public class UserServiceImpl implements IUserService {
      */
     @Async
     @Override
-    public void asyncSaveOpenId(String openId, String nickname, String headimgurl, String rawData) {
+    public void asyncSaveOpenId(String unionId, String openId, String nickname, String headimgurl, String rawData) {
         log.info("UserService.asyncSaveOpenId({},{},{},{})", openId, nickname, headimgurl, rawData);
         //保存微信用户信息
         Date now = DateFormatUtils.getNow();
         User user = queryUserByOpenId(openId);
         if (Objects.nonNull(user)) {
             user.setUpdated(now);
+            user.setWxUnionId(unionId);
             user.setNickname(nickname);
             user.setHeadimgurl(headimgurl);
             user.setRawData(rawData);
@@ -339,6 +346,7 @@ public class UserServiceImpl implements IUserService {
             user.setHeadimgurl(headimgurl);
             user.setNickname(nickname);
             user.setOpenId(openId);
+            user.setWxUnionId(unionId);
             user.setRawData(rawData);
             saveUser(user);
             //初始化钱包

@@ -5,7 +5,6 @@ import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.entity.UserWallet;
 import com.eds.ma.bis.user.vo.UserWalletVo;
 
-import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 
 /**
@@ -32,6 +31,12 @@ public interface IUserService {
      * @param openId
      */
     User queryUserByOpenId(String openId);
+
+    /**
+     * unionId
+     * @param unionId
+     */
+    User queryUserByUnionId(String unionId);
 
     /**
      * 更新用户信息
@@ -119,12 +124,13 @@ public interface IUserService {
     /**
      * 保存微信用户信息
      *
+     * @param unionId
      * @param openId
      * @param nickname
      * @param headimgurl
      * @param rawData
      */
-    void asyncSaveOpenId(String openId, String nickname, String headimgurl, String rawData);
+    void asyncSaveOpenId(String unionId, String openId, String nickname, String headimgurl, String rawData);
 
     /**
      * 发送用户提现短信验证码

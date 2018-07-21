@@ -126,5 +126,11 @@ public interface BizErrorConstants {
 	 */
 	String DEVICE_RENT_WITHDRAW_ERROR = "E10023";
 
+	/**
+	 * 您还没有关注公众号,请关注后再进行领取
+	 */
+	String USER_COUPON_UNSUBSCRIBE_ERROR = "E10024";
+
+
 
 }

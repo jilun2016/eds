@@ -1,5 +1,6 @@
 package com.eds.ma.resource;
 
+import com.eds.ma.bis.coupon.service.ICouponService;
 import com.eds.ma.bis.device.service.IDeviceService;
 import com.eds.ma.bis.device.vo.UserDeviceVo;
 import com.eds.ma.bis.order.OrderCodeCreater;
@@ -11,6 +12,7 @@ import com.eds.ma.config.SysConfig;
 import com.eds.ma.exception.BizCoreRuntimeException;
 import com.eds.ma.mongodb.MongoDbDaoSupport;
 import com.eds.ma.redis.RedisDaoSupport;
+import com.eds.ma.resource.request.PageRequest;
 import com.eds.ma.resource.request.SendSmsCodeRequest;
 import com.eds.ma.resource.request.UserWithdrawRequest;
 import com.eds.ma.rest.common.BizErrorConstants;
@@ -18,6 +20,7 @@ import com.eds.ma.rest.common.CommonConstants;
 import com.eds.ma.rest.integration.annotation.NoAuth;
 import com.eds.ma.socket.SessionMap;
 import com.eds.ma.util.CookieUtils;
+import com.xcrm.common.page.Pagination;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +52,9 @@ public class UserResource extends BaseAuthedResource{
 
 	@Autowired
 	private IUserService userService;
+
+    @Autowired
+    private ICouponService couponService;
 
     @Autowired
     private IDeviceService deviceService;
@@ -200,4 +206,28 @@ public class UserResource extends BaseAuthedResource{
         resultMap.put("transTime",DateFormatUtils.getNow());
         return Response.status(Response.Status.CREATED).entity(resultMap).build();
     }
+
+    /**
+     * 查询用户的优惠券
+     */
+    @GET
+    @Path("/coupons")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Pagination queryUserCouponList(@BeanParam PageRequest pageRequest) {
+        logger.debug("UserResource.queryUserCouponList({},{})",super.getOpenId(),pageRequest);
+        return couponService.queryUserCouponList(super.getUser().getId(),pageRequest.getPageNo(),pageRequest.getPageSize());
+    }
+
+    /**
+     * 保存用户关注公众号的
+     */
+    @POST
+    @Path("/subscription/coupon")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response saveUserSubscirpeCoupon() {
+        logger.debug("UserResource.saveUserSubscirpeCoupon({},{})",super.getOpenId());
+        couponService.saveUserSubscirpeCoupon(super.getUser().getId(),super.getUser().getWxUnionId());
+        return Response.status(Response.Status.CREATED).build();
+    }
+
 }

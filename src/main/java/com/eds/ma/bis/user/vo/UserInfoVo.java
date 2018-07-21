@@ -48,7 +48,7 @@ public class UserInfoVo {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("UserInfoVo{");
+        final StringBuilder sb = new StringBuilder("UserCouponVo{");
         sb.append("openId='").append(openId).append('\'');
         sb.append(", nickName='").append(nickName).append('\'');
         sb.append(", headimgurl='").append(headimgurl).append('\'');

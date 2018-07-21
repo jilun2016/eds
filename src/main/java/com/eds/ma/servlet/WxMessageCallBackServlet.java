@@ -50,17 +50,9 @@ public class WxMessageCallBackServlet extends HttpServlet {
             logger.info("~~~~~~message_callback~~~~~~request_para:" + request.getQueryString());
             logger.info("~~~~~~~~message_callback~~~~~request_para_detail_xml:" + xml);
 
-            wxMessageService.handleWxCallBackMessage(openId,msgSignature,timestamp,nonce,xml,response);
+            wxMessageService.handleWxCallBackMessage(msgSignature,timestamp,nonce,xml,response);
         } catch (Exception e) {
             logger.error("WxMessageCallBackServlet occurs exception ",e);
-        }finally {
-            //随机字符串
-            String echostr = request.getParameter("echostr");
-            try {
-                response.getOutputStream().println(echostr);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 

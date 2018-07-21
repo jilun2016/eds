@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.eds.coupon" >
+    <resultMap id="couponPageMap" type="com.eds.ma.bis.coupon.vo.UserCouponVo">
+        <result property="couponId" column="id"/>
+        <result property="userId" column="userId"/>
+        <result property="couponName" column="name"/>
+        <result property="couponType" column="type"/>
+        <result property="benefit" column="benefit"/>
+        <result property="beginTime" column="beginTime"/>
+        <result property="endTime" column="endTime"/>
+        <result property="couponStatus" column="couponStatus"/>
+    </resultMap>
+
+    <select id="queryUserCouponList" resultMap="couponPageMap">
+        SELECT euc.id,euc.userId,euc.name,euc.type,euc.benefit,euc.beginTime,euc.endTime,euc.couponStatus
+        FROM t_t_eds_user_coupon euc
+        WHERE  euc.userId = #{userId} AND euc.dataStatus = 1 and euc.couponStatus = #{couponStatus}
+        ORDER BY euc.created DESC
+        LIMIT #{start}, #{pageSize}
+    </select>
+
+</mapper>
