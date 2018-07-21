@@ -58,6 +58,18 @@ public class SysConfig {
     private String wxAppSecret;
 
     /**
+     * 微信消息token
+     */
+    @Value("${wxMessageToken}")
+    private String wxMessageToken;
+
+    /**
+     * 微信公众号消息加密密钥
+     */
+    @Value("${wxMessageAESKey}")
+    private String wxMessageAESKey;
+
+    /**
      * 微信授权回调url
      */
     @Value("${wxCallbackUrl}")

@@ -40,7 +40,13 @@ public class WxMessageCallBackServlet extends HttpServlet {
         try {
             String xml = InputStreamUtils.InputStreamTOString(request.getInputStream(), "UTF-8");
             logger.info("~~~~~~~~~~~WxMessageCallBackServlet callback_xml:" + xml);
-            wxMessageService.handleWxCallBackMessage(xml);
+            String msgSignature = request.getParameter("msg_signature");
+            String timestamp = request.getParameter("timestamp");
+            String nonce = request.getParameter("nonce");
+            logger.info("~~~~~~message_callback~~~~~~request_para:" + request.getQueryString());
+            logger.info("~~~~~~~~message_callback~~~~~request_para_detail_xml:" + xml);
+
+            wxMessageService.handleWxCallBackMessage(msgSignature,timestamp,nonce,xml,response);
         } catch (Exception e) {
             logger.error("WxMessageCallBackServlet occurs exception ",e);
         }
