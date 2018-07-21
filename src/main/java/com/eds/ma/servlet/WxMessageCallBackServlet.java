@@ -5,6 +5,7 @@ import com.eds.ma.bis.wx.service.IWxMessageService;
 import com.eds.ma.bis.wx.service.IWxPayService;
 import com.xcrm.common.util.InputStreamUtils;
 import com.xcrm.log.Logger;
+import com.yunpian.sdk.util.SignUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.ServletException;
@@ -12,7 +13,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * 微信回调支付处理
@@ -43,12 +46,21 @@ public class WxMessageCallBackServlet extends HttpServlet {
             String msgSignature = request.getParameter("msg_signature");
             String timestamp = request.getParameter("timestamp");
             String nonce = request.getParameter("nonce");
+            String openId = request.getParameter("openId");
             logger.info("~~~~~~message_callback~~~~~~request_para:" + request.getQueryString());
             logger.info("~~~~~~~~message_callback~~~~~request_para_detail_xml:" + xml);
 
-            wxMessageService.handleWxCallBackMessage(msgSignature,timestamp,nonce,xml,response);
+            wxMessageService.handleWxCallBackMessage(openId,msgSignature,timestamp,nonce,xml,response);
         } catch (Exception e) {
             logger.error("WxMessageCallBackServlet occurs exception ",e);
+        }finally {
+            //随机字符串
+            String echostr = request.getParameter("echostr");
+            try {
+                response.getOutputStream().println(echostr);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

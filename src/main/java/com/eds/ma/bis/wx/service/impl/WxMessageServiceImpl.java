@@ -20,7 +20,7 @@ public class WxMessageServiceImpl implements IWxMessageService {
     private SysConfig sysConfig;
 
     @Override
-    public void handleWxCallBackMessage(String msgSignature, String timestamp, String nonce, String xml, HttpServletResponse response) {
+    public void handleWxCallBackMessage(String openId, String msgSignature, String timestamp, String nonce, String xml, HttpServletResponse response) {
         try {
             WXBizMsgCrypt msg = new WXBizMsgCrypt(sysConfig.getWxMessageToken(),
                     sysConfig.getWxMessageAESKey(), sysConfig.getWxAppId());
@@ -30,6 +30,7 @@ public class WxMessageServiceImpl implements IWxMessageService {
         }catch (Exception e){
             logger.error("handleWxCallBackMessage error",e);
         }
-
     }
+
+
 }

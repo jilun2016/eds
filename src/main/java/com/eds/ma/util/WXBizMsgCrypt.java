@@ -285,4 +285,15 @@ public class WXBizMsgCrypt {
 		return result;
 	}
 
+	public static void main(String[] args) {
+		try {
+			WXBizMsgCrypt msg = new WXBizMsgCrypt("iNDQ2NTQ0NDAwOTQyMDgwMCIsImNpZGT",
+					"hU04F0SldCzxmhQwnWNmmeee5P1nYlo9Rj6KcHiRoZU", "wx043a1936df481fcc");
+			//消息解密
+			String decryptXml = msg.decryptMsg("b14ef884118fbff972fc7110effa96a145b2016e", "1532169796", "65616564", "<xml> <ToUserName><![CDATA[gh_930080ebd8b0]]></ToUserName> <Encrypt><![CDATA[g3oqbD5xBnfI3LkZfkONkgKx18MTvKGXPiVubGEQ78gme7Eufr8Q8B3Y8JqACEFQWa8NHGI4Ra8diIDnBfEuhLW4XijGB+OgU84PKtWmWJwLPTr7OZc9vkoGUdFz2cydNtAFbOQ2hX0bj9S9VqHe4aJYDBBvOdB45gwDrFP3awdo1y2rURW2Gp+NAFEMa2XvHu8cwKcyKN4LGKwyx2JBT1xaYqHceD/lja/VSBfO1xcKiMA4eLSU1OwVzWZczPdJqu8SoIYk2iiHtfwi4EO4QWtqe5yBldIw4BDmDZTT0AGXxD3hMsLPAQTSRO7VPRaQIl1gjrflYHpuVkoHkJc1EJkUvNmwv8DBBcp2yK4r2hkQ4sSPS+jyYWlANPg0ybxBEGxHXo/dhdQ9LQdsoy5Z+1jxQ8odDyHInxQLkW/itss=]]></Encrypt> </xml>");
+		}catch (Exception  e){
+
+		}
+	}
+
 }
