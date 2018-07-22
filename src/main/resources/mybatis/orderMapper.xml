@@ -36,7 +36,7 @@
                o.rentSpId,s1.spName AS rentSpName,s1.spLat AS rentSpLat,s1.spLng AS rentSpLng,
                o.rentSpId,s1.spName AS rentSpName,s1.spLat AS rentSpLat,s1.spLng AS rentSpLng,
                o.returnSpId,s2.spName AS returnSpName,s2.spLat AS returnSpLat,s2.spLng AS returnSpLng,
-               o.deviceId,o.userId,o.totalFee,o.balance
+               o.deviceId,o.userId,o.totalFee,o.balance,o.couponMoney as couponFee
         FROM t_eds_order o
         LEFT JOIN t_eds_sp s1 ON o.rentSpId = s1.id
         LEFT JOIN t_eds_sp s2 ON o.returnSpId = s2.id
@@ -55,7 +55,7 @@
     <update id="updateOrder">
         UPDATE t_eds_order o
         SET o.returnTime=#{returnTime},o.returnSpId =#{spId},o.rentFee = #{rentFee},
-            o.orderStatus = 'S_DDZT_YJS',o.balance = #{balance},o.totalFee = #{totalFee}
+            o.orderStatus = 'S_DDZT_YJS',o.balance = #{balance},o.totalFee = #{totalFee},o.couponMoney=#{couponMoney}
         WHERE o.id=#{orderId} AND o.deviceId = #{deviceId} and o.userId = #{userId} and o.orderStatus = 'S_DDZT_JXZ'
     </update>
 

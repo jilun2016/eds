@@ -111,7 +111,7 @@ public class WxPayServiceImpl implements IWxPayService {
         String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
         String noncestr = RandomStringGenerator.getRandomStringByLength(16);
         Map<String, Object> params2 = new TreeMap<>();
-        params2.put("appId", sysConfig.getWxAppId());
+        params2.put("appId", sysConfig.getWxMaAppId());
         params2.put("timeStamp", timestamp);
         params2.put("nonceStr", noncestr);
         params2.put("package", "prepay_id=" + response.getPrepayId());
@@ -200,7 +200,7 @@ public class WxPayServiceImpl implements IWxPayService {
 
     private PaySetting getPaySetting() {
         PaySetting paySetting = new PaySetting();
-        paySetting.setAppId(sysConfig.getWxAppId());
+        paySetting.setAppId(sysConfig.getWxMaAppId());
         paySetting.setKey(sysConfig.getWxMerchantKey());
         paySetting.setMchId(sysConfig.getWxMchId());
         return paySetting;

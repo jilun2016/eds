@@ -13,6 +13,7 @@ import com.xcrm.cloud.database.db.query.Ssqb;
 import com.xcrm.cloud.database.db.query.expression.Restrictions;
 import com.xcrm.common.page.Pagination;
 import com.xcrm.common.util.DateFormatUtils;
+import com.xcrm.common.util.ListUtil;
 import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.Objects;
+import java.util.*;
 
 @Transactional
 @Service
@@ -43,6 +43,25 @@ public class CouponServiceImpl implements ICouponService {
                 .setParam("pageSize", pageSize);
         queryUserCouponsSqb.setIncludeTotalCount(true);
         return dao.findForPage(queryUserCouponsSqb);
+    }
+
+    @Override
+    public List<UserCoupon> queryValidUserCouponList(Long userId) {
+        List<UserCoupon> validMaxUserCouponList = new ArrayList<>();
+        QueryBuilder querySubQb = QueryBuilder.where(Restrictions.eq("userId",userId))
+                .and(Restrictions.eq("couponStatus",CouponStatusEnum.S_HYYHQZT_WSY.value()))
+                .and(Restrictions.ge("endTime",DateFormatUtils.getStringToday()))
+                .and(Restrictions.eq("dataStatus",1));
+        List<UserCoupon> dbUserCouponList = dao.queryList(querySubQb,UserCoupon.class);
+        //找出基础的最大的优惠券,和可叠加的最大优惠券
+        if(ListUtil.isNotEmpty(dbUserCouponList)){
+            dbUserCouponList.stream().filter(UserCoupon::getIsDj)
+                    .max((o1, o2) -> o1.getBenefit().compareTo(o2.getBenefit())).ifPresent(validMaxUserCouponList::add);
+            dbUserCouponList.stream().filter(userCoupon -> !userCoupon.getIsDj())
+                    .max((o1, o2) -> o1.getBenefit().compareTo(o2.getBenefit())).ifPresent(validMaxUserCouponList::add);
+
+        }
+        return validMaxUserCouponList;
     }
 
     @Override

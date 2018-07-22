@@ -57,4 +57,14 @@ public class JobServiceImpl implements IJobService {
 			}
 		}
 	}
+
+	@Override
+	public void couponExpiredRunJob() {
+		String now = DateFormatUtils.getStringToday();
+		// 更新
+		//更新会员优惠券的过期状态
+		Ssqb updateMemberCouponSqb = Ssqb.create("com.xcrm.eds.quartz.updateUserCouponExpired")
+				.setParam("now", DateFormatUtils.getStringToday());
+		dao.updateByMybatis(updateMemberCouponSqb);
+	}
 }

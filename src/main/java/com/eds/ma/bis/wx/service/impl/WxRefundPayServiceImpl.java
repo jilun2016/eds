@@ -153,7 +153,7 @@ public class WxRefundPayServiceImpl implements IWxRefundPayService {
 
     private PaySetting getPaySetting() {
         PaySetting paySetting = new PaySetting();
-        paySetting.setAppId(sysConfig.getWxAppId());
+        paySetting.setAppId(sysConfig.getWxMaAppId());
         paySetting.setKey(sysConfig.getWxMerchantKey());
         paySetting.setMchId(sysConfig.getWxMchId());
         return paySetting;

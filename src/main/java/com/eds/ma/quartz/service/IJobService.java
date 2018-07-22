@@ -7,4 +7,9 @@ public interface IJobService {
      */
     void wxRefreshToken();
 
+    /**
+     * 定时清理过期基础优惠券和会员优惠券
+     */
+    void couponExpiredRunJob();
+
 }

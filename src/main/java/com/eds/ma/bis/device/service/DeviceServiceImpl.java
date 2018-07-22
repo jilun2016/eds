@@ -2,6 +2,9 @@ package com.eds.ma.bis.device.service;
 
 import com.eds.ma.bis.common.entity.EdsConfig;
 import com.eds.ma.bis.common.service.IEdsConfigService;
+import com.eds.ma.bis.coupon.CouponStatusEnum;
+import com.eds.ma.bis.coupon.entity.UserCoupon;
+import com.eds.ma.bis.coupon.service.ICouponService;
 import com.eds.ma.bis.device.DeviceStatusEnum;
 import com.eds.ma.bis.device.OrderStatusEnum;
 import com.eds.ma.bis.device.entity.Device;
@@ -10,6 +13,7 @@ import com.eds.ma.bis.device.entity.UserDeviceRecord;
 import com.eds.ma.bis.device.vo.*;
 import com.eds.ma.bis.order.OrderCodeCreater;
 import com.eds.ma.bis.order.entity.Order;
+import com.eds.ma.bis.order.entity.OrderCoupon;
 import com.eds.ma.bis.order.service.IOrderService;
 import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.entity.UserWallet;
@@ -27,6 +31,7 @@ import com.xcrm.cloud.database.db.query.Ssqb;
 import com.xcrm.cloud.database.db.query.expression.Restrictions;
 import com.xcrm.common.page.Pagination;
 import com.xcrm.common.util.DateFormatUtils;
+import com.xcrm.common.util.ListUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +40,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -50,6 +56,9 @@ public class DeviceServiceImpl implements IDeviceService {
 
     @Autowired
     private IUserService userService;
+
+    @Autowired
+    private ICouponService couponService;
 
     @Autowired
     private IOrderService orderService;
@@ -224,26 +233,41 @@ public class DeviceServiceImpl implements IDeviceService {
         Date now = DateFormatUtils.getNow();
         //计算金额
         BigDecimal rentFee = orderService.caculateRentFee(now);
-
-        //更新钱包状态
-        UserWallet userWallet = userService.queryUserWalletByUserIdWithLock(userId);
-        //计算租借金额
-        BigDecimal balanceFee = BigDecimal.ZERO;
-        if(userWallet.getBalance().compareTo(BigDecimal.ZERO)>0){
-            if(userWallet.getBalance().compareTo(rentFee) > 0){
-                balanceFee = rentFee;
-            }else {
-                balanceFee = userWallet.getBalance();
+        //查询优惠券
+        List<UserCoupon> validMaxUserCouponList =couponService.queryValidUserCouponList(userId);
+        BigDecimal couponMoney = BigDecimal.ZERO;
+        if(ListUtil.isNotEmpty(validMaxUserCouponList)){
+            //将优惠券更新为已使用状态
+            validMaxUserCouponList.forEach(userCoupon -> {
+                userCoupon.setCouponStatus(CouponStatusEnum.S_HYYHQZT_YSY.value());
+                dao.update(userCoupon);
+            });
+            couponMoney = validMaxUserCouponList.stream().map(UserCoupon::getBenefit).reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
+        rentFee = rentFee.subtract(couponMoney).compareTo(BigDecimal.ZERO)>0?rentFee.subtract(couponMoney):BigDecimal.ZERO;
+        BigDecimal totalFee = BigDecimal.ZERO;
+        if(rentFee.compareTo(BigDecimal.ZERO)>0){
+            //更新钱包状态
+            UserWallet userWallet = userService.queryUserWalletByUserIdWithLock(userId);
+            //计算租借金额
+            BigDecimal balanceFee = BigDecimal.ZERO;
+            if(userWallet.getBalance().compareTo(BigDecimal.ZERO)>0){
+                if(userWallet.getBalance().compareTo(rentFee) > 0){
+                    balanceFee = rentFee;
+                }else {
+                    balanceFee = userWallet.getBalance();
+                }
             }
-        }
-        BigDecimal  depositFee = rentFee.subtract(balanceFee);
-        if(userWallet.getDeposit().compareTo(depositFee)<=0){
-            depositFee = userWallet.getDeposit();
-        }
-        userService.updateUserWallet(userId,depositFee.negate(),balanceFee.negate());
+            BigDecimal  depositFee = rentFee.subtract(balanceFee);
+            if(userWallet.getDeposit().compareTo(depositFee)<=0){
+                depositFee = userWallet.getDeposit();
+            }
+            userService.updateUserWallet(userId,depositFee.negate(),balanceFee.negate());
 
 
-        BigDecimal totalFee = depositFee.add(balanceFee);
+            totalFee = depositFee.add(balanceFee);
+        }
+
         //更新订单
         Ssqb updateOrderSqb = Ssqb.create("com.eds.order.updateOrder")
                 .setParam("orderId",deviceRentDetailVo.getOrderId())
@@ -252,11 +276,28 @@ public class DeviceServiceImpl implements IDeviceService {
                 .setParam("spId",spDetailVo.getSpId())
                 .setParam("rentFee",rentFee)
                 .setParam("totalFee",totalFee)
+                .setParam("couponMoney",couponMoney)
                 .setParam("returnTime",now);
         int updateOrderResult =  dao.updateByMybatis(updateOrderSqb);
 
         if(updateOrderResult <= 0){
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_ORDER_NOT_EXIST_ERROR);
+        }
+
+        //保存订单优惠券信息
+        if(ListUtil.isNotEmpty(validMaxUserCouponList)){
+            List<OrderCoupon> saveOrderCouponList =  new ArrayList<>();
+            validMaxUserCouponList.forEach(userCoupon -> {
+                OrderCoupon saveOrderCoupon = new OrderCoupon();
+                saveOrderCoupon.setCouponId(userCoupon.getId());
+                saveOrderCoupon.setOrderId(deviceRentDetailVo.getOrderId());
+                saveOrderCoupon.setCreated(now);
+                saveOrderCouponList.add(saveOrderCoupon);
+            });
+            if(ListUtil.isNotEmpty(saveOrderCouponList)){
+                dao.batchSave(saveOrderCouponList,OrderCoupon.class);
+            }
+
         }
 
         //更新设备位置信息,及设备状态
