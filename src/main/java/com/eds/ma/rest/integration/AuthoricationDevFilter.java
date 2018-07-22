@@ -34,7 +34,7 @@ public class AuthoricationDevFilter implements ContainerRequestFilter,ContainerR
 
 	@Override
 	public void filter(ContainerRequestContext requestContext) {
-       String openId = "oiyZc5Qn8pe8wnO_BDl142Ozj6eE";
+       String openId = "oiyZc5QvTvZGQc1nMHuZUc5i9pb8";
         User user = userService.queryUserByOpenId(openId);
         if (Objects.isNull(user) || Objects.isNull(user.getId())) {
             requestContext.abortWith(buildErrorMessageResponse(RestErrorCode.WX_AUTH_USER_INFO_ERROR));

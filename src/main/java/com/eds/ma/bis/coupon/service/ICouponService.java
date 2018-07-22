@@ -12,11 +12,12 @@ public interface ICouponService {
     /**
      * 查询用户的优惠券
      * @param userId
+     * @param couponStatus
      * @param pageNo
      * @param pageSize
      * @return
      */
-    Pagination queryUserCouponList(Long userId, Integer pageNo, Integer pageSize);
+    Pagination queryUserCouponList(Long userId, String couponStatus, Integer pageNo, Integer pageSize);
 
     /**
      * 领取关注公众号的优惠券

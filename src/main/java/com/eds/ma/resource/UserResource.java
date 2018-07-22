@@ -23,6 +23,7 @@ import com.eds.ma.util.CookieUtils;
 import com.xcrm.common.page.Pagination;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.log.Logger;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
@@ -213,9 +214,9 @@ public class UserResource extends BaseAuthedResource{
     @GET
     @Path("/coupons")
     @Produces(MediaType.APPLICATION_JSON)
-    public Pagination queryUserCouponList(@BeanParam PageRequest pageRequest) {
+    public Pagination queryUserCouponList(@NotEmpty(message="优惠券状态不允许为空") @QueryParam("couponStatus") String couponStatus, @BeanParam PageRequest pageRequest) {
         logger.debug("UserResource.queryUserCouponList({},{})",super.getOpenId(),pageRequest);
-        return couponService.queryUserCouponList(super.getUser().getId(),pageRequest.getPageNo(),pageRequest.getPageSize());
+        return couponService.queryUserCouponList(super.getUser().getId(),couponStatus,pageRequest.getPageNo(),pageRequest.getPageSize());
     }
 
     /**

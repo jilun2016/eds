@@ -10,17 +10,17 @@ public enum CouponStatusEnum {
 	/**
 	 * 未使用
 	 */
-	S_YHQZT_WSY("S_HYYHQZT_WSY"),
+	S_HYYHQZT_WSY("S_HYYHQZT_WSY"),
 	
 	/**
 	 * 已使用
 	 */
-	S_YHQZT_YSY("S_HYYHQZT_YSY"),
+	S_HYYHQZT_YSY("S_HYYHQZT_YSY"),
 	
 	/**
 	 * 已过期
 	 */
-	S_YHQZT_YGQ("S_HYYHQZT_YGQ");
+	S_HYYHQZT_YGQ("S_HYYHQZT_YGQ");
 	
 	private final String value;
 	

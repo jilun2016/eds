@@ -35,8 +35,10 @@ public class CouponServiceImpl implements ICouponService {
 
 
     @Override
-    public Pagination queryUserCouponList(Long userId, Integer pageNo, Integer pageSize) {
+    public Pagination queryUserCouponList(Long userId, String couponStatus, Integer pageNo, Integer pageSize) {
         Ssqb queryUserCouponsSqb = Ssqb.create("com.eds.coupon.queryUserCouponList")
+                .setParam("couponStatus", couponStatus)
+                .setParam("userId", userId)
                 .setParam("pageNo", pageNo)
                 .setParam("pageSize", pageSize);
         queryUserCouponsSqb.setIncludeTotalCount(true);
@@ -60,7 +62,7 @@ public class CouponServiceImpl implements ICouponService {
             userCoupon.setBeginTime(DateFormatUtils.getFirstTimeOfDay(now));
             userCoupon.setEndTime(DateFormatUtils.addDate(now,30));
             userCoupon.setIsDj(true);
-            userCoupon.setCouponStatus(CouponStatusEnum.S_YHQZT_WSY.value());
+            userCoupon.setCouponStatus(CouponStatusEnum.S_HYYHQZT_WSY.value());
             userCoupon.setCreated(DateFormatUtils.getNow());
             dao.save(userCoupon);
         }else{
