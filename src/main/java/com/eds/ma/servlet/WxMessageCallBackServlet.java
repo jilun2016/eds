@@ -46,7 +46,6 @@ public class WxMessageCallBackServlet extends HttpServlet {
             String msgSignature = request.getParameter("msg_signature");
             String timestamp = request.getParameter("timestamp");
             String nonce = request.getParameter("nonce");
-            String openId = request.getParameter("openId");
             logger.info("~~~~~~message_callback~~~~~~request_para:" + request.getQueryString());
             logger.info("~~~~~~~~message_callback~~~~~request_para_detail_xml:" + xml);
 

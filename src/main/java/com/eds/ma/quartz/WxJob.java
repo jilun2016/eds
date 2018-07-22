@@ -24,15 +24,12 @@ public class WxJob {
 	private static final Logger logger = LoggerFactory.getLogger(WxJob.class);
 
 	@Autowired
-	private SysConfig sysConfig;
-
-	@Autowired
 	private IJobService jobService;
 	
 	@Scheduled(cron="0 * * * * ?")
 	public void wxRefreshTokenJob() {
 		//每小时扫描时效
-		if(Objects.equals(sysConfig.getProjectProfile(), SystemProfileEnum.DEVELOP.value())){
+		if(true){
 			logger.info("----------------wxRefreshTokenJob JOB end "+ DateFormatUtils.formatDate(new Date(),null)+"-------------------");
 			jobService.wxRefreshToken();
 		}

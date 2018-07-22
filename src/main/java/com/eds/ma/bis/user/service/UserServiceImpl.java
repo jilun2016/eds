@@ -83,7 +83,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public User queryUserByUnionId(String unionId) {
-        QueryBuilder queryUserQb = QueryBuilder.where(Restrictions.eq("unionId", unionId));
+        QueryBuilder queryUserQb = QueryBuilder.where(Restrictions.eq("wxUnionId", unionId));
         return dao.query(queryUserQb, User.class);
     }
 

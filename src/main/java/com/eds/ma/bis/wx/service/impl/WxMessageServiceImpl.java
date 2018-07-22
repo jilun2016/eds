@@ -24,7 +24,9 @@ import org.w3c.dom.Element;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Objects;
 
 @Service
@@ -59,6 +61,7 @@ public class WxMessageServiceImpl implements IWxMessageService {
             if(Objects.equals(event, EventType.subscribe.name())
                     ||Objects.equals(event, EventType.unsubscribe.name())){
                 String openId = XmlUtils.getElementValue(rootElement,"FromUserName");
+                String toUserName = XmlUtils.getElementValue(rootElement,"ToUserName");
                 WxUser wxUser = wxService.saveWxUser(openId,Objects.equals(event, EventType.subscribe.name()));
                 //如果是关注,那么发送客服消息,成功领取优惠券
                 if(Objects.equals(event, EventType.subscribe.name())
@@ -66,22 +69,20 @@ public class WxMessageServiceImpl implements IWxMessageService {
                         && Objects.nonNull(wxUser.getWxUnionId())){
                     User dbUser = userService.queryUserByUnionId(wxUser.getWxUnionId());
                     if(Objects.isNull(dbUser) || BooleanUtils.isFalse(dbUser.getSubscribeCoupon())){
-                        QueryBuilder queryWxAccessTokenQb = QueryBuilder.where(Restrictions.eq("appId",sysConfig.getWxAppId()))
-                                .and(Restrictions.eq("dataStatus",1));
-                        WxAccessToken wxAccessToken = dao.query(queryWxAccessTokenQb,WxAccessToken.class);
-                        replyTextMessage(response,wxAccessToken.getToken(), "感谢您关注享测就测公众号,请前往小程序领取优惠券.",
-                                openId, "gh_930080ebd8b0");
+                        replyTextMessage( response,"感谢您关注享测就测公众号,请前往小程序领取优惠券.",
+                                toUserName,openId);
                     }
-                }
-            }
+        }
+    }
         }catch (Exception e){
             logger.error("handleWxCallBackMessage error",e);
         }
     }
 
 
-    public void replyTextMessage(HttpServletResponse response,String wxAccessToken, String content, String toUserName, String fromUserName){
+    public void replyTextMessage(HttpServletResponse response, String content, String toUserName, String fromUserName) throws UnsupportedEncodingException {
         Long createTime = Calendar.getInstance().getTimeInMillis() / 1000;
+        content=new String(content.getBytes(), "iso8859-1");
         StringBuffer sb = new StringBuffer();
         sb.append("<xml>");
         sb.append("<ToUserName><![CDATA["+fromUserName+"]]></ToUserName>");
@@ -91,16 +92,18 @@ public class WxMessageServiceImpl implements IWxMessageService {
         sb.append("<Content><![CDATA["+content+"]]></Content>");
         sb.append("</xml>");
         String replyMsg = sb.toString();
-
+        logger.info("replyTextMessage origin:{} . ",replyMsg);
         String returnvaleue = "";
         try {
-            WXBizMsgCrypt pc = new WXBizMsgCrypt(wxAccessToken,
+            WXBizMsgCrypt pc = new WXBizMsgCrypt(sysConfig.getWxMessageToken(),
                     sysConfig.getWxMessageAESKey(), sysConfig.getWxAppId());
             returnvaleue = pc.encryptMsg(replyMsg, createTime.toString(), "easemob");
         } catch (AesException e) {
             logger.error("replyTextMessage error . ",e);
         }
-        output(response, returnvaleue);
+
+        logger.info("replyTextMessage crypt:{} . ",returnvaleue);
+        output(response, replyMsg);
     }
 
     /**

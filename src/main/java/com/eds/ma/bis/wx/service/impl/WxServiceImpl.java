@@ -57,7 +57,7 @@ public class WxServiceImpl implements IWxService {
                 logger.info("getwxUser result:"+wxUserMap);
                 if(StringUtils.isEmpty(MapUtils.getString(wxUserMap,"errmsg"))){
                     //通过openId查询db公众号用户信息
-                    QueryBuilder queryWxUserQb = QueryBuilder.where(Restrictions.eq("openId",openId))
+                    QueryBuilder queryWxUserQb = QueryBuilder.where(Restrictions.eq("wxOpenId",openId))
                             .and(Restrictions.eq("dataStatus",1));
                     WxUser dbWxUser = dao.query(queryWxUserQb,WxUser.class);
                     WxUser saveWxUser = new WxUser();
