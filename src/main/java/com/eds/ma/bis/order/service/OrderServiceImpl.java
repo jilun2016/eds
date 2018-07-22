@@ -97,7 +97,8 @@ public class OrderServiceImpl implements IOrderService {
                 .setParam("orderStatus", orderStatus)
                 .setParam("userId", user.getId())
                 .setParam("pageNo", pageNo)
-                .setParam("pageSize", pageSize);queryOrderListSqb.setIncludeTotalCount(true);
+                .setParam("pageSize", pageSize);
+        queryOrderListSqb.setIncludeTotalCount(true);
         return dao.findForPage(queryOrderListSqb);
     }
 

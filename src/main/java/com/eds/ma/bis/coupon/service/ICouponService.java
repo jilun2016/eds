@@ -1,6 +1,7 @@
 package com.eds.ma.bis.coupon.service;
 
 import com.eds.ma.bis.coupon.entity.UserCoupon;
+import com.eds.ma.bis.user.vo.UserShareCouponVo;
 import com.xcrm.common.page.Pagination;
 
 import java.util.List;
@@ -37,4 +38,18 @@ public interface ICouponService {
      * @return
      */
     void saveUserSubscirpeCoupon(Long userId, String wxUnionId);
+
+    /**
+     * 保存用户分享的优惠券
+     * @param userId
+     * @param openId
+     */
+    void saveUserDistCoupon(Long userId, String openId);
+
+
+    /**
+     * 查询分享优惠券的关注用户信息
+     * @param openId
+     */
+    Pagination queryUserShareCouponDetail(String openId, Integer pageNo, Integer pageSize);
 }

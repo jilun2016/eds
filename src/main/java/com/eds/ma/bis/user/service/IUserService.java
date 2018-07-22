@@ -3,9 +3,11 @@ package com.eds.ma.bis.user.service;
 import com.eds.ma.bis.order.entity.PayOrder;
 import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.entity.UserWallet;
+import com.eds.ma.bis.user.vo.UserShareCouponVo;
 import com.eds.ma.bis.user.vo.UserWalletVo;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 用户接口
@@ -141,8 +143,24 @@ public interface IUserService {
 
     /**
      * 查询用户租借次数
-     * @param id
+     * @param userId
      * @return
      */
     Integer queryUserRentTimes(Long userId);
+
+    /**
+     * 保存用户分销记录
+     * 如果当前用户有进行中的分销记录,那么返回进行中的,否则创建
+     * @param openId
+     * @return
+     */
+    Long saveUserDist(String openId);
+
+    /**
+     * 分销绑定处理
+     * @param distId
+     * @param openId
+     */
+    void shareBindUserDist(Long distId, String openId);
+
 }

@@ -4,7 +4,11 @@ import com.eds.ma.bis.coupon.CouponKindEnum;
 import com.eds.ma.bis.coupon.CouponStatusEnum;
 import com.eds.ma.bis.coupon.CouponTypeEnum;
 import com.eds.ma.bis.coupon.entity.UserCoupon;
+import com.eds.ma.bis.user.UserDistStatusEnum;
+import com.eds.ma.bis.user.entity.UserDist;
+import com.eds.ma.bis.user.entity.UserDistItem;
 import com.eds.ma.bis.user.entity.WxUser;
+import com.eds.ma.bis.user.vo.UserShareCouponVo;
 import com.eds.ma.exception.BizCoreRuntimeException;
 import com.eds.ma.rest.common.BizErrorConstants;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
@@ -88,5 +92,52 @@ public class CouponServiceImpl implements ICouponService {
             throw new BizCoreRuntimeException(BizErrorConstants.USER_COUPON_UNSUBSCRIBE_ERROR);
         }
 
+    }
+
+    @Override
+    public void saveUserDistCoupon(Long userId, String openId) {
+        //查询进行中的分享的id
+        QueryBuilder queryDistQb = QueryBuilder.where(Restrictions.eq("sponsorOpenId", openId))
+                .and(Restrictions.eq("distStatus", UserDistStatusEnum.S_DIST_JXZ.value()))
+                .and(Restrictions.eq("dataStatus", 1));
+        UserDist userDist = dao.query(queryDistQb, UserDist.class);
+        if(Objects.nonNull(userDist)
+                && Objects.equals(userDist.getDistStatus(),UserDistStatusEnum.S_DIST_JXZ.value())){
+            //查询已经激活的用户
+            QueryBuilder queryDistItemQb = QueryBuilder.where(Restrictions.eq("distId", userDist.getId()))
+                    .and(Restrictions.eq("isActived", 1))
+                    .and(Restrictions.eq("dataStatus", 1));
+            List<UserDistItem> userDistItemList = dao.queryList(queryDistItemQb, UserDistItem.class);
+            if(ListUtil.isNotEmpty(userDistItemList)){
+                Integer shareCount = userDistItemList.size();
+                BigDecimal benefit = shareCount>5?BigDecimal.valueOf(20):BigDecimal.TEN;
+                Date now = DateFormatUtils.getNow();
+                UserCoupon userCoupon = new UserCoupon();
+                userCoupon.setUserId(userId);
+                userCoupon.setName("分享优惠券");
+                userCoupon.setKind(CouponKindEnum.S_YHQLX_SHARE.value());
+                userCoupon.setType(CouponTypeEnum.S_YHQLX_HB.value());
+                userCoupon.setBenefit(benefit);
+                userCoupon.setBeginTime(DateFormatUtils.getFirstTimeOfDay(now));
+                userCoupon.setEndTime(DateFormatUtils.addDate(now,30));
+                userCoupon.setIsDj(false);
+                userCoupon.setCouponStatus(CouponStatusEnum.S_HYYHQZT_WSY.value());
+                userCoupon.setCreated(DateFormatUtils.getNow());
+                dao.save(userCoupon);
+            }
+            //将分享状态更新为已结束
+            userDist.setDistStatus(UserDistStatusEnum.S_DIST_YJS.value());
+            dao.update(userDist);
+        }
+    }
+
+    @Override
+    public Pagination queryUserShareCouponDetail(String openId, Integer pageNo, Integer pageSize) {
+        Ssqb queryShareCouponSqb = Ssqb.create("com.eds.coupon.queryUserShareCouponDetail")
+                .setParam("openId",openId)
+                .setParam("pageNo", pageNo)
+                .setParam("pageSize", pageSize);
+        queryShareCouponSqb.setIncludeTotalCount(true);
+        return dao.findForPage(queryShareCouponSqb);
     }
 }

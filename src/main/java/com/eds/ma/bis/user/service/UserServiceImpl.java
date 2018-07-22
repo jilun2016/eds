@@ -8,8 +8,12 @@ import com.eds.ma.bis.order.TransTypeEnum;
 import com.eds.ma.bis.order.entity.PayOrder;
 import com.eds.ma.bis.order.service.IOrderService;
 import com.eds.ma.bis.thread.BusinessAsyncProcess;
+import com.eds.ma.bis.user.UserDistStatusEnum;
 import com.eds.ma.bis.user.entity.User;
+import com.eds.ma.bis.user.entity.UserDist;
+import com.eds.ma.bis.user.entity.UserDistItem;
 import com.eds.ma.bis.user.entity.UserWallet;
+import com.eds.ma.bis.user.vo.UserShareCouponVo;
 import com.eds.ma.bis.user.vo.UserWalletVo;
 import com.eds.ma.bis.wx.PayStatusEnum;
 import com.eds.ma.exception.BizCoreRuntimeException;
@@ -466,4 +470,41 @@ public class UserServiceImpl implements IUserService {
                 .setParam("userId",userId);
         return dao.findForInt(queryDeviceSqb);
     }
+
+    @Override
+    public Long saveUserDist(String openId) {
+        QueryBuilder queryDistQb = QueryBuilder.where(Restrictions.eq("sponsorOpenId", openId))
+                .and(Restrictions.eq("distStatus", UserDistStatusEnum.S_DIST_JXZ.value()))
+                .and(Restrictions.eq("dataStatus", 1));
+        UserDist userDist = dao.query(queryDistQb, UserDist.class);
+        //如果分享为空,那么保存最新的分享,如果非空,那么直接返回分享id
+        if(Objects.isNull(userDist)){
+            userDist = new UserDist();
+            userDist.setSponsorOpenId(openId);
+            userDist.setCreated(DateFormatUtils.getNow());
+            userDist.setDistStatus(UserDistStatusEnum.S_DIST_JXZ.value());
+            dao.save(userDist);
+        }
+        return userDist.getId();
+    }
+
+    @Override
+    public void shareBindUserDist(Long distId, String openId) {
+        //查询分销记录
+        QueryBuilder queryDistQb = QueryBuilder.where(Restrictions.eq("sponsorOpenId", openId))
+                .and(Restrictions.eq("dataStatus", 1));
+        UserDist userDist = dao.query(queryDistQb, UserDist.class);
+        //如果是分销状态是进行中,那么当前用户作为优惠券基数
+        UserDistItem userDistItem = new UserDistItem();
+        userDistItem.setCreated(DateFormatUtils.getNow());
+        userDistItem.setDistId(distId);
+        userDistItem.setReceiveOpenId(openId);
+        if(Objects.nonNull(userDist)
+                && Objects.equals(userDist.getDistStatus(),UserDistStatusEnum.S_DIST_JXZ.value())
+                && !Objects.equals(userDist.getSponsorOpenId(),openId)){
+            userDistItem.setIsActived(true);
+        }
+        dao.save(userDistItem);
+    }
+
 }
