@@ -131,6 +131,11 @@ public interface BizErrorConstants {
 	 */
 	String USER_COUPON_UNSUBSCRIBE_ERROR = "E10024";
 
+	/**
+	 * 您已经领取过优惠券了
+	 */
+	String USER_COUPON_UNSUBSCRIBE_CLAIM_ERROR = "E10025";
+
 
 
 }

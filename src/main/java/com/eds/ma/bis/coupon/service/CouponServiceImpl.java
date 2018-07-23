@@ -4,10 +4,13 @@ import com.eds.ma.bis.coupon.CouponKindEnum;
 import com.eds.ma.bis.coupon.CouponStatusEnum;
 import com.eds.ma.bis.coupon.CouponTypeEnum;
 import com.eds.ma.bis.coupon.entity.UserCoupon;
+import com.eds.ma.bis.coupon.vo.UserCouponClaimStatusVo;
 import com.eds.ma.bis.user.UserDistStatusEnum;
+import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.entity.UserDist;
 import com.eds.ma.bis.user.entity.UserDistItem;
 import com.eds.ma.bis.user.entity.WxUser;
+import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.bis.user.vo.UserShareCouponVo;
 import com.eds.ma.exception.BizCoreRuntimeException;
 import com.eds.ma.rest.common.BizErrorConstants;
@@ -37,6 +40,34 @@ public class CouponServiceImpl implements ICouponService {
     @Autowired
     private BaseDaoSupport dao;
 
+    @Autowired
+    private IUserService userService;
+
+    @Override
+    public UserCouponClaimStatusVo queryUserCouponClaimStatusList(String openId,String wxUnionId) {
+        UserCouponClaimStatusVo userCouponClaimStatusVo = new UserCouponClaimStatusVo();
+        QueryBuilder queryDistQb = QueryBuilder.where(Restrictions.eq("dataStatus",1))
+                .and(Restrictions.eq("sponsorOpenId", openId));
+        UserDist userDist = dao.query(queryDistQb,UserDist.class);
+        if(Objects.isNull(userDist)
+                || Objects.equals(userDist.getDistStatus(),UserDistStatusEnum.S_DIST_JXZ.value())){
+            userCouponClaimStatusVo.setCouponShareStatus(true);
+        }else {
+            userCouponClaimStatusVo.setCouponShareStatus(false);
+        }
+
+        QueryBuilder querySubQb = QueryBuilder.where(Restrictions.eq("wxUnionId",wxUnionId))
+                .and(Restrictions.eq("dataStatus",1));
+        WxUser wxUser = dao.query(querySubQb,WxUser.class);
+        if(Objects.nonNull(wxUser)&& BooleanUtils.isTrue(wxUser.getSubscribeStatus())){
+            userCouponClaimStatusVo.setUserSubsribeStatus(true);
+        }else{
+            userCouponClaimStatusVo.setUserSubsribeStatus(false);
+        }
+        User user = userService.queryUserByOpenId(openId);
+        userCouponClaimStatusVo.setCouponSubsribeClaimStatus(user.getSubscribeCoupon());
+        return userCouponClaimStatusVo;
+    }
 
     @Override
     public Pagination queryUserCouponList(Long userId, String couponStatus, Integer pageNo, Integer pageSize) {
@@ -88,6 +119,11 @@ public class CouponServiceImpl implements ICouponService {
             userCoupon.setCouponStatus(CouponStatusEnum.S_HYYHQZT_WSY.value());
             userCoupon.setCreated(DateFormatUtils.getNow());
             dao.save(userCoupon);
+            //更新用户已领取关注公众号优惠券
+            User updateUser = new User();
+            updateUser.setId(userId);
+            updateUser.setSubscribeCoupon(true);
+            dao.update(updateUser);
         }else{
             throw new BizCoreRuntimeException(BizErrorConstants.USER_COUPON_UNSUBSCRIBE_ERROR);
         }

@@ -44,9 +44,6 @@ public class WxMessageServiceImpl implements IWxMessageService {
     @Autowired
     private IUserService userService;
 
-    @Autowired
-    private BaseDaoSupport dao;
-
     @Override
     public void handleWxCallBackMessage(String msgSignature, String timestamp, String nonce, String xml, HttpServletResponse response) {
         try {

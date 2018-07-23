@@ -2,7 +2,9 @@ package com.eds.ma.bis.device.service;
 
 import com.eds.ma.bis.common.entity.EdsConfig;
 import com.eds.ma.bis.common.service.IEdsConfigService;
+import com.eds.ma.bis.coupon.CouponKindEnum;
 import com.eds.ma.bis.coupon.CouponStatusEnum;
+import com.eds.ma.bis.coupon.CouponTypeEnum;
 import com.eds.ma.bis.coupon.entity.UserCoupon;
 import com.eds.ma.bis.coupon.service.ICouponService;
 import com.eds.ma.bis.device.DeviceStatusEnum;
@@ -310,6 +312,20 @@ public class DeviceServiceImpl implements IDeviceService {
         if(updateDeviceResult<= 0){
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_ORDER_NOT_EXIST_ERROR);
         }
+
+        //保存优惠券信息,老用户增加20元优惠券
+        UserCoupon userCoupon = new UserCoupon();
+        userCoupon.setUserId(userId);
+        userCoupon.setName("老用户专享优惠券");
+        userCoupon.setKind(CouponKindEnum.S_YHQZL_ORDER.value());
+        userCoupon.setType(CouponTypeEnum.S_YHQLX_HB.value());
+        userCoupon.setBenefit(BigDecimal.valueOf(20));
+        userCoupon.setBeginTime(DateFormatUtils.getFirstTimeOfDay(now));
+        userCoupon.setEndTime(DateFormatUtils.addDate(now,30));
+        userCoupon.setIsDj(false);
+        userCoupon.setCouponStatus(CouponStatusEnum.S_HYYHQZT_WSY.value());
+        userCoupon.setCreated(DateFormatUtils.getNow());
+        dao.save(userCoupon);
 
         //保存租借记录
         //生成设备租借记录

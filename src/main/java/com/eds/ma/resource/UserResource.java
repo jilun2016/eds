@@ -1,6 +1,7 @@
 package com.eds.ma.resource;
 
 import com.eds.ma.bis.coupon.service.ICouponService;
+import com.eds.ma.bis.coupon.vo.UserCouponClaimStatusVo;
 import com.eds.ma.bis.device.service.IDeviceService;
 import com.eds.ma.bis.device.vo.UserDeviceVo;
 import com.eds.ma.bis.order.OrderCodeCreater;
@@ -23,6 +24,7 @@ import com.eds.ma.util.CookieUtils;
 import com.xcrm.common.page.Pagination;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.log.Logger;
+import org.apache.commons.lang.BooleanUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -220,13 +222,27 @@ public class UserResource extends BaseAuthedResource{
     }
 
     /**
-     * 保存用户关注公众号的
+     * 查询用户的优惠券
+     */
+    @GET
+    @Path("/coupon/claim/status")
+    @Produces(MediaType.APPLICATION_JSON)
+    public UserCouponClaimStatusVo queryUserCouponClaimStatusList() {
+        logger.debug("UserResource.queryUserCouponClaimStatusList({})",super.getOpenId());
+        return couponService.queryUserCouponClaimStatusList(super.getUser().getOpenId(),super.getUser().getWxUnionId());
+    }
+
+    /**
+     * 保存用户关注公众号的优惠券
      */
     @POST
     @Path("/subscription/coupon")
     @Produces(MediaType.APPLICATION_JSON)
     public Response saveUserSubscirpeCoupon() {
         logger.debug("UserResource.saveUserSubscirpeCoupon({},{})",super.getOpenId());
+        if(BooleanUtils.isTrue(super.getUser().getSubscribeCoupon())){
+            throw new BizCoreRuntimeException(BizErrorConstants.USER_COUPON_UNSUBSCRIBE_CLAIM_ERROR);
+        }
         couponService.saveUserSubscirpeCoupon(super.getUser().getId(),super.getUser().getWxUnionId());
         return Response.status(Response.Status.CREATED).build();
     }

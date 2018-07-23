@@ -1,6 +1,7 @@
 package com.eds.ma.bis.coupon.service;
 
 import com.eds.ma.bis.coupon.entity.UserCoupon;
+import com.eds.ma.bis.coupon.vo.UserCouponClaimStatusVo;
 import com.eds.ma.bis.user.vo.UserShareCouponVo;
 import com.xcrm.common.page.Pagination;
 
@@ -12,6 +13,13 @@ import java.util.List;
  * @Date: 2017/12/24
  */
 public interface ICouponService {
+
+    /**
+     * 查询用户的优惠券领取状态
+     * @param openId
+     * @return
+     */
+    UserCouponClaimStatusVo queryUserCouponClaimStatusList(String openId,String wxUnionId);
 
     /**
      * 查询用户的优惠券

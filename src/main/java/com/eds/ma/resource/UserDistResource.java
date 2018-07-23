@@ -1,13 +1,8 @@
 package com.eds.ma.resource;
 
-import com.eds.ma.bis.common.service.IEdsConfigService;
 import com.eds.ma.bis.coupon.service.ICouponService;
-import com.eds.ma.bis.device.service.IDeviceService;
 import com.eds.ma.bis.user.service.IUserService;
-import com.eds.ma.resource.request.DeviceRentRequest;
-import com.eds.ma.resource.request.DeviceReturnRequest;
 import com.eds.ma.resource.request.PageRequest;
-import com.eds.ma.rest.integration.annotation.NoAuth;
 import com.xcrm.common.page.Pagination;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
