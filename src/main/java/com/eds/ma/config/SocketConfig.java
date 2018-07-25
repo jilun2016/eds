@@ -83,15 +83,12 @@ public class SocketConfig {
     }
 
     @Bean(initMethod = "bind",destroyMethod = "unbind")
-    public NioSocketAcceptor nioSocketAcceptor() throws IOException {
+    public NioSocketAcceptor nioSocketAcceptor(){
         NioSocketAcceptor nioSocketAcceptor = new NioSocketAcceptor();
         nioSocketAcceptor.setReuseAddress(true);
         nioSocketAcceptor.setHandler(serviceHandler());
         List<InetSocketAddress> localAddresses = new ArrayList<>();
         localAddresses.add(new InetSocketAddress(9000));
-        localAddresses.add(new InetSocketAddress(9001));
-        localAddresses.add(new InetSocketAddress(9002));
-        localAddresses.add(new InetSocketAddress(9003));
         nioSocketAcceptor.setDefaultLocalAddresses(localAddresses);
         nioSocketAcceptor.setFilterChainBuilder(filterChainBuilder());
         return nioSocketAcceptor;
