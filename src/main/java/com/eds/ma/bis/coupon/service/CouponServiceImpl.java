@@ -48,12 +48,16 @@ public class CouponServiceImpl implements ICouponService {
         UserCouponClaimStatusVo userCouponClaimStatusVo = new UserCouponClaimStatusVo();
         QueryBuilder queryDistQb = QueryBuilder.where(Restrictions.eq("dataStatus",1))
                 .and(Restrictions.eq("sponsorOpenId", openId));
-        UserDist userDist = dao.query(queryDistQb,UserDist.class);
-        if(Objects.isNull(userDist)
-                || Objects.equals(userDist.getDistStatus(),UserDistStatusEnum.S_DIST_JXZ.value())){
+        List<UserDist> userDistList = dao.queryList(queryDistQb,UserDist.class);
+        if(ListUtil.isEmpty(userDistList)){
             userCouponClaimStatusVo.setCouponShareStatus(true);
         }else {
-            userCouponClaimStatusVo.setCouponShareStatus(false);
+            //如果非空,那么存在进行中的,那么还是去分享状态
+            if(userDistList.stream().anyMatch(userDist -> Objects.equals(userDist.getDistStatus(),UserDistStatusEnum.S_DIST_JXZ.value()))){
+                userCouponClaimStatusVo.setCouponShareStatus(true);
+            }else{
+                userCouponClaimStatusVo.setCouponShareStatus(false);
+            }
         }
 
         QueryBuilder querySubQb = QueryBuilder.where(Restrictions.eq("wxUnionId",wxUnionId))

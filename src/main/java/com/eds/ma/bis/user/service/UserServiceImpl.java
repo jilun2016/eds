@@ -492,6 +492,7 @@ public class UserServiceImpl implements IUserService {
     public void shareBindUserDist(Long distId, String openId) {
         //查询分销记录
         QueryBuilder queryDistQb = QueryBuilder.where(Restrictions.eq("sponsorOpenId", openId))
+                .and(Restrictions.eq("id", distId))
                 .and(Restrictions.eq("dataStatus", 1));
         UserDist userDist = dao.query(queryDistQb, UserDist.class);
         //如果是分销状态是进行中,那么当前用户作为优惠券基数
