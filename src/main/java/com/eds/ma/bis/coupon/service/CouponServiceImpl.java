@@ -11,7 +11,6 @@ import com.eds.ma.bis.user.entity.UserDist;
 import com.eds.ma.bis.user.entity.UserDistItem;
 import com.eds.ma.bis.user.entity.WxUser;
 import com.eds.ma.bis.user.service.IUserService;
-import com.eds.ma.bis.user.vo.UserShareCouponVo;
 import com.eds.ma.exception.BizCoreRuntimeException;
 import com.eds.ma.rest.common.BizErrorConstants;
 import com.xcrm.cloud.database.db.BaseDaoSupport;

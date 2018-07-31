@@ -5,9 +5,7 @@ import com.eds.ma.bis.device.entity.DeviceRelation;
 import com.eds.ma.bis.device.entity.UserDeviceRecord;
 import com.eds.ma.bis.device.vo.*;
 import com.eds.ma.bis.user.entity.User;
-import com.eds.ma.socket.vo.DeviceDataVo;
 import com.xcrm.common.page.Pagination;
-import org.springframework.scheduling.annotation.Async;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -110,11 +108,6 @@ public interface IDeviceService {
      */
     void sendDevcieStatusMessage(Long deviceId,Integer lockStatus);
 
-    /**
-     * 异步保存消息
-     * @param deviceDataVo
-     */
-    void asyncSaveMessage(DeviceDataVo deviceDataVo);
 
     /**
      * 异步更新设备锁定状态

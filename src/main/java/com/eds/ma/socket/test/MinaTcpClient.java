@@ -37,15 +37,21 @@ public class MinaTcpClient extends IoHandlerAdapter {
 //			for (int i = 0; i < 11; i++) {
 //				bts[i] = (byte) i;
 //			}
-			byte[] bts = new byte[7];
-			bts[0] =  (byte) 0x18;
-			bts[1] =  (byte) 0x01;
-			bts[2] =  (byte) 0x11;
-			bts[3] =  (byte) 0x00;
-			bts[4] =  (byte) 0xbc;
-			bts[5] =  (byte) 0x61;
-			bts[6] =  (byte) 0x4e;
-			IoBuffer buffer = IoBuffer.allocate(7);
+			byte[] bts = new byte[13];
+			bts[0] =  (byte) 0x01;
+			bts[1] =  (byte) 0x32;
+			bts[2] =  (byte) 0x34;
+			bts[3] =  (byte) 0xe4;
+			bts[4] =  (byte) 0xc2;
+			bts[5] =  (byte) 0xa1;
+			bts[6] =  (byte) 0x01;
+			bts[7] =  (byte) 0x04;
+			bts[8] =  (byte) 0x00;
+			bts[9] =  (byte) 0x00;
+			bts[10] =  (byte) 0x00;
+			bts[11] =  (byte) 0x01;
+			bts[12] =  (byte) 0xF1;
+			IoBuffer buffer = IoBuffer.allocate(13);
 			// 自动扩容
 			buffer.setAutoExpand(true);
 			// 自动收缩
