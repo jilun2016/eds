@@ -19,12 +19,13 @@ public interface IWxPayService {
 
     /**
      * 微信预支付
+     * @param userId
      * @param openId
      * @param transType
      * @param payMoney
      * @param payTitle
      */
-    Map<String, Object> prepay(String openId,String transType, BigDecimal payMoney,String payTitle);
+    Map<String, Object> prepay(Long userId, String openId, String transType, BigDecimal payMoney, String payTitle);
 
     /**
      * 处理微信支付回调

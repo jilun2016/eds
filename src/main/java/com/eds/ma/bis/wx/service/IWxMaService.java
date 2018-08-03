@@ -1,9 +1,6 @@
 package com.eds.ma.bis.wx.service;
 
-import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.vo.UserInfoVo;
-
-import java.math.BigDecimal;
 
 /**
  * 微信小程序服务
@@ -30,11 +27,11 @@ public interface IWxMaService {
 
     /**
      * 保存小程序手机号
-     * @param user
+     * @param userId
      * @param code
      * @param encryptedData
      * @param iv
      */
-    void saveUserPhone(User user, String code, String encryptedData, String iv);
+    void saveUserPhone(Long userId, String code, String encryptedData, String iv);
 }
 

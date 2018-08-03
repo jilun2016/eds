@@ -4,10 +4,8 @@ import com.eds.ma.bis.device.entity.Device;
 import com.eds.ma.bis.device.entity.DeviceRelation;
 import com.eds.ma.bis.device.entity.UserDeviceRecord;
 import com.eds.ma.bis.device.vo.*;
-import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.socket.vo.DeviceDataVo;
 import com.xcrm.common.page.Pagination;
-import org.springframework.scheduling.annotation.Async;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -84,11 +82,11 @@ public interface IDeviceService {
     /**
      * 归还设备
      * @param deviceId
-     * @param user
+     * @param userId
      * @param userLat
      * @param userLng
      */
-    Long deviceReturn(Long deviceId, User user, BigDecimal userLat, BigDecimal userLng);
+    Long deviceReturn(Long deviceId, Long userId, BigDecimal userLat, BigDecimal userLng);
 
     /**
      * 保存设备租借记录

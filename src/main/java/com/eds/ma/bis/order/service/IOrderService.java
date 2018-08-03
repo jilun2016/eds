@@ -4,7 +4,6 @@ import com.eds.ma.bis.order.entity.FinanceIncome;
 import com.eds.ma.bis.order.entity.Order;
 import com.eds.ma.bis.order.entity.PayOrder;
 import com.eds.ma.bis.order.vo.OrderDetailVo;
-import com.eds.ma.bis.user.entity.User;
 import com.xcrm.common.page.Pagination;
 
 import java.math.BigDecimal;
@@ -76,28 +75,28 @@ public interface IOrderService {
     /**
      * 查询订单列表
      * @param orderStatus
-     * @param user
+     * @param userId
      * @param pageNo
      * @param pageSize
      * @return
      */
-    Pagination queryOrders(String orderStatus, User user, Integer pageNo, Integer pageSize);
+    Pagination queryOrders(String orderStatus, Long userId, Integer pageNo, Integer pageSize);
 
     /**
      * 查询订单详情
      *
-     * @param user
+     * @param userId
      * @param orderId
      * @return
      */
-    OrderDetailVo queryOrderDetail(User user, Long orderId);
+    OrderDetailVo queryOrderDetail(Long userId, Long orderId);
 
     /**
      * 查询最新的使用中的订单id
-     * @param user
+     * @param userId
      * @return
      */
-    Long queryLatestOrderId(User user);
+    Long queryLatestOrderId(Long userId);
 
     /**
      * 计算租金金额

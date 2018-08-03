@@ -5,7 +5,6 @@ import com.eds.ma.bis.order.TransTypeEnum;
 import com.eds.ma.bis.order.entity.FinanceIncome;
 import com.eds.ma.bis.order.entity.PayOrder;
 import com.eds.ma.bis.order.service.IOrderService;
-import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.bis.wx.PayStatusEnum;
 import com.eds.ma.bis.wx.sdk.common.util.RandomStringGenerator;
@@ -76,9 +75,7 @@ public class WxPayServiceImpl implements IWxPayService {
     }
 
     @Override
-    public Map<String, Object> prepay(String openId,String transType, BigDecimal payMoney,String payTitle) {
-        User user = userService.checkUserExist(openId);
-        Long userId = user.getId();
+    public Map<String, Object> prepay(Long userId, String openId, String transType, BigDecimal payMoney, String payTitle) {
         //订单编号
         String orderCode = OrderCodeCreater.createTradeNO();
         //支付订单流水号

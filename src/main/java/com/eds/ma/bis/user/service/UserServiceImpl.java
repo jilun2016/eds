@@ -1,5 +1,6 @@
 package com.eds.ma.bis.user.service;
 
+import com.eds.ma.bis.common.EdsAppId;
 import com.eds.ma.bis.common.service.IEdsConfigService;
 import com.eds.ma.bis.message.TmplEvent;
 import com.eds.ma.bis.message.service.IMessageService;
@@ -9,11 +10,8 @@ import com.eds.ma.bis.order.entity.PayOrder;
 import com.eds.ma.bis.order.service.IOrderService;
 import com.eds.ma.bis.thread.BusinessAsyncProcess;
 import com.eds.ma.bis.user.UserDistStatusEnum;
-import com.eds.ma.bis.user.entity.User;
-import com.eds.ma.bis.user.entity.UserDist;
-import com.eds.ma.bis.user.entity.UserDistItem;
-import com.eds.ma.bis.user.entity.UserWallet;
-import com.eds.ma.bis.user.vo.UserShareCouponVo;
+import com.eds.ma.bis.user.entity.*;
+import com.eds.ma.bis.user.vo.ContextUser;
 import com.eds.ma.bis.user.vo.UserWalletVo;
 import com.eds.ma.bis.wx.PayStatusEnum;
 import com.eds.ma.exception.BizCoreRuntimeException;
@@ -70,8 +68,8 @@ public class UserServiceImpl implements IUserService {
 
 
     @Override
-    public void saveUser(User user) {
-        dao.save(user);
+    public void saveUserWxMa(UserWxMa userWxMa) {
+        dao.save(userWxMa);
     }
 
     @Override
@@ -80,20 +78,43 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public User queryUserByOpenId(String openId) {
-        QueryBuilder queryUserQb = QueryBuilder.where(Restrictions.eq("openId", openId));
-        return dao.query(queryUserQb, User.class);
+    public ContextUser queryUserByOpenId(String openId) {
+        Ssqb queryUserSqb = Ssqb.create("com.eds.user.queryUserByAliWx")
+                .setParam("openId", openId);
+        return dao.findForObj(queryUserSqb, ContextUser.class);
     }
 
     @Override
-    public User queryUserByUnionId(String unionId) {
-        QueryBuilder queryUserQb = QueryBuilder.where(Restrictions.eq("wxUnionId", unionId));
-        return dao.query(queryUserQb, User.class);
+    public ContextUser queryUserByAliUid(String aliUid) {
+        Ssqb queryUserSqb = Ssqb.create("com.eds.user.queryUserByAliWx")
+                .setParam("aliUid", aliUid);
+        return dao.findForObj(queryUserSqb, ContextUser.class);
     }
 
     @Override
-    public void updateUser(User user) {
-        dao.update(user);
+    public UserWxMa queryUserWxMaByUnionId(String unionId) {
+        QueryBuilder queryUserWxMaQb = QueryBuilder.where(Restrictions.eq("wxUnionId",unionId))
+                .and(Restrictions.eq("dataStatus",1));
+        return dao.query(queryUserWxMaQb,UserWxMa.class);
+    }
+
+    @Override
+    public UserWxMa queryUserWxMaByOpenId(String openId) {
+        QueryBuilder queryUserWxMaQb = QueryBuilder.where(Restrictions.eq("openId",openId))
+                .and(Restrictions.eq("dataStatus",1));
+        return dao.query(queryUserWxMaQb,UserWxMa.class);
+    }
+
+    @Override
+    public User queryUserByMobile(String mobile) {
+        QueryBuilder queryUserQb = QueryBuilder.where(Restrictions.eq("mobile",mobile))
+                .and(Restrictions.eq("dataStatus",1));
+        return dao.query(queryUserQb,User.class);
+    }
+
+    @Override
+    public void updateUserWxMa(UserWxMa userWxMa) {
+        dao.update(userWxMa);
     }
 
     @Override
@@ -136,19 +157,6 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public User checkUserExist(String openId) {
-        if (Objects.isNull(openId)) {
-            throw new BizCoreRuntimeException(BizErrorConstants.USER_NOT_EXIST_ERROR);
-        }
-        //对用户信息,钱包进行校验
-        User user = queryUserByOpenId(openId);
-        if (Objects.isNull(user) || Objects.isNull(user.getId())) {
-            throw new BizCoreRuntimeException(BizErrorConstants.USER_NOT_EXIST_ERROR);
-        }
-        return user;
-    }
-
-    @Override
     public BigDecimal caculateCurrentDeposit(Long userId,BigDecimal defaultUnitDeposit){
         int userDeviceCount = queryUserRentingDeviceCount(userId);
         return defaultUnitDeposit.multiply(BigDecimal.valueOf(userDeviceCount));
@@ -174,8 +182,8 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public UserWalletVo queryUserWallet(User user) {
-        UserWallet userWallet = queryUserWalletByUserId(user.getId());
+    public UserWalletVo queryUserWallet(Long userId) {
+        UserWallet userWallet = queryUserWalletByUserId(userId);
         UserWalletVo userWalletVo = new UserWalletVo();
         userWalletVo.setUserId(userWallet.getUserId());
         userWalletVo.setBalance(userWallet.getBalance());
@@ -184,9 +192,9 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public int walletWithdraw(User user, Boolean isNeedSms, String smsCode) {
+    public int walletWithdraw(ContextUser user, Boolean isNeedSms, String smsCode) {
         int result = 1;
-        Long userId = user.getId();
+        Long userId = user.getUserId();
         //用户如果有租借设备,那么不能进行体现
         int userDeviceCount = queryUserRentingDeviceCount(userId);
         if(userDeviceCount > 0){
@@ -212,14 +220,14 @@ public class UserServiceImpl implements IUserService {
 //
 //            if(StringUtils.isEmpty(dbSmsCode)) {
 //                //验证码错误
-//                throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_ERROR);
+//                throw new BizCoreRuntimeException(BizErrorConstants.SMSCODE_ERROR);
 //            }
 //            if(!dbSmsCode.equals(smsCode)) {
 //                //验证码错误
-//                throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_ERROR);
+//                throw new BizCoreRuntimeException(BizErrorConstants.SMSCODE_ERROR);
 //            } else if(activeExpired != null && activeExpired.getTime() < now) {
 //                //已过期
-//                throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMSCODE_EXPIRED);
+//                throw new BizCoreRuntimeException(BizErrorConstants.SMSCODE_EXPIRED);
 //            }
 //        }
 
@@ -336,27 +344,23 @@ public class UserServiceImpl implements IUserService {
         log.info("UserService.asyncSaveOpenId({},{},{},{})", openId, nickname, headimgurl, rawData);
         //保存微信用户信息
         Date now = DateFormatUtils.getNow();
-        User user = queryUserByOpenId(openId);
-        if (Objects.nonNull(user)) {
-            user.setUpdated(now);
-            user.setWxUnionId(unionId);
-            user.setNickname(nickname);
-            user.setHeadimgurl(headimgurl);
-            user.setRawData(rawData);
-            updateUser(user);
+        UserWxMa userWxMa = queryUserWxMaByOpenId(openId);
+        if (Objects.nonNull(userWxMa)) {
+            userWxMa.setUpdated(now);
+            userWxMa.setWxUnionId(unionId);
+            userWxMa.setNickname(nickname);
+            userWxMa.setHeadimgurl(headimgurl);
+            userWxMa.setRawData(rawData);
+            updateUserWxMa(userWxMa);
         } else {
-            user = new User();
-            user.setCreated(now);
-            user.setHeadimgurl(headimgurl);
-            user.setNickname(nickname);
-            user.setOpenId(openId);
-            user.setWxUnionId(unionId);
-            user.setRawData(rawData);
-            saveUser(user);
-            //初始化钱包
-            if (Objects.nonNull(user.getId())) {
-                saveDefaultUserWallet(user.getId());
-            }
+            userWxMa = new UserWxMa();
+            userWxMa.setCreated(now);
+            userWxMa.setHeadimgurl(headimgurl);
+            userWxMa.setNickname(nickname);
+            userWxMa.setOpenId(openId);
+            userWxMa.setWxUnionId(unionId);
+            userWxMa.setRawData(rawData);
+            saveUserWxMa(userWxMa);
         }
     }
 
@@ -414,8 +418,7 @@ public class UserServiceImpl implements IUserService {
 //    }
 
     @Override
-    public void sendWithdrawSmsCode(User user, String mobile) {
-        Long userId = user.getId();
+    public void sendWithdrawSmsCode(Long userId, String mobile) {
         UserWallet userWallet = queryUserWalletByUserIdWithLock(userId);
         BigDecimal balance = userWallet.getBalance();
         BigDecimal deposit = userWallet.getDeposit();
@@ -444,9 +447,10 @@ public class UserServiceImpl implements IUserService {
                 smsCode = userWallet.getSmsCode();
             }
             Date lastSendTime = new Timestamp(smsExpired.getTime() - 30 * 60 * 1000);
-            if(System.currentTimeMillis() - lastSendTime.getTime() < 30 * 1000)
+            if(System.currentTimeMillis() - lastSendTime.getTime() < 30 * 1000){
                 //频率小于30秒
-                throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_SMS_CHECK_FREQUENCY_ERROR);
+                throw new BizCoreRuntimeException(BizErrorConstants.SMS_CHECK_FREQUENCY_ERROR);
+            }
         } else {
             smsCode = RandomStringUtils.randomNumeric(6);
         }
@@ -512,6 +516,60 @@ public class UserServiceImpl implements IUserService {
         if(Objects.isNull(dbUserDistItem)){
             dao.save(userDistItem);
         }
+    }
+
+    @Override
+    public void saveUserForRegist(String appId, String mobile) {
+        User user = queryUserByMobile(mobile);
+        Date now = DateFormatUtils.getNow();
+        if(Objects.isNull(user)){
+            user = new User();
+            user.setMobile(mobile);
+            if(Objects.equals(appId,EdsAppId.eds_ali.value())){
+                user.setAliSmsCode(RandomStringUtils.randomNumeric(6));
+                user.setAliSmsExpired(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000));
+            }else{
+                user.setWxSmsCode(RandomStringUtils.randomNumeric(6));
+                user.setWxSmsExpired(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000));
+            }
+            user.setCreated(now);
+            dao.save(user);
+        }else{
+            Date smsExpired = Objects.equals(appId,EdsAppId.eds_ali.value())?user.getAliSmsExpired():user.getWxSmsExpired();
+            String smsCode = Objects.equals(appId,EdsAppId.eds_ali.value())?user.getAliSmsCode():user.getWxSmsCode();
+
+            if(smsExpired != null && StringUtils.isNotEmpty(smsCode)) {
+                DateTime activationCodeExpired2 = new DateTime(smsExpired);
+                if(activationCodeExpired2.isBeforeNow()) {
+                    //短信码已经失效则发送新的验证码
+                    smsCode = RandomStringUtils.randomNumeric(6);
+                }
+                Date lastSendTime = new Timestamp(smsExpired.getTime() - 30 * 60 * 1000);
+                if(System.currentTimeMillis() - lastSendTime.getTime() < 30 * 1000){
+                    //频率小于30秒
+                    throw new BizCoreRuntimeException(BizErrorConstants.SMS_CHECK_FREQUENCY_ERROR);
+                }
+            } else {
+                smsCode = RandomStringUtils.randomNumeric(6);
+            }
+
+            if(Objects.equals(appId,EdsAppId.eds_ali.value())){
+                user.setAliSmsCode(smsCode);
+                user.setAliSmsExpired(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000));
+            }else{
+                user.setWxSmsCode(smsCode);
+                user.setWxSmsExpired(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000));
+            }
+            user.setUpdated(now);
+            dao.update(user);
+        }
+        //发送短信
+        SmsMessageContent smsMessageContent = new SmsMessageContent();
+        smsMessageContent.setTmplEvent(TmplEvent.member_register.value());
+        smsMessageContent.setMobile(mobile);
+        String sendSmsCode = Objects.equals(appId,EdsAppId.eds_ali.value())?user.getAliSmsCode():user.getWxSmsCode();
+        smsMessageContent.setSmsParams(new String[]{sendSmsCode});
+        messageService.pushSmsMessage(smsMessageContent);
     }
 
 }

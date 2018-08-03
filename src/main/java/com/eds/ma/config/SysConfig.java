@@ -154,6 +154,12 @@ public class SysConfig {
     private String edsCookieHost;
 
     /**
+     * ali的Cookie配置
+     */
+    @Value("${edsAliCookieHost}")
+    private String edsAliCookieHost;
+
+    /**
      * 阿里小程序appid
      */
     @Value("${aliMaAppId}")

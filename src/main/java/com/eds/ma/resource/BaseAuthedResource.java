@@ -1,7 +1,7 @@
 package com.eds.ma.resource;
 
 
-import com.eds.ma.bis.user.entity.User;
+import com.eds.ma.bis.user.vo.ContextUser;
 import com.eds.ma.rest.common.CommonConstants;
 
 import javax.ws.rs.container.ContainerRequestContext;
@@ -21,8 +21,20 @@ public class BaseAuthedResource {
 		return (String) containerRequestContext.getProperty(CommonConstants.WX_OPEN_ID_COOKIE);
 	}
 
-	public User getUser() {
-		return (User) containerRequestContext.getProperty(CommonConstants.EDS_USER);
+	public String getAliUid() {
+		return (String) containerRequestContext.getProperty(CommonConstants.ALI_UID_COOKIE);
+	}
+
+	public Long getUserId() {
+		return getUser().getUserId();
+	}
+
+	public String getAppId() {
+		return (String) containerRequestContext.getProperty(CommonConstants.HTTP_HEADER_APP_ID);
+	}
+
+	public ContextUser getUser() {
+		return (ContextUser) containerRequestContext.getProperty(CommonConstants.EDS_USER);
 	}
 
 }

@@ -5,8 +5,6 @@ import com.eds.ma.bis.order.entity.FinanceIncome;
 import com.eds.ma.bis.order.entity.Order;
 import com.eds.ma.bis.order.entity.PayOrder;
 import com.eds.ma.bis.order.vo.OrderDetailVo;
-import com.eds.ma.bis.user.entity.User;
-import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.bis.wx.PayStatusEnum;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
 import com.xcrm.cloud.database.db.query.Ssqb;
@@ -91,11 +89,11 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public Pagination queryOrders(String orderStatus, User user, Integer pageNo, Integer pageSize) {
+    public Pagination queryOrders(String orderStatus, Long userId, Integer pageNo, Integer pageSize) {
         //通过openId查询userId
         Ssqb queryOrderListSqb = Ssqb.create("com.eds.order.queryOrders")
                 .setParam("orderStatus", orderStatus)
-                .setParam("userId", user.getId())
+                .setParam("userId", userId)
                 .setParam("pageNo", pageNo)
                 .setParam("pageSize", pageSize);
         queryOrderListSqb.setIncludeTotalCount(true);
@@ -103,10 +101,10 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public OrderDetailVo queryOrderDetail(User user, Long orderId) {
+    public OrderDetailVo queryOrderDetail(Long userId, Long orderId) {
         //通过openId查询userId
         Ssqb queryOrderDetailSqb = Ssqb.create("com.eds.order.queryOrderDetail")
-                .setParam("userId", user.getId())
+                .setParam("userId", userId)
                 .setParam("orderId", orderId);
         OrderDetailVo orderDetailVo = dao.findForObj(queryOrderDetailSqb,OrderDetailVo.class);
         if(Objects.nonNull(orderDetailVo) && Objects.equals(orderDetailVo.getOrderStatus(),OrderStatusEnum.S_DDZT_JXZ.value())){
@@ -117,10 +115,10 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public Long queryLatestOrderId(User user) {
+    public Long queryLatestOrderId(Long userId) {
         //通过openId查询userId
         Ssqb queryOrderIdSqb = Ssqb.create("com.eds.order.queryLatestOrderId")
-                .setParam("userId", user.getId());
+                .setParam("userId", userId);
         return dao.findForObj(queryOrderIdSqb,Long.class);
     }
 

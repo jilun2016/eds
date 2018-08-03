@@ -66,7 +66,7 @@ public class UserDistResource extends BaseAuthedResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response saveUserDistCoupon() {
 		logger.debug("UserResource.saveUserDistCoupon({},{})",super.getOpenId());
-		couponService.saveUserDistCoupon(super.getUser().getId(),super.getOpenId());
+		couponService.saveUserDistCoupon(super.getUserId(),super.getOpenId());
 		return Response.status(Response.Status.CREATED).build();
 	}
 

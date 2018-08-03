@@ -21,10 +21,10 @@
     </select>
 
     <select id="queryUserShareCouponDetail" resultType="com.eds.ma.bis.user.vo.UserShareCouponVo">
-        SELECT eudi.receiveOpenId as openId,eu.nickname,eu.headimgurl,eudi.created as shardDateTime
+        SELECT eudi.receiveOpenId as openId,euw.nickname,euw.headimgurl,eudi.created as shardDateTime
         FROM t_eds_user_dist eud
         left join t_eds_user_dist_item eudi on eud.id = eudi.distId
-        left join t_eds_user eu on eudi.receiveOpenId = eu.openId
+        left join t_eds_user_wxma euw on eudi.receiveOpenId = euw.openId
         WHERE  eud.sponsorOpenId = #{openId} and eud.distStatus = 'S_DIST_JXZ'
                AND eud.dataStatus = 1 and eudi.dataStatus = 1 and eudi.isActived = 1
         ORDER BY eudi.created DESC

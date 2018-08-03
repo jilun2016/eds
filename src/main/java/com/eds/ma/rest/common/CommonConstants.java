@@ -13,8 +13,18 @@ public interface CommonConstants {
 	String WX_OPEN_ID_COOKIE = "_eds_wx_openId";
 
 	/**
+	 *  cookie中ali的uid
+	 */
+	String ALI_UID_COOKIE = "_eds_ali_uid";
+
+	/**
 	 * 上下文的user信息
 	 */
 	String EDS_USER = "eds_user";
+
+	/**
+	 * httpheader中客户端应用标示
+	 */
+	String HTTP_HEADER_APP_ID = "x-app-id";
 
 }

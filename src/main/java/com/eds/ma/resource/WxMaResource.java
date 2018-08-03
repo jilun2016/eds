@@ -89,7 +89,7 @@ public class WxMaResource extends BaseAuthedResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response saveUserPhone(@Valid UserPhoneRequest request){
 		logger.debug("WxMaResource.saveUserPhone({},{},{})",super.getOpenId(),super.getUser(),request);
-		wxMaService.saveUserPhone(super.getUser(),request.getCode(),request.getEncryptedData(),request.getIv());
+		wxMaService.saveUserPhone(super.getUserId(),request.getCode(),request.getEncryptedData(),request.getIv());
 		return Response.status(Response.Status.CREATED).build();
 	}
 

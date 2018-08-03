@@ -17,12 +17,12 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 /**
- * 微信支付资源
+ * ali支付资源
  * @Author gaoyan
  * @Date: 2018/3/31
  */
-@Path("/wx/pay")
-public class WxPayResource extends BaseAuthedResource{
+@Path("/ali/pay")
+public class AliPayResource extends BaseAuthedResource{
 
     private static Logger logger = Logger.getLogger(DeviceResource.class);
 

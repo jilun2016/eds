@@ -7,19 +7,9 @@ package com.eds.ma.bis.message;
  */
 public enum TmplEvent {
 	/**
-	 * 余额充值提醒
+	 * 会员注册时
 	 */
-	balance_recharge("balance_recharge"),
-
-	/**
-	 * 押金充值提醒
-	 */
-	deposit_recharge("deposit_recharge"),
-
-	/**
-	 * 钱包提现提醒
-	 */
-	wallet_withdraw_success("wallet_withdraw_success"),
+	member_register("member_register"),
 
 	/**
 	 * 钱包提现提醒
@@ -29,7 +19,7 @@ public enum TmplEvent {
 
 	private final String value;
 	
-	private TmplEvent(final String value) {
+	TmplEvent(final String value) {
 		this.value = value;
 	}
 	

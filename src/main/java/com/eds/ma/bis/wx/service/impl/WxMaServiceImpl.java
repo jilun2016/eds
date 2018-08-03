@@ -91,7 +91,7 @@ public class WxMaServiceImpl implements IWxMaService {
     }
 
     @Override
-    public void saveUserPhone(User user, String code, String encryptedData, String iv) {
+    public void saveUserPhone(Long userId, String code, String encryptedData, String iv) {
         Map<String,String> sessionMap = getWxMaSessionKey(code);
         String sessionKey = MapUtils.getString(sessionMap,"sessionKey");
         String resultJson = MapUtils.getString(sessionMap,"resultJson");
@@ -104,9 +104,8 @@ public class WxMaServiceImpl implements IWxMaService {
                 }
                 String userMobile = userPhoneInfoJSON.getString("phoneNumber");
                 User updateUser = new User();
-                updateUser.setId(user.getId());
+                updateUser.setId(userId);
                 updateUser.setMobile(userMobile);
-                updateUser.setMobileRawData(userPhoneInfoJSON.toString());
                 dao.update(updateUser);
             }else{
                 logger.error("WxMinaServiceImpl.parse user info failed.resultJson:{}",resultJson);

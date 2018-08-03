@@ -6,12 +6,8 @@ import com.eds.ma.bis.coupon.CouponTypeEnum;
 import com.eds.ma.bis.coupon.entity.UserCoupon;
 import com.eds.ma.bis.coupon.vo.UserCouponClaimStatusVo;
 import com.eds.ma.bis.user.UserDistStatusEnum;
-import com.eds.ma.bis.user.entity.User;
-import com.eds.ma.bis.user.entity.UserDist;
-import com.eds.ma.bis.user.entity.UserDistItem;
-import com.eds.ma.bis.user.entity.WxUser;
+import com.eds.ma.bis.user.entity.*;
 import com.eds.ma.bis.user.service.IUserService;
-import com.eds.ma.bis.user.vo.UserShareCouponVo;
 import com.eds.ma.exception.BizCoreRuntimeException;
 import com.eds.ma.rest.common.BizErrorConstants;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
@@ -68,8 +64,8 @@ public class CouponServiceImpl implements ICouponService {
         }else{
             userCouponClaimStatusVo.setUserSubsribeStatus(false);
         }
-        User user = userService.queryUserByOpenId(openId);
-        userCouponClaimStatusVo.setCouponSubsribeClaimStatus(user.getSubscribeCoupon());
+        UserWxMa userWxMa = userService.queryUserWxMaByOpenId(openId);
+        userCouponClaimStatusVo.setCouponSubsribeClaimStatus(userWxMa.getSubscribeCoupon());
         return userCouponClaimStatusVo;
     }
 
@@ -104,7 +100,7 @@ public class CouponServiceImpl implements ICouponService {
     }
 
     @Override
-    public void saveUserSubscirpeCoupon(Long userId, String wxUnionId) {
+    public void saveUserSubscirpeCoupon(Long userId, String wxUnionId, String openId) {
         //通过wxUnionId查询是否已经关注公众号
         QueryBuilder querySubQb = QueryBuilder.where(Restrictions.eq("wxUnionId",wxUnionId))
                 .and(Restrictions.eq("dataStatus",1));
@@ -124,10 +120,10 @@ public class CouponServiceImpl implements ICouponService {
             userCoupon.setCreated(DateFormatUtils.getNow());
             dao.save(userCoupon);
             //更新用户已领取关注公众号优惠券
-            User updateUser = new User();
-            updateUser.setId(userId);
-            updateUser.setSubscribeCoupon(true);
-            dao.update(updateUser);
+            UserWxMa updateUserWxMa = new UserWxMa();
+            updateUserWxMa.setOpenId(openId);
+            updateUserWxMa.setSubscribeCoupon(true);
+            dao.update(updateUserWxMa);
         }else{
             throw new BizCoreRuntimeException(BizErrorConstants.USER_COUPON_UNSUBSCRIBE_ERROR);
         }

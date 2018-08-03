@@ -2,7 +2,6 @@ package com.eds.ma.bis.coupon.service;
 
 import com.eds.ma.bis.coupon.entity.UserCoupon;
 import com.eds.ma.bis.coupon.vo.UserCouponClaimStatusVo;
-import com.eds.ma.bis.user.vo.UserShareCouponVo;
 import com.xcrm.common.page.Pagination;
 
 import java.util.List;
@@ -43,9 +42,10 @@ public interface ICouponService {
      *
      * @param userId
      * @param wxUnionId
+     * @param openId
      * @return
      */
-    void saveUserSubscirpeCoupon(Long userId, String wxUnionId);
+    void saveUserSubscirpeCoupon(Long userId, String wxUnionId, String openId);
 
     /**
      * 保存用户分享的优惠券

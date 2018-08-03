@@ -1,6 +1,46 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.eds.user" >
+
+    <select id="queryUserByAliWx" resultType="com.eds.ma.bis.user.vo.ContextUser">
+        SELECT eu.id as userId,eu.aliUid,eu.openId,euw.wxUnionId,eu.mobile,euw.nickname as wxNickname,
+              euw.headimgurl as wxHeadimgurl,euw.subscribeCoupon,euw.rawData as wxUseRawData,
+              eua.aliNickname,eua.aliHeadimgurl,eua.aliTokenRawData,eua.aliUserRawData
+              <if test="openId != null">,euw.nickname,euw.headimgurl</if>
+              <if test="aliUid != null">,eua.aliNickname as nickname,eua.aliHeadimgurl as headimgurl</if>
+        FROM t_eds_user eu
+        left join t_eds_user_ali eua on eu.aliUid = eua.aliUid
+        left join t_eds_user_wxma euw on eu.openId = euw.openId
+        WHERE
+              <if test="openId != null">
+                  eu.openId = #{openId} and euw.dataStatus = 1 and
+              </if>
+              <if test="aliUid != null">
+                  eu.aliUid = #{aliUid} and eua.dataStatus = 1 and
+              </if>
+           eu.dataStatus = 1
+    </select>
+
+    <select id="queryUserWxMaByUnionId" resultType="com.eds.ma.bis.user.vo.ContextUser">
+        SELECT eu.id as userId,eu.aliUid,eu.openId,euw.wxUnionId,eu.mobile,euw.nickname as wxNickname,
+        euw.headimgurl as wxHeadimgurl,euw.subscribeCoupon,euw.rawData as wxUseRawData,
+        eua.aliNickname,eua.aliHeadimgurl,eua.aliTokenRawData,eua.aliUserRawData
+        <if test="openId != null">,euw.nickname,euw.headimgurl</if>
+        <if test="aliUid != null">,eua.aliNickname as nickname,eua.aliHeadimgurl as headimgurl</if>
+        FROM t_eds_user eu
+        left join t_eds_user_ali eua on eu.aliUid = eua.aliUid
+        left join t_eds_user_wxma euw on eu.openId = euw.openId
+        WHERE
+        <if test="openId != null">
+            eu.openId = #{openId} and euw.dataStatus = 1 and
+        </if>
+        <if test="aliUid != null">
+            eu.aliUid = #{aliUid} and eua.dataStatus = 1 and
+        </if>
+        eu.dataStatus = 1
+    </select>
+
+
     <update id="updateUserWallet">
         UPDATE t_eds_user_wallet
         SET updated = now()
@@ -26,5 +66,11 @@
         WHERE  euw.userId = #{userId} and euw.orderStatus = 'S_DDZT_YJS' and euw.dataStatus = 1
         FOR UPDATE
     </select>
+
+    <update id="updateAliMemberLoginSuc">
+        UPDATE t_eds_user
+        SET aliUid = #{aliUid},aliLoginTime = #{loginTime},aliSmsCode = '',aliSmsExpired = null
+        WHERE id=#{userId} AND dataStatus=1
+    </update>
 
 </mapper>

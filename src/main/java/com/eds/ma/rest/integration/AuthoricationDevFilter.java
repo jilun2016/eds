@@ -1,7 +1,9 @@
 package com.eds.ma.rest.integration;
 
+import com.eds.ma.bis.common.EdsAppId;
 import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.service.IUserService;
+import com.eds.ma.bis.user.vo.ContextUser;
 import com.eds.ma.rest.common.CommonConstants;
 import com.eds.ma.rest.common.ErrorMessage;
 import com.eds.ma.rest.common.RestErrorCode;
@@ -34,19 +36,39 @@ public class AuthoricationDevFilter implements ContainerRequestFilter,ContainerR
 
 	@Override
 	public void filter(ContainerRequestContext requestContext) {
-       String openId = "oiyZc5QvTvZGQc1nMHuZUc5i9pb8";
-        User user = userService.queryUserByOpenId(openId);
-        if (Objects.isNull(user) || Objects.isNull(user.getId())) {
-            requestContext.abortWith(buildErrorMessageResponse(RestErrorCode.WX_AUTH_USER_INFO_ERROR));
+        //获取业务的appid
+        String appId = requestContext.getHeaderString(CommonConstants.HTTP_HEADER_APP_ID);
+        if(StringUtils.isBlank(appId) ||
+                !(Objects.equals(EdsAppId.eds_wx.value(),appId) || Objects.equals(EdsAppId.eds_ali.value(),appId))) {
+            requestContext.abortWith(buildErrorMessageResponse(RestErrorCode.HTTP_HEADER_FIELD_INVALID));
             return;
         }
-        requestContext.setProperty(CommonConstants.EDS_USER, user);
-        requestContext.setProperty(CommonConstants.WX_OPEN_ID_COOKIE, openId);
+        //如果是微信访问,那么读取openId
+        if(Objects.equals(EdsAppId.eds_wx.value(),appId)){
+            String openId = "oiyZc5QvTvZGQc1nMHuZUc5i9pb8";
+            ContextUser contextUser = userService.queryUserByOpenId(openId);
+            logger.debug("AuthoricationFilter.contextUser({})",contextUser);
+            if (Objects.isNull(contextUser) || Objects.isNull(contextUser.getUserId())) {
+                requestContext.abortWith(buildErrorMessageResponse(RestErrorCode.WX_AUTH_USER_INFO_ERROR));
+                return;
+            }
+            requestContext.setProperty(CommonConstants.EDS_USER, contextUser);
+            requestContext.setProperty(CommonConstants.WX_OPEN_ID_COOKIE, openId);
+        }else{
+            String aliUid = "5620605473427456";
+            ContextUser contextUser = userService.queryUserByAliUid(aliUid);
+            logger.debug("AuthoricationFilter.contextUser({})",contextUser);
+            if (Objects.isNull(contextUser) || Objects.isNull(contextUser.getUserId())) {
+                requestContext.abortWith(buildErrorMessageResponse(RestErrorCode.WX_AUTH_USER_INFO_ERROR));
+                return;
+            }
+            requestContext.setProperty(CommonConstants.EDS_USER, contextUser);
+            requestContext.setProperty(CommonConstants.ALI_UID_COOKIE, aliUid);
+        }
 	}
 
 	@Override
-	public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
-			throws IOException {
+	public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext){
 
 	}
 

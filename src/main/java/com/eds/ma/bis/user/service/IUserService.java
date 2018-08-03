@@ -1,13 +1,13 @@
 package com.eds.ma.bis.user.service;
 
 import com.eds.ma.bis.order.entity.PayOrder;
+import com.eds.ma.bis.user.entity.UserWxMa;
 import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.entity.UserWallet;
-import com.eds.ma.bis.user.vo.UserShareCouponVo;
+import com.eds.ma.bis.user.vo.ContextUser;
 import com.eds.ma.bis.user.vo.UserWalletVo;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * 用户接口
@@ -18,9 +18,9 @@ public interface IUserService {
 
     /**
      * 保存用户信息
-     * @param user
+     * @param userWxMa
      */
-    void saveUser(User user);
+    void saveUserWxMa(UserWxMa userWxMa);
 
     /**
      * 查询用户信息
@@ -28,23 +28,42 @@ public interface IUserService {
      */
     User queryUserById(Long userId);
 
+
     /**
      * 通过openId查询用户信息
      * @param openId
      */
-    User queryUserByOpenId(String openId);
+    ContextUser queryUserByOpenId(String openId);
+
+    /**
+     * 通过aliUid查询用户信息
+     * @param aliUid
+     */
+    ContextUser queryUserByAliUid(String aliUid);
 
     /**
      * unionId
      * @param unionId
      */
-    User queryUserByUnionId(String unionId);
+    UserWxMa queryUserWxMaByUnionId(String unionId);
+
+    /**
+     * unionId
+     * @param openId
+     */
+    UserWxMa queryUserWxMaByOpenId(String openId);
+
+    /**
+     * 通过手机号查询用户信息
+     * @param mobile
+     */
+    User queryUserByMobile(String mobile);
 
     /**
      * 更新用户信息
-     * @param user
+     * @param userWxMa
      */
-    void updateUser(User user);
+    void updateUserWxMa(UserWxMa userWxMa);
 
     /**
      * 查询用户钱包信息
@@ -73,13 +92,6 @@ public interface IUserService {
     void updateUserWallet(Long userId, BigDecimal deposit,BigDecimal balance);
 
     /**
-     * 校验用户是否存在
-     * @param openId
-     * @return
-     */
-    User checkUserExist(String openId);
-
-    /**
      * 计算当前用户的押金
      * @param userId
      * @param defaultUnitDeposit
@@ -103,10 +115,10 @@ public interface IUserService {
 
     /**
      * 查询用户钱包
-     * @param user
+     * @param userId
      * @return
      */
-    UserWalletVo queryUserWallet(User user);
+    UserWalletVo queryUserWallet(Long userId);
 
     /**
      * 用户提现
@@ -115,7 +127,7 @@ public interface IUserService {
      * @param isNeedSms
      * @param smsCode
      */
-    int walletWithdraw(User user, Boolean isNeedSms, String smsCode);
+    int walletWithdraw(ContextUser user, Boolean isNeedSms, String smsCode);
 
     /**
      * 用户退款失败回滚
@@ -136,10 +148,10 @@ public interface IUserService {
 
     /**
      * 发送用户提现短信验证码
-     * @param user
+     * @param userId
      * @param mobile
      */
-    void sendWithdrawSmsCode(User user, String mobile);
+    void sendWithdrawSmsCode(Long userId, String mobile);
 
     /**
      * 查询用户租借次数
@@ -163,4 +175,10 @@ public interface IUserService {
      */
     void shareBindUserDist(Long distId, String openId);
 
+    /**
+     * 用户注册保存用户信息
+     * @param appId
+     * @param mobile
+     */
+    void saveUserForRegist(String appId, String mobile);
 }

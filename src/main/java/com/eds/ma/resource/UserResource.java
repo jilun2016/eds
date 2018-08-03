@@ -7,41 +7,30 @@ import com.eds.ma.bis.device.vo.UserDeviceVo;
 import com.eds.ma.bis.order.OrderCodeCreater;
 import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.service.IUserService;
+import com.eds.ma.bis.user.vo.ContextUser;
 import com.eds.ma.bis.user.vo.UserInfoVo;
 import com.eds.ma.bis.user.vo.UserWalletVo;
-import com.eds.ma.config.SysConfig;
 import com.eds.ma.exception.BizCoreRuntimeException;
-import com.eds.ma.mongodb.MongoDbDaoSupport;
-import com.eds.ma.redis.RedisDaoSupport;
 import com.eds.ma.resource.request.PageRequest;
 import com.eds.ma.resource.request.SendSmsCodeRequest;
 import com.eds.ma.resource.request.UserWithdrawRequest;
 import com.eds.ma.rest.common.BizErrorConstants;
-import com.eds.ma.rest.common.CommonConstants;
 import com.eds.ma.rest.integration.annotation.NoAuth;
-import com.eds.ma.socket.SessionMap;
-import com.eds.ma.util.CookieUtils;
 import com.xcrm.common.page.Pagination;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.log.Logger;
 import org.apache.commons.lang.BooleanUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 /**
  * 用户资源
@@ -79,7 +68,7 @@ public class UserResource extends BaseAuthedResource{
     @Produces(MediaType.APPLICATION_JSON)
     public UserInfoVo queryUserInfo() {
         logger.debug("UserResource.queryUserInfo({},{})", super.getOpenId(),super.getUser());
-        User user = super.getUser();
+        ContextUser user = super.getUser();
         UserInfoVo userInfoVo = new UserInfoVo();
         userInfoVo.setHeadimgurl(user.getHeadimgurl());
         userInfoVo.setNickName(user.getNickname());
@@ -95,7 +84,7 @@ public class UserResource extends BaseAuthedResource{
     @Produces(MediaType.APPLICATION_JSON)
     public Response checkUserDeposit() {
         logger.debug("UserResource.checkUserDeposit({},{})", super.getOpenId(),super.getUser());
-        Boolean isRentDepositValid = userService.checkUserRentDepositValid(super.getUser().getId());
+        Boolean isRentDepositValid = userService.checkUserRentDepositValid(super.getUserId());
         Map<String,Boolean> resultMap = new HashMap<>(1);
         resultMap.put("isRentDepositValid",isRentDepositValid);
         return Response.ok(resultMap).build();
@@ -109,7 +98,7 @@ public class UserResource extends BaseAuthedResource{
     @Produces(MediaType.APPLICATION_JSON)
     public Response queryUserRentTimes() {
         logger.debug("UserResource.queryUserRentTimes({},{})", super.getOpenId(),super.getUser());
-        Integer rentTimes = userService.queryUserRentTimes(super.getUser().getId());
+        Integer rentTimes = userService.queryUserRentTimes(super.getUserId());
         Map<String,Integer> rentResult = new HashMap<>(1);
         rentResult.put("rentTimes",rentTimes);
         return Response.ok(rentResult).build();
@@ -123,9 +112,8 @@ public class UserResource extends BaseAuthedResource{
 	@Path("/devices")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<UserDeviceVo> queryUserDeviceList(@QueryParam("spId") Long spId) {
-		logger.debug("UserResource.queryUserDeviceList({},{},{})",spId, super.getOpenId(),super.getUser());
-        User user = super.getUser();
-		return deviceService.queryUserDeviceList(user.getId(),null);
+		logger.debug("UserResource.queryUserDeviceList({},{})",spId,super.getUser());
+		return deviceService.queryUserDeviceList(super.getUserId(),null);
 	}
 
     /**
@@ -136,7 +124,7 @@ public class UserResource extends BaseAuthedResource{
     @Produces(MediaType.APPLICATION_JSON)
     public UserWalletVo queryUserWallet() {
         logger.debug("UserResource.queryUserWallet({},{})", super.getOpenId(),super.getUser());
-        return userService.queryUserWallet(super.getUser());
+        return userService.queryUserWallet(super.getUserId());
     }
 
     /**
@@ -203,7 +191,7 @@ public class UserResource extends BaseAuthedResource{
     @Produces(MediaType.APPLICATION_JSON)
     public Response sendWithdrawSmsCode(@Valid SendSmsCodeRequest request){
         logger.debug("UserResource.sendWithdrawSmsCode({},{},{})",super.getOpenId(),super.getUser(),request);
-        userService.sendWithdrawSmsCode(super.getUser(),request.getMobile());
+        userService.sendWithdrawSmsCode(super.getUserId(),request.getMobile());
         Map<String,Object> resultMap = new HashMap<>();
         resultMap.put("transCode", OrderCodeCreater.createTradeNO());
         resultMap.put("transTime",DateFormatUtils.getNow());
@@ -218,7 +206,7 @@ public class UserResource extends BaseAuthedResource{
     @Produces(MediaType.APPLICATION_JSON)
     public Pagination queryUserCouponList(@NotEmpty(message="优惠券状态不允许为空") @QueryParam("couponStatus") String couponStatus, @BeanParam PageRequest pageRequest) {
         logger.debug("UserResource.queryUserCouponList({},{})",super.getOpenId(),pageRequest);
-        return couponService.queryUserCouponList(super.getUser().getId(),couponStatus,pageRequest.getPageNo(),pageRequest.getPageSize());
+        return couponService.queryUserCouponList(super.getUserId(),couponStatus,pageRequest.getPageNo(),pageRequest.getPageSize());
     }
 
     /**
@@ -243,7 +231,7 @@ public class UserResource extends BaseAuthedResource{
         if(BooleanUtils.isTrue(super.getUser().getSubscribeCoupon())){
             throw new BizCoreRuntimeException(BizErrorConstants.USER_COUPON_UNSUBSCRIBE_CLAIM_ERROR);
         }
-        couponService.saveUserSubscirpeCoupon(super.getUser().getId(),super.getUser().getWxUnionId());
+        couponService.saveUserSubscirpeCoupon(super.getUserId(),super.getUser().getWxUnionId(),super.getOpenId());
         return Response.status(Response.Status.CREATED).build();
     }
 

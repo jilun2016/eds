@@ -3,10 +3,11 @@ package com.eds.ma.resource;
 import com.eds.ma.bis.common.entity.EdsConfig;
 import com.eds.ma.bis.common.service.IEdsConfigService;
 import com.eds.ma.bis.device.service.IDeviceService;
-import com.eds.ma.bis.device.vo.DeviceFaqInfoVo;
 import com.eds.ma.bis.device.vo.DeviceInfoVo;
-import com.eds.ma.config.SysConfig;
-import com.eds.ma.resource.request.*;
+import com.eds.ma.resource.request.DeviceRentRequest;
+import com.eds.ma.resource.request.DeviceReturnRequest;
+import com.eds.ma.resource.request.PageRequest;
+import com.eds.ma.resource.request.SearchDeviceRequest;
 import com.eds.ma.rest.integration.annotation.NoAuth;
 import com.eds.ma.util.DistanceUtil;
 import com.xcrm.common.page.Pagination;
@@ -17,7 +18,6 @@ import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +72,7 @@ public class DeviceResource extends BaseAuthedResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deviceRent(@Valid DeviceRentRequest request) {
 		logger.debug("WxMaResource.deviceRent({},{})",super.getOpenId(), request);
-        deviceService.deviceRent(request.getDeviceId(),super.getUser().getId(),request.getUserLat(),request.getUserLng());
+        deviceService.deviceRent(request.getDeviceId(),super.getUserId(),request.getUserLat(),request.getUserLng());
 		return Response.status(Response.Status.CREATED).build();
 	}
 
@@ -86,7 +86,7 @@ public class DeviceResource extends BaseAuthedResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deviceReturn(@Valid DeviceReturnRequest request) {
 		logger.debug("WxMaResource.deviceReturn({},{},{})",super.getOpenId(),super.getUser(), request);
-		Long orderId = deviceService.deviceReturn(request.getDeviceId(),super.getUser(),request.getUserLat(),request.getUserLng());
+		Long orderId = deviceService.deviceReturn(request.getDeviceId(),super.getUserId(),request.getUserLat(),request.getUserLng());
 		Map<String,Long> resultMap = new HashMap<>(1);
 		resultMap.put("orderId",orderId);
 		return Response.status(Response.Status.CREATED).entity(resultMap).build();

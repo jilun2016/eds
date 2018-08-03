@@ -2,15 +2,9 @@ package com.eds.ma.resource;
 
 import com.eds.ma.bis.order.service.IOrderService;
 import com.eds.ma.bis.order.vo.OrderDetailVo;
-import com.eds.ma.bis.order.vo.OrderVo;
-import com.eds.ma.bis.user.vo.UserInfoVo;
-import com.eds.ma.bis.wx.service.IWxMaService;
-import com.eds.ma.config.SysConfig;
 import com.eds.ma.resource.request.PageRequest;
-import com.eds.ma.rest.integration.annotation.NoAuth;
 import com.xcrm.common.page.Pagination;
 import com.xcrm.log.Logger;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.constraints.NotNull;
@@ -18,7 +12,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,7 +37,7 @@ public class OrderResource extends BaseAuthedResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Pagination queryOrders(@QueryParam("orderStatus") String orderStatus, @BeanParam PageRequest pageRequest) {
 		logger.debug("----OrderResource.queryOrders({},{})",orderStatus,super.getOpenId());
-		return orderService.queryOrders(orderStatus,super.getUser(),pageRequest.getPageNo(),pageRequest.getPageSize());
+		return orderService.queryOrders(orderStatus,super.getUserId(),pageRequest.getPageNo(),pageRequest.getPageSize());
 	}
 
     /**
@@ -58,7 +51,7 @@ public class OrderResource extends BaseAuthedResource {
     public OrderDetailVo queryOrderDetail(@NotNull(message="订单ID不允许为空") @PathParam("orderId") Long orderId) {
         logger.debug("OrderResource.queryOrderDetail({},{})",super.getOpenId(), orderId);
 
-        OrderDetailVo orderDetailVO = orderService.queryOrderDetail(super.getUser(),orderId);
+        OrderDetailVo orderDetailVO = orderService.queryOrderDetail(super.getUserId(),orderId);
         logger.debug("OrderResource.queryOrderDetail result:[{}]",orderDetailVO);
         if(orderDetailVO == null) {
             throw new NotFoundException("未查询到该订单详情");
@@ -76,7 +69,7 @@ public class OrderResource extends BaseAuthedResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response queryLatestOrderId() {
         logger.debug("OrderResource.queryLatestOrderId({})",super.getOpenId());
-        Long orderId = orderService.queryLatestOrderId(super.getUser());
+        Long orderId = orderService.queryLatestOrderId(super.getUserId());
         Map<String,Long> resultMap = new HashMap<>(1);
         resultMap.put("orderId",orderId);
         return Response.ok(resultMap).build();
@@ -91,7 +84,7 @@ public class OrderResource extends BaseAuthedResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Pagination queryTrnasFinanceIncome(@BeanParam PageRequest pageRequest) {
         logger.debug("OrderResource.queryTrnasFinanceIncome({},{})",super.getOpenId(),pageRequest);
-        return orderService.queryTrnasFinanceIncome(super.getUser().getId(),pageRequest.getPageNo(),pageRequest.getPageSize());
+        return orderService.queryTrnasFinanceIncome(super.getUserId(),pageRequest.getPageNo(),pageRequest.getPageSize());
     }
 
 

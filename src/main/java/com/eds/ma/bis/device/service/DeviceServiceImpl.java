@@ -17,7 +17,6 @@ import com.eds.ma.bis.order.OrderCodeCreater;
 import com.eds.ma.bis.order.entity.Order;
 import com.eds.ma.bis.order.entity.OrderCoupon;
 import com.eds.ma.bis.order.service.IOrderService;
-import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.entity.UserWallet;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.exception.BizCoreRuntimeException;
@@ -190,9 +189,8 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
-    public Long deviceReturn(Long deviceId, User user, BigDecimal userLat, BigDecimal userLng) {
+    public Long deviceReturn(Long deviceId, Long userId, BigDecimal userLat, BigDecimal userLng) {
         //校验用户信息
-        Long userId = user.getId();
         EdsConfig edsConfig = edsConfigService.queryEdsConfig();
         //用户的位置和店铺的位置是否在有效距离内
         SpDetailVo spDetailVo = queryNearestbySpByCoordinate(userLat.doubleValue(), userLng.doubleValue(), edsConfig.getNearbyDistance());

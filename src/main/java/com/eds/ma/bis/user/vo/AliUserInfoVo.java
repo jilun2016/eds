@@ -20,4 +20,9 @@ public class AliUserInfoVo {
      */
     private String headimgurl;
 
+    /**
+     * ali用户id
+     */
+    private String aliUid;
+
 }

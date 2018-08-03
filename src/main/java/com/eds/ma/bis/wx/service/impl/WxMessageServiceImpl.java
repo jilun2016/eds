@@ -2,6 +2,7 @@ package com.eds.ma.bis.wx.service.impl;
 
 import com.alipay.api.internal.util.XmlUtils;
 import com.eds.ma.bis.user.entity.User;
+import com.eds.ma.bis.user.entity.UserWxMa;
 import com.eds.ma.bis.user.entity.WxUser;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.bis.wx.entity.WxAccessToken;
@@ -64,8 +65,8 @@ public class WxMessageServiceImpl implements IWxMessageService {
                 if(Objects.equals(event, EventType.subscribe.name())
                         && wxUser.getSubscribeStatus()
                         && Objects.nonNull(wxUser.getWxUnionId())){
-                    User dbUser = userService.queryUserByUnionId(wxUser.getWxUnionId());
-                    if(Objects.isNull(dbUser) || BooleanUtils.isFalse(dbUser.getSubscribeCoupon())){
+                    UserWxMa dbUserWxMa = userService.queryUserWxMaByUnionId(wxUser.getWxUnionId());
+                    if(Objects.isNull(dbUserWxMa) || BooleanUtils.isFalse(dbUserWxMa.getSubscribeCoupon())){
                         replyTextMessage( response,"感谢您关注享测就测公众号,请前往小程序领取优惠券.",
                                 toUserName,openId);
                     }
