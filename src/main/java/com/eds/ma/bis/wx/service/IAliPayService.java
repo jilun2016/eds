@@ -1,6 +1,7 @@
 package com.eds.ma.bis.wx.service;
 
 
+import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.util.Map;
 
@@ -18,22 +19,21 @@ public interface IAliPayService {
     String getPayCode();
 
     /**
-     * 微信预支付
+     * ali预支付
      * @param userId
-     * @param openId
+     * @param aliUid
      * @param transType
      * @param payMoney
      * @param payTitle
      */
-    Map<String, Object> prepay(Long userId, String openId, String transType, BigDecimal payMoney, String payTitle);
+    String prepay(Long userId, String aliUid, String transType, BigDecimal payMoney, String payTitle);
 
     /**
      * 处理微信支付回调
-     * @param xml
+     * @param requestParams
+     * @param response
      */
-    String optAliPayCallback(String xml);
-
-
+    void optAliPayCallback(Map<String, String[]> requestParams, HttpServletResponse response);
 
 }
 

@@ -3,6 +3,7 @@ package com.eds.ma.bis.wx.service.impl;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
+import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradeAppPayRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
 import com.eds.ma.bis.order.OrderCodeCreater;
@@ -12,36 +13,24 @@ import com.eds.ma.bis.order.entity.PayOrder;
 import com.eds.ma.bis.order.service.IOrderService;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.bis.wx.PayStatusEnum;
-import com.eds.ma.bis.wx.sdk.common.util.RandomStringGenerator;
-import com.eds.ma.bis.wx.sdk.common.util.XmlObjectMapper;
-import com.eds.ma.bis.wx.sdk.pay.base.PaySetting;
-import com.eds.ma.bis.wx.sdk.pay.payment.Payments;
-import com.eds.ma.bis.wx.sdk.pay.payment.bean.PaymentNotification;
-import com.eds.ma.bis.wx.sdk.pay.payment.bean.UnifiedOrderRequest;
-import com.eds.ma.bis.wx.sdk.pay.payment.bean.UnifiedOrderResponse;
-import com.eds.ma.bis.wx.sdk.pay.util.SignatureUtil;
 import com.eds.ma.bis.wx.service.IAliPayService;
-import com.eds.ma.bis.wx.service.IWxPayService;
 import com.eds.ma.config.SysConfig;
 import com.eds.ma.exception.BizCoreRuntimeException;
 import com.eds.ma.rest.common.BizErrorConstants;
 import com.eds.ma.rest.common.CommonConstants;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.log.Logger;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
-
-import static com.eds.ma.bis.wx.service.impl.WxPayServiceImpl.RET_F;
+import java.util.*;
 
 /**
  * ali支付service
@@ -76,17 +65,19 @@ public class AliPayServiceImpl implements IAliPayService {
     }
 
     @Override
-    public Map<String, Object> prepay(Long userId, String openId, String transType, BigDecimal payMoney, String payTitle) {
+    public String prepay(Long userId, String aliUid, String transType, BigDecimal payMoney, String payTitle) {
         //订单编号
         String orderCode = OrderCodeCreater.createTradeNO();
         //支付订单流水号
         String payCode = getPayCode();
         AlipayTradeAppPayResponse prePayResponse = aliPrePay(payCode,payTitle,payMoney);
-
-
+        if(!prePayResponse.isSuccess()){
+            logger.error("AliPayServiceImpl.prepay error,result:{}",prePayResponse.getBody());
+            throw new BizCoreRuntimeException(BizErrorConstants.PAY_SYSTEM_ERROR);
+        }
 
         PayOrder pay = new PayOrder();
-        pay.setBuyerId(openId);
+        pay.setBuyerId(aliUid);
         pay.setCreated(DateFormatUtils.getNow());
         pay.setOrderCode(orderCode);
         pay.setPayCode(payCode);
@@ -98,100 +89,110 @@ public class AliPayServiceImpl implements IAliPayService {
         orderService.savePayOrder(pay);
 
 
-        String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
-        String noncestr = RandomStringGenerator.getRandomStringByLength(16);
-        Map<String, Object> params2 = new TreeMap<>();
-        params2.put("appId", sysConfig.getWxMaAppId());
-        params2.put("timeStamp", timestamp);
-        params2.put("nonceStr", noncestr);
-        params2.put("package", "prepay_id=" + response.getPrepayId());
-        params2.put("signType", "MD5");
-        String paySign = SignatureUtil.sign(params2, sysConfig.getWxMerchantKey());
-        params2.put("paySign", paySign);
-
-        return params2;
+        return prePayResponse.getBody();
     }
 
     @Override
-    public String optAliPayCallback(String xml) {
-        try {
-            PaymentNotification paymentNotification = XmlObjectMapper.nonEmptyMapper().fromXml(xml, PaymentNotification.class);
-            if (paymentNotification == null || paymentNotification.getReturnCode() == null) {
-                logger.error("【支付失败】支付请求逻辑错误，请仔细检测传过去的每一个参数是否合法，或是看API能否被正常访问");
-                return RET_F;
+    public void optAliPayCallback(Map<String, String[]> requestParams, HttpServletResponse response) {
+        // 获取支付宝POST过来反馈信息
+        Map<String, String> params = new HashMap<>();
+
+        Set<String> keySet = requestParams.keySet();
+        String payCode = "";
+        String trade_status = "";
+        BigDecimal payMoney = null;
+        for (String key : keySet) {
+            StringBuilder buffer = new StringBuilder();
+            for (String string : requestParams.get(key)) {
+                buffer.append(string);
             }
-
-            if (paymentNotification.getReturnCode().equals("FAIL")) {
-                //注意：一般这里返回FAIL是出现系统级参数错误，请检测Post给API的数据是否规范合法
-                logger.error("【支付失败】支付API系统返回失败，请检测Post给API的数据是否规范合法, return_msg={}", paymentNotification.getReturnMessage());
-                return RET_F;
+            params.put(key, buffer.toString());
+            if (key.equals("out_trade_no")) {
+                // 商户订单号
+                payCode = buffer.toString();
+            } else if (key.equals("trade_status")) {
+                // 交易状态
+                trade_status = buffer.toString();
+            } else if (key.equals("total_amount")) {
+                // 充值金额
+                payMoney = BigDecimal.valueOf(Double.valueOf(buffer.toString()));
             }
-
-            PaySetting paySetting = getPaySetting();
-            if (!Payments.with(paySetting).checkSignature(paymentNotification)) {
-                logger.error("【支付失败】支付请求API返回的数据签名验证失败，有可能数据被篡改了");
-                return RET_F;
-            }
-
-            String payCode = paymentNotification.getTradeNumber();
-            String tradeNo = paymentNotification.getTransactionId();
-            String nonce = paymentNotification.getNonce();
-            BigDecimal totalFee = BigDecimal.valueOf(paymentNotification.getTotalFee()).divide(BigDecimal.valueOf(100));
-            BigDecimal cashFee = BigDecimal.valueOf(paymentNotification.getCashFee()).divide(BigDecimal.valueOf(100));
-            String sellerId = paymentNotification.getMchId();
-            String openId = paymentNotification.getOpenId();
-            PayOrder payOrder = orderService.queryPayOrderByPayCode(payCode);
-            if (Objects.isNull(payOrder)) {
-                //支付信息未找到
-                return RET_F;
-            }
-
-            int result = orderService.updatePayOrderForCallBack(payCode
-                    , nonce
-                    , tradeNo
-                    , openId
-                    , payOrder.getPayMoney()
-                    , totalFee
-                    , cashFee
-                    , paymentNotification.getTimeEndString()
-                    , paymentNotification.getBankType()
-                    , sellerId
-                    , paymentNotification.getAppId()
-                    , paymentNotification.getIsSubscribed());
-
-            if (result > 0) {
-                //押金充值,将押金累加到用户钱包-押金中
-                if(Objects.equals(payOrder.getTransType(), TransTypeEnum.S_JYLX_YJCZ.value())){
-                    userService.updateUserWallet(payOrder.getUserId(),payOrder.getPayMoney(),null);
-                }
-
-                //余额充值,将押金累加到用户钱包-余额中
-                if(Objects.equals(payOrder.getTransType(), TransTypeEnum.S_JYLX_YECZ.value())){
-                    userService.updateUserWallet(payOrder.getUserId(),null,payOrder.getPayMoney());
-                }
-                //保存交易记录
-                FinanceIncome financeIncome = new FinanceIncome();
-                financeIncome.setTransCode(OrderCodeCreater.createTradeNO());
-                financeIncome.setContent(payOrder.getTitle());
-                financeIncome.setUserId(payOrder.getUserId());
-                financeIncome.setOpenId(payOrder.getBuyerId());
-                financeIncome.setTransType(payOrder.getTransType());
-                financeIncome.setTransTime(DateFormatUtils.getNow());
-                financeIncome.setMoney(payOrder.getPayMoney());
-                financeIncome.setOrderCode(payOrder.getOrderCode());
-                orderService.saveFinanceIncome(financeIncome);
-            }
-            return RET_S;
-        } catch (Exception e) {
-            logger.error("WX-JSAPI-NOTIFY error.wx callback data: " + xml, e);
         }
-        return RET_F;
+        try {
+            // 计算得出通知验证结果
+            boolean verify_result = AlipaySignature.rsaCheckV1(params, sysConfig.getAliGatewayPublicKey(),
+                    "UTF-8", "RSA2");
+            // 验证成功
+            if (verify_result) {
+                // 交易支付成功
+                if (trade_status.equals("TRADE_SUCCESS")) {
+                    PayOrder payOrder = orderService.queryPayOrderByPayCode(payCode);
+                    if (Objects.isNull(payOrder)) {
+                        //支付信息未找到
+                        logger.error("AliPayServiceImpl.optAliPayCallback occur error,payOrder not found:{}",params);
+                        response.getWriter().println("fail");
+                        return;
+                    }
+
+                    int result = orderService.updatePayOrderForCallBack(payCode
+                            , MapUtils.getString(params,"notify_id")
+                            , MapUtils.getString(params,"trade_no")
+                            , MapUtils.getString(params,"buyer_id")
+                            , payOrder.getPayMoney()
+                            , payMoney
+                            , BigDecimal.valueOf(MapUtils.getDouble(params,"receipt_amount"))
+                            , MapUtils.getString(params,"gmt_payment")
+                            , null
+                            , MapUtils.getString(params,"seller_id")
+                            , MapUtils.getString(params,"app_id")
+                            , null);
+
+                    if (result > 0) {
+                        //押金充值,将押金累加到用户钱包-押金中
+                        if(Objects.equals(payOrder.getTransType(), TransTypeEnum.S_JYLX_YJCZ.value())){
+                            userService.updateUserWallet(payOrder.getUserId(),payOrder.getPayMoney(),null);
+                        }
+
+                        //余额充值,将押金累加到用户钱包-余额中
+                        if(Objects.equals(payOrder.getTransType(), TransTypeEnum.S_JYLX_YECZ.value())){
+                            userService.updateUserWallet(payOrder.getUserId(),null,payOrder.getPayMoney());
+                        }
+                        //保存交易记录
+                        FinanceIncome financeIncome = new FinanceIncome();
+                        financeIncome.setTransCode(OrderCodeCreater.createTradeNO());
+                        financeIncome.setContent(payOrder.getTitle());
+                        financeIncome.setUserId(payOrder.getUserId());
+                        financeIncome.setOpenId(payOrder.getBuyerId());
+                        financeIncome.setTransType(payOrder.getTransType());
+                        financeIncome.setTransTime(DateFormatUtils.getNow());
+                        financeIncome.setMoney(payOrder.getPayMoney());
+                        financeIncome.setOrderCode(payOrder.getOrderCode());
+                        orderService.saveFinanceIncome(financeIncome);
+                        response.getWriter().println("success");
+                    }else{
+                        response.getWriter().println("fail");
+                        logger.error("AliPayServiceImpl.optAliPayCallback update payOrder error,result:{}",params);
+                    }
+                }
+            } else {
+                // 验证失败
+                logger.error("AliPayServiceImpl.optAliPayCallback verify error,result:{}",params);
+                response.getWriter().println("fail");
+            }
+        } catch (Exception e) {
+            logger.error("AliPayServiceImpl.optAliPayCallback occurs unkonwn exception",e);
+            try {
+                response.getWriter().println("fail");
+            } catch (IOException e1) {
+                logger.error("AliPayServiceImpl.optAliPayCallback occurs unkonwn IOException",e);
+            }
+        }
     }
 
     private AlipayTradeAppPayResponse aliPrePay(String payCode,String payTitle,BigDecimal payMoney){
         //实例化客户端
         AlipayClient alipayClient = new DefaultAlipayClient( sysConfig.getAliGatewayUrl(),sysConfig.getAliMaAppId(),
-                sysConfig.getAliGatewayPrivateKey(),"json","GBK",sysConfig.getAliGatewayPublicKey(),"RSA2");
+                sysConfig.getAliGatewayPrivateKey(),"json","UTF-8",sysConfig.getAliGatewayPublicKey(),"RSA2");
 
         //实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
         AlipayTradeAppPayRequest request = new AlipayTradeAppPayRequest();

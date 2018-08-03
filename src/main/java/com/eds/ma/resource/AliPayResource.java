@@ -2,7 +2,7 @@ package com.eds.ma.resource;
 
 import com.eds.ma.bis.common.service.IEdsConfigService;
 import com.eds.ma.bis.order.TransTypeEnum;
-import com.eds.ma.bis.wx.service.IWxPayService;
+import com.eds.ma.bis.wx.service.IAliPayService;
 import com.eds.ma.resource.request.BalancePayRequest;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +14,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -27,35 +28,41 @@ public class AliPayResource extends BaseAuthedResource{
     private static Logger logger = Logger.getLogger(DeviceResource.class);
 
     @Autowired
-    private IWxPayService wxPayService;
+    private IAliPayService aliPayService;
 
     @Autowired
     private IEdsConfigService edsConfigService;
 
     /**
-     * 微信余额充值
+     * ali余额充值
      */
     @POST
     @Path("/balance")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Map<String, Object> userBalancePrepay(@Valid BalancePayRequest request){
+    public Map<String, String> userBalancePrepay(@Valid BalancePayRequest request){
         logger.debug("UserResource.userBalancePrepay({},{})",super.getOpenId(),request);
-        return wxPayService.prepay(super.getUserId(),super.getOpenId(),TransTypeEnum.S_JYLX_YECZ.value(),request.getBalance(),"余额充值");
+        String prePayParams = aliPayService.prepay(super.getUserId(),super.getUser().getAliUid(),TransTypeEnum.S_JYLX_YECZ.value(),request.getBalance(),"余额充值");
+        Map<String,String> prePayResult = new HashMap<>();
+        prePayResult.put("prePayParams",prePayParams);
+        return prePayResult;
     }
 
     /**
-     * 微信押金支付
+     * ali押金支付
      */
     @POST
     @Path("/deposit")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Map<String, Object> userDepositPrepay(){
-        logger.debug("UserResource.userDepositPrepay({})",super.getOpenId());
+    public Map<String, String> userDepositPrepay(){
+        logger.debug("UserResource.userDepositPrepay({})",super.getUserId());
         //计算押金
         BigDecimal defaultUnitDeposit = edsConfigService.queryEdsConfigDeposit();
-        return wxPayService.prepay(super.getUserId(), super.getOpenId(), TransTypeEnum.S_JYLX_YJCZ.value(),defaultUnitDeposit,"支付押金");
+        String prePayParams = aliPayService.prepay(super.getUserId(), super.getUser().getAliUid(), TransTypeEnum.S_JYLX_YJCZ.value(),defaultUnitDeposit,"支付押金");
+        Map<String,String> prePayResult = new HashMap<>();
+        prePayResult.put("prePayParams",prePayParams);
+        return prePayResult;
     }
 
 }
