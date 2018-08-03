@@ -27,4 +27,9 @@ public interface CommonConstants {
 	 */
 	String HTTP_HEADER_APP_ID = "x-app-id";
 
+	/**
+	 * 时间格式 yyyyMMdd
+	 */
+	String DATE_PATTERN = "yyyyMMdd";
+
 }

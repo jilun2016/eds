@@ -1,5 +1,10 @@
 package com.eds.ma.bis.wx.service.impl;
 
+import com.alipay.api.AlipayClient;
+import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.domain.AlipayTradeAppPayModel;
+import com.alipay.api.request.AlipayTradeAppPayRequest;
+import com.alipay.api.response.AlipayTradeAppPayResponse;
 import com.eds.ma.bis.order.OrderCodeCreater;
 import com.eds.ma.bis.order.TransTypeEnum;
 import com.eds.ma.bis.order.entity.FinanceIncome;
@@ -15,8 +20,11 @@ import com.eds.ma.bis.wx.sdk.pay.payment.bean.PaymentNotification;
 import com.eds.ma.bis.wx.sdk.pay.payment.bean.UnifiedOrderRequest;
 import com.eds.ma.bis.wx.sdk.pay.payment.bean.UnifiedOrderResponse;
 import com.eds.ma.bis.wx.sdk.pay.util.SignatureUtil;
+import com.eds.ma.bis.wx.service.IAliPayService;
 import com.eds.ma.bis.wx.service.IWxPayService;
 import com.eds.ma.config.SysConfig;
+import com.eds.ma.exception.BizCoreRuntimeException;
+import com.eds.ma.rest.common.BizErrorConstants;
 import com.eds.ma.rest.common.CommonConstants;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.log.Logger;
@@ -33,28 +41,20 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 
+import static com.eds.ma.bis.wx.service.impl.WxPayServiceImpl.RET_F;
+
 /**
- * 微信支付service
+ * ali支付service
  *
  * @Author gaoyan
  * @Date: 2017/6/12
  */
 @Service
 @Transactional
-public class WxPayServiceImpl implements IWxPayService {
+public class AliPayServiceImpl implements IAliPayService {
 
-    private static Logger logger = Logger.getLogger(WxPayServiceImpl.class);
+    private static Logger logger = Logger.getLogger(AliPayServiceImpl.class);
 
-    public static final String DATE_PATTERN = "yyyyMMdd";
-
-    /**
-     * 微信回调返回处理成功
-     */
-    public static final String RET_S = "<xml><return_code><![CDATA[SUCCESS]]></return_code></xml>";
-    /**
-     * 微信回调返回处理失败
-     */
-    public static final String RET_F = "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
 
     @Autowired
     private SysConfig sysConfig;
@@ -64,6 +64,7 @@ public class WxPayServiceImpl implements IWxPayService {
 
     @Autowired
     private IOrderService orderService;
+
 
     /**
      * 获取支付订单编号
@@ -80,16 +81,8 @@ public class WxPayServiceImpl implements IWxPayService {
         String orderCode = OrderCodeCreater.createTradeNO();
         //支付订单流水号
         String payCode = getPayCode();
-        UnifiedOrderRequest unifiedOrderRequest = new UnifiedOrderRequest();
-        unifiedOrderRequest.setBody(payTitle);
-        unifiedOrderRequest.setTradeNumber(payCode);
-        unifiedOrderRequest.setTotalFee(getWxPayMoney(payMoney));
-        unifiedOrderRequest.setBillCreatedIp("127.0.0.1");
-        unifiedOrderRequest.setNotifyUrl(sysConfig.getWxPayCallbackUrl());
-        unifiedOrderRequest.setTradeType("JSAPI");
-        unifiedOrderRequest.setOpenId(openId);
-        PaySetting paySetting = getPaySetting();
-        UnifiedOrderResponse response = Payments.with(paySetting).unifiedOrder(unifiedOrderRequest);
+        AlipayTradeAppPayResponse prePayResponse = aliPrePay(payCode,payTitle,payMoney);
+
 
 
         PayOrder pay = new PayOrder();
@@ -120,7 +113,7 @@ public class WxPayServiceImpl implements IWxPayService {
     }
 
     @Override
-    public String optWxPayCallback(String xml) {
+    public String optAliPayCallback(String xml) {
         try {
             PaymentNotification paymentNotification = XmlObjectMapper.nonEmptyMapper().fromXml(xml, PaymentNotification.class);
             if (paymentNotification == null || paymentNotification.getReturnCode() == null) {
@@ -195,12 +188,30 @@ public class WxPayServiceImpl implements IWxPayService {
         return RET_F;
     }
 
-    private PaySetting getPaySetting() {
-        PaySetting paySetting = new PaySetting();
-        paySetting.setAppId(sysConfig.getWxMaAppId());
-        paySetting.setKey(sysConfig.getWxMerchantKey());
-        paySetting.setMchId(sysConfig.getWxMchId());
-        return paySetting;
+    private AlipayTradeAppPayResponse aliPrePay(String payCode,String payTitle,BigDecimal payMoney){
+        //实例化客户端
+        AlipayClient alipayClient = new DefaultAlipayClient( sysConfig.getAliGatewayUrl(),sysConfig.getAliMaAppId(),
+                sysConfig.getAliGatewayPrivateKey(),"json","GBK",sysConfig.getAliGatewayPublicKey(),"RSA2");
+
+        //实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
+        AlipayTradeAppPayRequest request = new AlipayTradeAppPayRequest();
+        //SDK已经封装掉了公共参数，这里只需要传入业务参数。以下方法为sdk的model入参方式(model和biz_content同时存在的情况下取biz_content)。
+        AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();
+        model.setBody(payTitle);
+        model.setSubject(payTitle);
+        model.setOutTradeNo(payCode);
+        model.setTimeoutExpress("30m");
+        model.setTotalAmount(String.valueOf(payMoney));
+        model.setProductCode("QUICK_MSECURITY_PAY");
+        request.setBizModel(model);
+        request.setNotifyUrl(sysConfig.getAliPayCallbackUrl());
+        try {
+            //这里和普通的接口调用不同，使用的是sdkExecute
+            return alipayClient.sdkExecute(request);
+        } catch (Exception e) {
+            logger.error("AliPayServiceImpl.aliPrePay error",e);
+            throw new BizCoreRuntimeException(BizErrorConstants.PAY_SYSTEM_ERROR);
+        }
     }
 
     /**

@@ -182,4 +182,10 @@ public class SysConfig {
      */
     @Value("${aliGatewayUrl}")
     private String aliGatewayUrl;
+
+    /**
+     * 阿里网关url
+     */
+    @Value("${aliPayCallbackUrl}")
+    private String aliPayCallbackUrl;
 }
