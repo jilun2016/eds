@@ -1,6 +1,7 @@
 package com.eds.ma.servlet;
 
 
+import com.alibaba.druid.support.json.JSONUtils;
 import com.eds.ma.bis.wx.service.IAliPayService;
 import com.eds.ma.bis.wx.service.IWxPayService;
 import com.xcrm.common.util.InputStreamUtils;
@@ -40,7 +41,7 @@ public class AliPayCallBackServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
         try {
             Map<String, String[]> requestParams = request.getParameterMap();
-            logger.info("~~~~~~~~~~~~~~~~~~callback_params:" + requestParams);
+            logger.info("~~~~~~~~~~~~~~~~~~AliPayCallBackServlet callback_params:" + JSONUtils.toJSONString(requestParams));
             aliPayService.optAliPayCallback(requestParams,response);
         } catch (Exception e) {
             logger.error("AliPayCallBack occurs exception ",e);

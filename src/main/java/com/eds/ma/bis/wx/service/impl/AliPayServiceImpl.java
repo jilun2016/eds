@@ -1,11 +1,15 @@
 package com.eds.ma.bis.wx.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradeAppPayRequest;
+import com.alipay.api.request.AlipayTradeRefundRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
+import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.eds.ma.bis.order.OrderCodeCreater;
 import com.eds.ma.bis.order.TransTypeEnum;
 import com.eds.ma.bis.order.entity.FinanceIncome;
@@ -13,11 +17,16 @@ import com.eds.ma.bis.order.entity.PayOrder;
 import com.eds.ma.bis.order.service.IOrderService;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.bis.wx.PayStatusEnum;
+import com.eds.ma.bis.wx.RefundStatusEnum;
+import com.eds.ma.bis.wx.entity.PayRefund;
+import com.eds.ma.bis.wx.entity.PayRefundLog;
 import com.eds.ma.bis.wx.service.IAliPayService;
+import com.eds.ma.bis.wx.vo.AlipayRefund;
 import com.eds.ma.config.SysConfig;
 import com.eds.ma.exception.BizCoreRuntimeException;
 import com.eds.ma.rest.common.BizErrorConstants;
 import com.eds.ma.rest.common.CommonConstants;
+import com.xcrm.cloud.database.db.BaseDaoSupport;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.log.Logger;
 import org.apache.commons.collections.MapUtils;
@@ -30,6 +39,7 @@ import org.springframework.util.Assert;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.*;
 
 /**
@@ -53,6 +63,10 @@ public class AliPayServiceImpl implements IAliPayService {
 
     @Autowired
     private IOrderService orderService;
+
+
+    @Autowired
+    private BaseDaoSupport dao;
 
 
     /**
@@ -189,6 +203,55 @@ public class AliPayServiceImpl implements IAliPayService {
         }
     }
 
+    @Override
+    public void submiteRefund(PayOrder payOrder, BigDecimal tkFee) {
+        //实例化客户端
+        AlipayClient alipayClient = new DefaultAlipayClient( sysConfig.getAliGatewayUrl(),sysConfig.getAliMaAppId(),
+                sysConfig.getAliGatewayPrivateKey(),"json","UTF-8",sysConfig.getAliGatewayPublicKey(),"RSA2");
+        AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();
+        AlipayRefund alipayRefund= new AlipayRefund();
+        alipayRefund.setOut_trade_no(payOrder.getPayCode());//这个是商户的订单号
+        alipayRefund.setTrade_no(payOrder.getTradeNo());//这个是支付宝的订单号
+        alipayRefund.setRefund_amount(String.valueOf(tkFee));//退款金额
+        alipayRefund.setRefund_reason("提现");//退款说明
+        String orderTkCode = OrderCodeCreater.createTradeNO();
+        alipayRefund.setOut_request_no(orderTkCode);
+        request.setBizContent(JSONObject.toJSONString(alipayRefund));//2个都可以，这个参数的顺序 不影响退款
+        //退款日志
+        PayRefundLog log = new PayRefundLog(payOrder.getPayCode(),payOrder.getOrderCode(),orderTkCode,tkFee);
+        log.setReqData(request.getBizContent());
+        try {
+            AlipayTradeRefundResponse response = alipayClient.execute(request);
+            log.setResData(response.getBody());
+            log.setErrorCode(response.getCode()+"@"+response.getSubCode());
+            log.setErrDes(response.getMsg()+"@"+response.getSubMsg());
+            if (response.isSuccess()) {
+                //保存一条退款记录
+                PayRefund entity = new PayRefund();
+                entity.setCreated(new Timestamp(System.currentTimeMillis()));
+                entity.setOrderCode(payOrder.getOrderCode());
+                entity.setOrderTkCode(orderTkCode);
+                entity.setPayCode(payOrder.getPayCode());
+                entity.setPayTradeNo(payOrder.getTradeNo());
+                entity.setRefundFee(tkFee);
+                entity.setRefundStatus(RefundStatusEnum.REFUND_ING.value());
+                entity.setSellerId(payOrder.getSellerId());
+                entity.setBuyerId(payOrder.getBuyerId());
+                savePayRefund(entity);
+            } else {
+                logger.error("AliPayServiceImpl.submiteRefund fail",response.getBody());
+                throw new BizCoreRuntimeException(BizErrorConstants.PAY_REFUND_FAIL);
+            }
+        } catch (AlipayApiException e) {
+            logger.error("AliPayServiceImpl.submiteRefund error",e);
+            log.setErrorCode("eds refund sumbmit error");
+            log.setErrDes(e.getMessage());
+            throw new BizCoreRuntimeException(BizErrorConstants.PAY_REFUND_FAIL);
+        } finally {
+            saveRefundLog(log);
+        }
+    }
+
     private AlipayTradeAppPayResponse aliPrePay(String payCode,String payTitle,BigDecimal payMoney){
         //实例化客户端
         AlipayClient alipayClient = new DefaultAlipayClient( sysConfig.getAliGatewayUrl(),sysConfig.getAliMaAppId(),
@@ -215,15 +278,12 @@ public class AliPayServiceImpl implements IAliPayService {
         }
     }
 
-    /**
-     * 获得微信支付金额 将系统BigDecimal（元） 转换为（分）
-     *
-     * @param payMoney
-     * @return
-     */
-    public int getWxPayMoney(BigDecimal payMoney) {
-        Assert.notNull(payMoney, "payMoney is required");
-        BigDecimal orderPayMoney = payMoney.multiply(BigDecimal.valueOf(100L));
-        return orderPayMoney.intValue();
+    private PayRefund savePayRefund(PayRefund entity) {
+        dao.save(entity);
+        return entity;
+    }
+
+    private void saveRefundLog(PayRefundLog log) {
+        dao.save(log);
     }
 }
