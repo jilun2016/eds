@@ -11,6 +11,7 @@ import com.alipay.api.request.AlipayTradeRefundRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
 import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.eds.ma.bis.order.OrderCodeCreater;
+import com.eds.ma.bis.order.OrderPayTypeEnum;
 import com.eds.ma.bis.order.TransTypeEnum;
 import com.eds.ma.bis.order.entity.FinanceIncome;
 import com.eds.ma.bis.order.entity.PayOrder;
@@ -100,9 +101,8 @@ public class AliPayServiceImpl implements IAliPayService {
         pay.setPayStatus(PayStatusEnum.WAIT_BUYER_PAY.value());
         pay.setUserId(userId);
         pay.setTitle(payTitle);
+        pay.setPayType(OrderPayTypeEnum.S_ZFFS_ZFB.value());
         orderService.savePayOrder(pay);
-
-
         return prePayResponse.getBody();
     }
 

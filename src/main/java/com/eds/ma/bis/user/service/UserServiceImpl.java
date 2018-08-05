@@ -232,7 +232,7 @@ public class UserServiceImpl implements IUserService {
 //        }
 
 
-        List<PayOrder> payOrderList = orderService.queryToRefundPayOrder(user.getOpenId());
+        List<PayOrder> payOrderList = orderService.queryToRefundPayOrder(user.getOpenId(),user.getAliUid());
         if (ListUtil.isNotEmpty(payOrderList)) {
             //校验提现的金额应该大于钱包中的余额
             BigDecimal allWxRefundMoney = payOrderList.stream()

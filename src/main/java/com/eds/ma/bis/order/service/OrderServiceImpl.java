@@ -54,9 +54,10 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public List<PayOrder> queryToRefundPayOrder(String openId) {
+    public List<PayOrder> queryToRefundPayOrder(String openId, String aliUid) {
         Ssqb query = Ssqb.create("com.eds.wx.pay.queryToRefundPayOrder")
-                .setParam("openId", openId);
+                .setParam("openId", openId)
+                .setParam("aliUid", aliUid);
         return dao.findForList(query, PayOrder.class);
     }
 
