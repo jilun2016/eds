@@ -66,4 +66,15 @@ public class BaseResponse {
         this.errorCodeDesc = errorCodeDesc;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("BaseResponse{");
+        sb.append("returnCode='").append(returnCode).append('\'');
+        sb.append(", returnMessage='").append(returnMessage).append('\'');
+        sb.append(", resultCode='").append(resultCode).append('\'');
+        sb.append(", errorCode='").append(errorCode).append('\'');
+        sb.append(", errorCodeDesc='").append(errorCodeDesc).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

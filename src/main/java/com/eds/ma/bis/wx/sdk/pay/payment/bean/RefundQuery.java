@@ -298,4 +298,21 @@ public class RefundQuery extends BaseResponse {
             this.couponRefundFee = couponRefundFee;
         }
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("RefundQuery{");
+        sb.append("transactionId='").append(transactionId).append('\'');
+        sb.append(", tradeNumber='").append(tradeNumber).append('\'');
+        sb.append(", totalFee=").append(totalFee);
+        sb.append(", settlementTotalFee=").append(settlementTotalFee);
+        sb.append(", feeType='").append(feeType).append('\'');
+        sb.append(", cashFee=").append(cashFee);
+        sb.append(", refundCount=").append(refundCount);
+        sb.append(", refundAccount='").append(refundAccount).append('\'');
+        sb.append(", others=").append(others);
+        sb.append(", baseResponse=").append(super.toString());
+        sb.append('}');
+        return sb.toString();
+    }
 }

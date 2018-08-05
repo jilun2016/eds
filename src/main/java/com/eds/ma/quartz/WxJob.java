@@ -34,4 +34,28 @@ public class WxJob {
 			jobService.wxRefreshToken();
 		}
 	}
+
+	/**
+	 * 每半个小时，查询退款中的订单的微信处理情况
+	 */
+	@Scheduled(cron="0 * * * * ?")
+	public void refundOrderRunJob() {
+		logger.debug("----------------refundOrderRunJob JOB开始 "+ DateFormatUtils.formatDate(new Date(),null)+"-------------------");
+		jobService.wxRefundOrderJob();
+		logger.debug("----------------refundOrderRunJob JOB结束 "+ DateFormatUtils.formatDate(new Date(),null)+"-------------------");
+	}
+
+
+	/**
+	 * 零点执行优惠券过期操作
+	 */
+	@Scheduled(cron="0 0 * * * ?")
+	public void couponExpiredRunJob() {
+		//零点更新基础优惠券和会员优惠券过期操作
+		if(true) {
+			logger.info("----------------couponExpiredRunJob JOB开始 "+DateFormatUtils.formatDate(new Date(),null)+"-------------------");
+			jobService.couponExpiredRunJob();
+			logger.debug("----------------couponExpiredRunJob JOB结束 "+DateFormatUtils.formatDate(new Date(),null)+"-------------------");
+		}
+	}
 }

@@ -7,8 +7,10 @@ import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradeAppPayRequest;
+import com.alipay.api.request.AlipayTradeFastpayRefundQueryRequest;
 import com.alipay.api.request.AlipayTradeRefundRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
+import com.alipay.api.response.AlipayTradeFastpayRefundQueryResponse;
 import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.eds.ma.bis.order.OrderCodeCreater;
 import com.eds.ma.bis.order.OrderPayTypeEnum;
@@ -228,6 +230,7 @@ public class AliPayServiceImpl implements IAliPayService {
             if (response.isSuccess()) {
                 //保存一条退款记录
                 PayRefund entity = new PayRefund();
+                entity.setPayType(OrderPayTypeEnum.S_ZFFS_ZFB.value());
                 entity.setCreated(new Timestamp(System.currentTimeMillis()));
                 entity.setOrderCode(payOrder.getOrderCode());
                 entity.setOrderTkCode(orderTkCode);
@@ -250,6 +253,63 @@ public class AliPayServiceImpl implements IAliPayService {
         } finally {
             saveRefundLog(log);
         }
+    }
+
+    @Override
+    public void aliRefundQuery(List<PayRefund> payRefundList) {
+        //实例化客户端
+        AlipayClient alipayClient = new DefaultAlipayClient( sysConfig.getAliGatewayUrl(),sysConfig.getAliMaAppId(),
+                sysConfig.getAliGatewayPrivateKey(),"json","UTF-8",sysConfig.getAliGatewayPublicKey(),"RSA2");
+        for(PayRefund payRefund:payRefundList){
+            operateRefundRecord(alipayClient,payRefund);
+        }
+
+    }
+
+    /**
+     * 退款处理
+     */
+    private void operateRefundRecord(AlipayClient alipayClient,PayRefund payRefund) {
+
+        String orderTkCode = payRefund.getOrderTkCode();
+
+        PayRefundLog log = new PayRefundLog(payRefund.getPayCode(),payRefund.getOrderCode()
+                ,orderTkCode,payRefund.getRefundFee());
+        log.setReqData("{\"trade_no\":"+payRefund.getPayTradeNo()+"}");
+        try {
+            AlipayTradeFastpayRefundQueryRequest request = new AlipayTradeFastpayRefundQueryRequest();
+            request.setBizContent("{" +
+                    "\"trade_no\":\""+payRefund.getPayTradeNo()+"\"}");
+            AlipayTradeFastpayRefundQueryResponse response = alipayClient.execute(request);
+            if(response.isSuccess()){
+                notifyBiz(payRefund);
+            } else {
+                log.setErrorCode(response.getCode()+"@"+response.getSubCode());
+                log.setErrDes(response.getMsg()+"@"+response.getSubMsg());
+                logger.error("ali refund query result fails.params: payRefund:{}", payRefund);
+            }
+            log.setResData(response.getBody());
+        } catch (Exception e) {
+            log.setErrorCode("ali refund query error");
+            log.setErrDes(e.getMessage());
+            logger.error("###############queryRefund get Exception ########", e);
+        } finally {
+            saveRefundLog(log);
+        }
+    }
+
+    /**
+     * 通知业务系统，退款处理已成功
+     * @param payRefund
+     */
+    private void notifyBiz(PayRefund payRefund) {
+        //更新t_b_pay_refund 状态为退款成功
+        PayRefund updatePayRefund = new PayRefund();
+        updatePayRefund.setRefundOkTime(DateFormatUtils.getNow());
+        updatePayRefund.setId(payRefund.getId());
+        updatePayRefund.setRefundStatus(RefundStatusEnum.REFUND_SUCCESS.value());
+        updatePayRefund.setMemo("退款成功");
+        dao.update(updatePayRefund);
     }
 
     private AlipayTradeAppPayResponse aliPrePay(String payCode,String payTitle,BigDecimal payMoney){
