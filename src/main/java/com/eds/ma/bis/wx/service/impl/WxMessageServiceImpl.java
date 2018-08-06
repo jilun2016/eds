@@ -1,20 +1,15 @@
 package com.eds.ma.bis.wx.service.impl;
 
 import com.alipay.api.internal.util.XmlUtils;
-import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.entity.UserWxMa;
 import com.eds.ma.bis.user.entity.WxUser;
 import com.eds.ma.bis.user.service.IUserService;
-import com.eds.ma.bis.wx.entity.WxAccessToken;
 import com.eds.ma.bis.wx.sdk.common.event.EventType;
 import com.eds.ma.bis.wx.service.IWxMessageService;
 import com.eds.ma.bis.wx.service.IWxService;
 import com.eds.ma.config.SysConfig;
 import com.eds.ma.util.AesException;
 import com.eds.ma.util.WXBizMsgCrypt;
-import com.xcrm.cloud.database.db.BaseDaoSupport;
-import com.xcrm.cloud.database.db.query.QueryBuilder;
-import com.xcrm.cloud.database.db.query.expression.Restrictions;
 import com.xcrm.log.Logger;
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +22,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Objects;
 
 @Service

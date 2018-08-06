@@ -67,7 +67,6 @@ public class AliPayServiceImpl implements IAliPayService {
     @Autowired
     private IOrderService orderService;
 
-
     @Autowired
     private BaseDaoSupport dao;
 

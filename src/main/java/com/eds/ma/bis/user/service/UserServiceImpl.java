@@ -371,59 +371,6 @@ public class UserServiceImpl implements IUserService {
         }
     }
 
-//    /**
-//     * 异步退款处理
-//     * @param refundPayOrderPool
-//     * @param toRefundMoney
-//     * @return 退款部分失败 0 退款成功 :1
-//     */
-//    @Deprecated
-//    public int asyncPayRefund(List<PayOrder> refundPayOrderPool, BigDecimal toRefundMoney) {
-//        List<Integer> resultList = new ArrayList<>();
-//        CompletableFuture[] cfs = null;
-//        List<PayRefundVo> payRefundVos = new ArrayList<>();
-//        BigDecimal leftToRefundMoney = toRefundMoney;
-//        for (PayOrder payOrder : refundPayOrderPool) {
-//            if (leftToRefundMoney.compareTo(BigDecimal.ZERO) > 0) {
-//                BigDecimal payOrderMoney = payOrder.getPayMoney();
-//                BigDecimal refundMoney = null;
-//                if (leftToRefundMoney.compareTo(payOrderMoney) > 0) {
-//                    refundMoney = payOrderMoney;
-//                    leftToRefundMoney = leftToRefundMoney.subtract(payOrderMoney);
-//                } else {
-//                    refundMoney = leftToRefundMoney;
-//                    leftToRefundMoney = BigDecimal.ZERO;
-//                }
-//                PayRefundVo payRefundVo = new PayRefundVo();
-//                payRefundVo.setPayOrder(payOrder);
-//                payRefundVo.setRefundMoney(refundMoney);
-//                payRefundVos.add(payRefundVo);
-//            } else {
-//                break;
-//            }
-//        }
-//
-//        if(ListUtil.isNotEmpty(payRefundVos)){
-//            cfs = payRefundVos.stream()
-//                    .map(payRefundVo-> CompletableFuture.supplyAsync(()->{
-//                        try {
-//                            wxRefundPayService.submiteRefund(payRefundVo.getPayOrder(), payRefundVo.getRefundMoney());
-//                            return 1;
-//                        }catch (Exception e){
-//                            revertRefundFailedRecord(payRefundVo.getPayOrder());
-//                            return 0;
-//                        }
-//                    }, taskExecutor)
-//                            .whenComplete((v, e) -> {//如需获取任务完成先手顺序，此处代码即可
-//                                resultList.add(v);
-//                            }))
-//                    .toArray(CompletableFuture[]::new);
-//            CompletableFuture.allOf(cfs).join();//封装后无返回值，必须自己whenComplete()获取
-//        }
-//
-//        return BooleanUtils.toInteger(resultList.stream().noneMatch(result -> result == 0));
-//    }
-
     @Override
     public void sendWithdrawSmsCode(Long userId, String mobile) {
         UserWallet userWallet = queryUserWalletByUserIdWithLock(userId);
