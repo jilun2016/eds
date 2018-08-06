@@ -54,7 +54,7 @@ public class AuthoricationFilter implements ContainerRequestFilter,ContainerResp
             logger.debug("AuthoricationFilter.cookieFromOpenId({})",cookieFromOpenId.getValue());
             ContextUser contextUser = userService.queryUserByOpenId(cookieFromOpenId.getValue());
             logger.debug("AuthoricationFilter.contextUser({})",contextUser);
-            if (Objects.isNull(contextUser) || Objects.isNull(contextUser.getUserId())) {
+            if (Objects.isNull(contextUser) || Objects.isNull(contextUser.getUserId()) || Objects.isNull(contextUser.getMobile())) {
                 requestContext.abortWith(buildErrorMessageResponse(RestErrorCode.WX_AUTH_USER_INFO_ERROR));
                 return;
             }
@@ -71,7 +71,7 @@ public class AuthoricationFilter implements ContainerRequestFilter,ContainerResp
             logger.debug("AuthoricationFilter.cookieFromAliUId({})",cookieFromAliUId.getValue());
             ContextUser contextUser = userService.queryUserByAliUid(cookieFromAliUId.getValue());
             logger.debug("AuthoricationFilter.contextUser({})",contextUser);
-            if (Objects.isNull(contextUser) || Objects.isNull(contextUser.getUserId())) {
+            if (Objects.isNull(contextUser) || Objects.isNull(contextUser.getUserId()) || Objects.isNull(contextUser.getMobile())) {
                 requestContext.abortWith(buildErrorMessageResponse(RestErrorCode.WX_AUTH_USER_INFO_ERROR));
                 return;
             }
