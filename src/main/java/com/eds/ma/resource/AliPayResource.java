@@ -4,6 +4,7 @@ import com.eds.ma.bis.common.service.IEdsConfigService;
 import com.eds.ma.bis.order.TransTypeEnum;
 import com.eds.ma.bis.order.service.IOrderService;
 import com.eds.ma.bis.wx.service.IAliPayService;
+import com.eds.ma.bis.wx.service.IAliRefundPayService;
 import com.eds.ma.resource.request.BalancePayRequest;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ public class AliPayResource extends BaseAuthedResource{
 
     @Autowired
     private IAliPayService aliPayService;
+
+    @Autowired
+    private IAliRefundPayService aliRefundPayService;
 
     @Autowired
     private IEdsConfigService edsConfigService;
@@ -77,7 +81,7 @@ public class AliPayResource extends BaseAuthedResource{
     @Produces(MediaType.APPLICATION_JSON)
     public Response aliRefund(@NotNull(message = "payCode") @PathParam("payCode") String payCode) {
         logger.debug("AliPayResource.aliRefund({})", super.getUserId());
-        aliPayService.submiteRefund(orderService.queryPayOrderByPayCode(payCode), BigDecimal.valueOf(0.01));
+        aliRefundPayService.submiteRefund(orderService.queryPayOrderByPayCode(payCode), BigDecimal.valueOf(0.01));
         return Response.noContent().build();
     }
 

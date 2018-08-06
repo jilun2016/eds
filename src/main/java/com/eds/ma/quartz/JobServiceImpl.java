@@ -7,6 +7,7 @@ import com.eds.ma.bis.wx.entity.WxAccessToken;
 import com.eds.ma.bis.wx.sdk.common.AccessToken;
 import com.eds.ma.bis.wx.sdk.common.DefaultAccessTokenHolder;
 import com.eds.ma.bis.wx.service.IAliPayService;
+import com.eds.ma.bis.wx.service.IAliRefundPayService;
 import com.eds.ma.bis.wx.service.IWxRefundPayService;
 import com.eds.ma.config.SysConfig;
 import com.eds.ma.quartz.service.IJobService;
@@ -44,7 +45,7 @@ public class JobServiceImpl implements IJobService {
 	private IWxRefundPayService wxRefundPayService;
 
 	@Autowired
-	private IAliPayService aliPayService;
+	private IAliRefundPayService aliRefundPayService;
 
 	@Override
 	public void wxRefreshToken() {
@@ -98,7 +99,7 @@ public class JobServiceImpl implements IJobService {
 					.filter(payRefund -> Objects.equals(OrderPayTypeEnum.S_ZFFS_ZFB.value(),payRefund.getPayType()))
 					.collect(Collectors.toList());
 			if(ListUtil.isNotEmpty(aliPayRefundList)){
-				aliPayService.aliRefundQuery(payRefundList);
+                aliRefundPayService.aliRefundQuery(payRefundList);
 			}
 		}
 	}

@@ -8,7 +8,7 @@ import com.eds.ma.bis.order.entity.FinanceIncome;
 import com.eds.ma.bis.order.entity.PayOrder;
 import com.eds.ma.bis.order.service.IOrderService;
 import com.eds.ma.bis.user.vo.PayRefundVo;
-import com.eds.ma.bis.wx.service.IAliPayService;
+import com.eds.ma.bis.wx.service.IAliRefundPayService;
 import com.eds.ma.bis.wx.service.IWxRefundPayService;
 import com.eds.ma.email.SendMailUtil;
 import com.xcrm.cloud.database.db.util.StringUtil;
@@ -39,7 +39,7 @@ public class BusinessAsyncProcess {
 	private IWxRefundPayService wxRefundPayService;
 
 	@Autowired
-	private IAliPayService aliPayService;
+	private IAliRefundPayService aliRefundPayService;
 
 	@Autowired
 	private IOrderService orderService;
@@ -79,7 +79,7 @@ public class BusinessAsyncProcess {
 					if(Objects.equals(payRefundVo.getPayOrder().getPayType(),OrderPayTypeEnum.S_ZFFS_WX.value())){
 						wxRefundPayService.submiteRefund(payRefundVo.getPayOrder(), payRefundVo.getRefundMoney());
 					}else{
-						aliPayService.submiteRefund(payRefundVo.getPayOrder(), payRefundVo.getRefundMoney());
+						aliRefundPayService.submiteRefund(payRefundVo.getPayOrder(), payRefundVo.getRefundMoney());
 					}
 					//保存提现交易记录
 					FinanceIncome financeIncome = new FinanceIncome();
