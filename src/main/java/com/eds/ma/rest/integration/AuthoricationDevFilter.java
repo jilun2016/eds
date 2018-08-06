@@ -1,13 +1,11 @@
 package com.eds.ma.rest.integration;
 
 import com.eds.ma.bis.common.EdsAppId;
-import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.bis.user.vo.ContextUser;
 import com.eds.ma.rest.common.CommonConstants;
 import com.eds.ma.rest.common.ErrorMessage;
 import com.eds.ma.rest.common.RestErrorCode;
-import com.eds.ma.util.CookieUtils;
 import com.xcrm.log.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +14,7 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.util.Objects;
 
 
@@ -45,7 +41,7 @@ public class AuthoricationDevFilter implements ContainerRequestFilter,ContainerR
         }
         //如果是微信访问,那么读取openId
         if(Objects.equals(EdsAppId.eds_wx.value(),appId)){
-            String openId = "oiyZc5QvTvZGQc1nMHuZUc5i9pb8";
+            String openId = "oiyZc5Qn8pe8wnO_BDl142Ozj6eE";
             ContextUser contextUser = userService.queryUserByOpenId(openId);
             logger.debug("AuthoricationFilter.contextUser({})",contextUser);
             if (Objects.isNull(contextUser) || Objects.isNull(contextUser.getUserId())) {

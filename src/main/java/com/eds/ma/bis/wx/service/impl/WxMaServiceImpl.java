@@ -2,6 +2,7 @@ package com.eds.ma.bis.wx.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.eds.ma.bis.user.entity.User;
+import com.eds.ma.bis.user.entity.UserWxMa;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.bis.user.vo.UserInfoVo;
 import com.eds.ma.bis.wx.service.IWxMaService;
@@ -11,6 +12,7 @@ import com.eds.ma.rest.common.BizErrorConstants;
 import com.eds.ma.util.AesCbcUtil;
 import com.eds.ma.util.HTTPUtil;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
+import com.xcrm.cloud.database.db.query.Ssqb;
 import com.xcrm.log.Logger;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -18,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -72,22 +76,41 @@ public class WxMaServiceImpl implements IWxMaService {
     }
 
     @Override
-    public String queryMaUserOpenId(String code) {
-        Map<String,String> sessionMap = getWxMaSessionKey(code);
-        String openId = MapUtils.getString(sessionMap,"openId");
-        String resultJson = MapUtils.getString(sessionMap,"resultJson");
-        if(StringUtils.isBlank(openId)){
-            logger.error("queryMaUserOpenId.parse user info failed.resultJson:{}",resultJson);
+    public void wxMaLogin(String openId, String mobile, String smsCode) {
+        User user = userService.queryUserByMobile(mobile);
+        if (Objects.isNull(user)) {
             throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
         }
-        try {
-            //异步保存用户信息
-            userService.asyncSaveOpenId(null, openId,null,null,null);
-        } catch (Exception e) {
-            logger.error("queryMaUserOpenId.parse user info failed.resultJson:{}",resultJson);
+
+        //是否微信授权过,保存微信用户信息
+        UserWxMa userWxMa = userService.queryUserWxMaByOpenId(openId);
+        if(Objects.isNull(userWxMa)){
             throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
         }
-        return openId;
+
+        String dbSmsCode = user.getWxSmsCode();
+        long now = System.currentTimeMillis();
+        Date activeExpired = user.getWxSmsExpired();
+        if(StringUtils.isEmpty(dbSmsCode)) {
+            //验证码错误
+            throw new BizCoreRuntimeException(BizErrorConstants.SMSCODE_ERROR);
+        }
+        if(!dbSmsCode.equals(smsCode)) {
+            //验证码错误
+            throw new BizCoreRuntimeException(BizErrorConstants.SMSCODE_ERROR);
+        } else if(activeExpired != null && activeExpired.getTime() < now){
+            //已过期
+            throw new BizCoreRuntimeException(BizErrorConstants.SMSCODE_EXPIRED);
+        } else {
+            Ssqb query = Ssqb.create("com.eds.user.updateWxMemberLoginSuc")
+                    .setParam("loginTime", new Timestamp(System.currentTimeMillis()))
+                    .setParam("wxUnionId", userWxMa.getWxUnionId())
+                    .setParam("openId", openId)
+                    .setParam("userId", user.getId());
+            dao.updateByMybatis(query);
+            //初始化钱包
+            userService.queryUserWalletByUserId(user.getId());
+        }
     }
 
     @Override

@@ -34,7 +34,6 @@
             <if test="userId != null">
                 and ed.userId = #{userId}
             </if>
-
         FOR UPDATE
     </select>
 

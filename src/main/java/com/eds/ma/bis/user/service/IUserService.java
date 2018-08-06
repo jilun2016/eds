@@ -1,6 +1,7 @@
 package com.eds.ma.bis.user.service;
 
 import com.eds.ma.bis.order.entity.PayOrder;
+import com.eds.ma.bis.user.entity.AliUser;
 import com.eds.ma.bis.user.entity.UserWxMa;
 import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.entity.UserWallet;
@@ -28,7 +29,6 @@ public interface IUserService {
      */
     User queryUserById(Long userId);
 
-
     /**
      * 通过openId查询用户信息
      * @param openId
@@ -52,6 +52,12 @@ public interface IUserService {
      * @param openId
      */
     UserWxMa queryUserWxMaByOpenId(String openId);
+
+    /**
+     * aliUid
+     * @param aliUid
+     */
+    AliUser queryUserAliByAliUid(String aliUid);
 
     /**
      * 通过手机号查询用户信息

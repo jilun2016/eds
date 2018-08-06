@@ -3,10 +3,8 @@ package com.eds.ma.resource;
 import com.eds.ma.bis.user.vo.UserInfoVo;
 import com.eds.ma.bis.wx.service.IWxMaService;
 import com.eds.ma.config.SysConfig;
-import com.eds.ma.exception.BizCoreRuntimeException;
 import com.eds.ma.resource.request.UserPhoneRequest;
-import com.eds.ma.resource.request.UserWithdrawRequest;
-import com.eds.ma.rest.common.BizErrorConstants;
+import com.eds.ma.resource.request.WxAuthorizationRequest;
 import com.eds.ma.rest.common.CommonConstants;
 import com.eds.ma.rest.integration.annotation.NoAuth;
 import com.eds.ma.util.CookieUtils;
@@ -61,28 +59,35 @@ public class WxMaResource extends BaseAuthedResource {
 	}
 
 	/**
-	 * 获取小程序用户openid
-	 * @param code 登陆code
+	 * 微信小程序登陆
+	 * @param req
+	 * @param request
+	 * @param response
+	 * @return
 	 */
-	@GET
-	@Path("/{code}/openid")
+	@POST
+	@Path("/authorization")
+	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@NoAuth
-	public Response queryMaUserOpenId(@NotNull(message = "登录code不允许为空") @PathParam("code") String code,
-								 @Context HttpServletRequest request, @Context HttpServletResponse response) {
+	public Response authorization(@Valid WxAuthorizationRequest req,
+								  @Context HttpServletRequest request,
+								  @Context HttpServletResponse response) {
 
-		logger.debug("----WxMaResource.queryMaSession({})",code);
-		String openId = wxMaService.queryMaUserOpenId(code);
-		CookieUtils.addCookie(request,response,  CommonConstants.WX_OPEN_ID_COOKIE, openId,
-				null, sysConfig.getEdsCookieHost());
-		Map<String,String> resultMap = new HashMap<>(1);
-		resultMap.put("openId",openId);
-		return Response.ok(resultMap).build();
+		logger.debug("WxMaResource.authorization.params:{}", req);
+		wxMaService.wxMaLogin(req.getOpenId(),req.getMobile(),req.getSmsCode());
+		CookieUtils.addCookie(request,response,  CommonConstants.WX_OPEN_ID_COOKIE, req.getOpenId(),
+				null, sysConfig.getEdsAliCookieHost());
+		Map<String,String> resultMap = new HashMap<>();
+		resultMap.put("openId",req.getOpenId());
+		return Response.status(Response.Status.CREATED).entity(resultMap).build();
 	}
+
 
 	/**
 	 * 保存用户手机号
 	 */
+	@Deprecated
 	@POST
 	@Path("/user/phone")
 	@Consumes(MediaType.APPLICATION_JSON)

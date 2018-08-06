@@ -75,7 +75,7 @@ public class AliMaResource extends BaseAuthedResource {
 								  @Context HttpServletResponse response) {
 
 		logger.debug("AliMaResource.authorization.params:{}", req);
-		aliMaService.aliMaLogin(EdsAppId.eds_ali.value(),req.getAliUid(),req.getMobile(),req.getSmsCode());
+		aliMaService.aliMaLogin(req.getAliUid(),req.getMobile(),req.getSmsCode());
 		CookieUtils.addCookie(request,response,  CommonConstants.ALI_UID_COOKIE, req.getAliUid(),
 				null, sysConfig.getEdsAliCookieHost());
 		Map<String,String> resultMap = new HashMap<>();

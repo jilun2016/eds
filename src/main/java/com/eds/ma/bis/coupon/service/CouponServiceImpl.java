@@ -91,9 +91,9 @@ public class CouponServiceImpl implements ICouponService {
         //找出基础的最大的优惠券,和可叠加的最大优惠券
         if(ListUtil.isNotEmpty(dbUserCouponList)){
             dbUserCouponList.stream().filter(UserCoupon::getIsDj)
-                    .max((o1, o2) -> o1.getBenefit().compareTo(o2.getBenefit())).ifPresent(validMaxUserCouponList::add);
+                    .max(Comparator.comparing(UserCoupon::getBenefit)).ifPresent(validMaxUserCouponList::add);
             dbUserCouponList.stream().filter(userCoupon -> !userCoupon.getIsDj())
-                    .max((o1, o2) -> o1.getBenefit().compareTo(o2.getBenefit())).ifPresent(validMaxUserCouponList::add);
+                    .max(Comparator.comparing(UserCoupon::getBenefit)).ifPresent(validMaxUserCouponList::add);
 
         }
         return validMaxUserCouponList;

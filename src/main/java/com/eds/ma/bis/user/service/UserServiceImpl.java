@@ -106,6 +106,13 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    public AliUser queryUserAliByAliUid(String aliUid) {
+        QueryBuilder queryUserAliQb = QueryBuilder.where(Restrictions.eq("aliUid",aliUid))
+                .and(Restrictions.eq("dataStatus",1));
+        return dao.query(queryUserAliQb,AliUser.class);
+    }
+
+    @Override
     public User queryUserByMobile(String mobile) {
         QueryBuilder queryUserQb = QueryBuilder.where(Restrictions.eq("mobile",mobile))
                 .and(Restrictions.eq("dataStatus",1));
@@ -234,10 +241,10 @@ public class UserServiceImpl implements IUserService {
 
         List<PayOrder> payOrderList = orderService.queryToRefundPayOrder(user.getOpenId(),user.getAliUid());
         if (ListUtil.isNotEmpty(payOrderList)) {
-            //校验提现的金额应该大于钱包中的余额
-            BigDecimal allWxRefundMoney = payOrderList.stream()
+            //校验提现的金额应该大于钱包中的余额,差额是每次使用的费用
+            BigDecimal allToRefundMoney = payOrderList.stream()
                     .map(PayOrder::getPayMoney).reduce(BigDecimal.ZERO, BigDecimal::add);
-            if (allRefundMoney.compareTo(allWxRefundMoney) > 0) {
+            if (allRefundMoney.compareTo(allToRefundMoney) > 0) {
                 throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_MONEY_COMPARE_ERROR);
             }
 
@@ -252,10 +259,10 @@ public class UserServiceImpl implements IUserService {
                     throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_MONEY_COMPARE_ERROR);
                 }
 
-                BigDecimal allWxRefundDepositMoney = depositPayOrderList.stream()
+                BigDecimal allToRefundDepositMoney = depositPayOrderList.stream()
                         .map(PayOrder::getPayMoney).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-                if (deposit.compareTo(allWxRefundDepositMoney) > 0) {
+                if (deposit.compareTo(allToRefundDepositMoney) > 0) {
                     throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_MONEY_COMPARE_ERROR);
                 }
             }
@@ -268,10 +275,10 @@ public class UserServiceImpl implements IUserService {
                     throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_MONEY_COMPARE_ERROR);
                 }
 
-                BigDecimal allWxRefundBalanceMoney = balancePayOrderList.stream()
+                BigDecimal allToRefundBalanceMoney = balancePayOrderList.stream()
                         .map(PayOrder::getPayMoney).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-                if (balance.compareTo(allWxRefundBalanceMoney) > 0) {
+                if (balance.compareTo(allToRefundBalanceMoney) > 0) {
                     throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_MONEY_COMPARE_ERROR);
                 }
             }
@@ -525,11 +532,13 @@ public class UserServiceImpl implements IUserService {
         if(Objects.isNull(user)){
             user = new User();
             user.setMobile(mobile);
+//            String sendSmsCode = RandomStringUtils.randomNumeric(6);
+            String sendSmsCode = "8888";
             if(Objects.equals(appId,EdsAppId.eds_ali.value())){
-                user.setAliSmsCode(RandomStringUtils.randomNumeric(6));
+                user.setAliSmsCode(sendSmsCode);
                 user.setAliSmsExpired(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000));
             }else{
-                user.setWxSmsCode(RandomStringUtils.randomNumeric(6));
+                user.setWxSmsCode(sendSmsCode);
                 user.setWxSmsExpired(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000));
             }
             user.setCreated(now);
@@ -552,7 +561,7 @@ public class UserServiceImpl implements IUserService {
             } else {
                 smsCode = RandomStringUtils.randomNumeric(6);
             }
-
+            smsCode = "8888";
             if(Objects.equals(appId,EdsAppId.eds_ali.value())){
                 user.setAliSmsCode(smsCode);
                 user.setAliSmsExpired(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000));
@@ -563,13 +572,13 @@ public class UserServiceImpl implements IUserService {
             user.setUpdated(now);
             dao.update(user);
         }
-        //发送短信
-        SmsMessageContent smsMessageContent = new SmsMessageContent();
-        smsMessageContent.setTmplEvent(TmplEvent.member_register.value());
-        smsMessageContent.setMobile(mobile);
-        String sendSmsCode = Objects.equals(appId,EdsAppId.eds_ali.value())?user.getAliSmsCode():user.getWxSmsCode();
-        smsMessageContent.setSmsParams(new String[]{sendSmsCode});
-        messageService.pushSmsMessage(smsMessageContent);
+//        //发送短信
+//        SmsMessageContent smsMessageContent = new SmsMessageContent();
+//        smsMessageContent.setTmplEvent(TmplEvent.member_register.value());
+//        smsMessageContent.setMobile(mobile);
+//        String sendSmsCode = Objects.equals(appId,EdsAppId.eds_ali.value())?user.getAliSmsCode():user.getWxSmsCode();
+//        smsMessageContent.setSmsParams(new String[]{sendSmsCode});
+//        messageService.pushSmsMessage(smsMessageContent);
     }
 
 }

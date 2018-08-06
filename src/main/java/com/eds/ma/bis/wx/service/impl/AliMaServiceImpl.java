@@ -116,9 +116,15 @@ public class AliMaServiceImpl implements IAliMaService {
     }
 
     @Override
-    public void aliMaLogin(String appId, String aliUid, String mobile, String smsCode) {
+    public void aliMaLogin(String aliUid, String mobile, String smsCode) {
         User user = userService.queryUserByMobile(mobile);
         if (Objects.isNull(user)) {
+            throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
+        }
+
+        //是否ali授权过,保存ali用户信息
+        AliUser aliUser = userService.queryUserAliByAliUid(aliUid);
+        if(Objects.isNull(aliUser)){
             throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
         }
 
@@ -138,12 +144,11 @@ public class AliMaServiceImpl implements IAliMaService {
         } else {
             Ssqb query = Ssqb.create("com.eds.user.updateAliMemberLoginSuc")
                     .setParam("loginTime", new Timestamp(System.currentTimeMillis()))
-                    .setParam("appId", appId)
                     .setParam("aliUid", aliUid)
                     .setParam("userId", user.getId());
             dao.updateByMybatis(query);
             //初始化钱包
-            userService.saveDefaultUserWallet(user.getId());
+            userService.queryUserWalletByUserId(user.getId());
         }
     }
 
