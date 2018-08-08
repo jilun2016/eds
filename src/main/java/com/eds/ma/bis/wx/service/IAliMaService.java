@@ -33,6 +33,6 @@ public interface IAliMaService {
      * @param mobile
      * @param smsCode
      */
-    void aliMaLogin(String appId, String aliUid, String mobile, String smsCode);
+    void aliMaLogin(String aliUid, String mobile, String smsCode);
 }
 

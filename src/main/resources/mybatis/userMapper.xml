@@ -73,4 +73,10 @@
         WHERE id=#{userId} AND dataStatus=1
     </update>
 
+    <update id="updateWxMemberLoginSuc">
+        UPDATE t_eds_user
+        SET openId = #{openId},wxUnionId = #{wxUnionId},wxLoginTime = #{loginTime},wxSmsCode = '',wxSmsExpired = null
+        WHERE id=#{userId} AND dataStatus=1
+    </update>
+
 </mapper>

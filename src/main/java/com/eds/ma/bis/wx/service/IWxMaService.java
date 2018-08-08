@@ -19,11 +19,11 @@ public interface IWxMaService {
     UserInfoVo queryMaUserInfo(String code, String encryptedData, String iv);
 
     /**
-     * 获取小程序 openId
-     * @param code
-     * @return
+     * 微信小程序登陆
+     * @param mobile
+     * @param smsCode
      */
-    String queryMaUserOpenId(String code);
+    void wxMaLogin(String openId, String mobile, String smsCode);
 
     /**
      * 保存小程序手机号

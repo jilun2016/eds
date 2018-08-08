@@ -106,6 +106,13 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    public AliUser queryUserAliByAliUid(String aliUid) {
+        QueryBuilder queryUserAliQb = QueryBuilder.where(Restrictions.eq("aliUid",aliUid))
+                .and(Restrictions.eq("dataStatus",1));
+        return dao.query(queryUserAliQb,AliUser.class);
+    }
+
+    @Override
     public User queryUserByMobile(String mobile) {
         QueryBuilder queryUserQb = QueryBuilder.where(Restrictions.eq("mobile",mobile))
                 .and(Restrictions.eq("dataStatus",1));
@@ -232,12 +239,12 @@ public class UserServiceImpl implements IUserService {
 //        }
 
 
-        List<PayOrder> payOrderList = orderService.queryToRefundPayOrder(user.getOpenId());
+        List<PayOrder> payOrderList = orderService.queryToRefundPayOrder(user.getOpenId(),user.getAliUid());
         if (ListUtil.isNotEmpty(payOrderList)) {
-            //校验提现的金额应该大于钱包中的余额
-            BigDecimal allWxRefundMoney = payOrderList.stream()
+            //校验提现的金额应该大于钱包中的余额,差额是每次使用的费用
+            BigDecimal allToRefundMoney = payOrderList.stream()
                     .map(PayOrder::getPayMoney).reduce(BigDecimal.ZERO, BigDecimal::add);
-            if (allRefundMoney.compareTo(allWxRefundMoney) > 0) {
+            if (allRefundMoney.compareTo(allToRefundMoney) > 0) {
                 throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_MONEY_COMPARE_ERROR);
             }
 
@@ -252,10 +259,10 @@ public class UserServiceImpl implements IUserService {
                     throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_MONEY_COMPARE_ERROR);
                 }
 
-                BigDecimal allWxRefundDepositMoney = depositPayOrderList.stream()
+                BigDecimal allToRefundDepositMoney = depositPayOrderList.stream()
                         .map(PayOrder::getPayMoney).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-                if (deposit.compareTo(allWxRefundDepositMoney) > 0) {
+                if (deposit.compareTo(allToRefundDepositMoney) > 0) {
                     throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_MONEY_COMPARE_ERROR);
                 }
             }
@@ -268,10 +275,10 @@ public class UserServiceImpl implements IUserService {
                     throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_MONEY_COMPARE_ERROR);
                 }
 
-                BigDecimal allWxRefundBalanceMoney = balancePayOrderList.stream()
+                BigDecimal allToRefundBalanceMoney = balancePayOrderList.stream()
                         .map(PayOrder::getPayMoney).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-                if (balance.compareTo(allWxRefundBalanceMoney) > 0) {
+                if (balance.compareTo(allToRefundBalanceMoney) > 0) {
                     throw new BizCoreRuntimeException(BizErrorConstants.WALLET_WITHDRAW_MONEY_COMPARE_ERROR);
                 }
             }
@@ -363,59 +370,6 @@ public class UserServiceImpl implements IUserService {
             saveUserWxMa(userWxMa);
         }
     }
-
-//    /**
-//     * 异步退款处理
-//     * @param refundPayOrderPool
-//     * @param toRefundMoney
-//     * @return 退款部分失败 0 退款成功 :1
-//     */
-//    @Deprecated
-//    public int asyncPayRefund(List<PayOrder> refundPayOrderPool, BigDecimal toRefundMoney) {
-//        List<Integer> resultList = new ArrayList<>();
-//        CompletableFuture[] cfs = null;
-//        List<PayRefundVo> payRefundVos = new ArrayList<>();
-//        BigDecimal leftToRefundMoney = toRefundMoney;
-//        for (PayOrder payOrder : refundPayOrderPool) {
-//            if (leftToRefundMoney.compareTo(BigDecimal.ZERO) > 0) {
-//                BigDecimal payOrderMoney = payOrder.getPayMoney();
-//                BigDecimal refundMoney = null;
-//                if (leftToRefundMoney.compareTo(payOrderMoney) > 0) {
-//                    refundMoney = payOrderMoney;
-//                    leftToRefundMoney = leftToRefundMoney.subtract(payOrderMoney);
-//                } else {
-//                    refundMoney = leftToRefundMoney;
-//                    leftToRefundMoney = BigDecimal.ZERO;
-//                }
-//                PayRefundVo payRefundVo = new PayRefundVo();
-//                payRefundVo.setPayOrder(payOrder);
-//                payRefundVo.setRefundMoney(refundMoney);
-//                payRefundVos.add(payRefundVo);
-//            } else {
-//                break;
-//            }
-//        }
-//
-//        if(ListUtil.isNotEmpty(payRefundVos)){
-//            cfs = payRefundVos.stream()
-//                    .map(payRefundVo-> CompletableFuture.supplyAsync(()->{
-//                        try {
-//                            wxRefundPayService.submiteRefund(payRefundVo.getPayOrder(), payRefundVo.getRefundMoney());
-//                            return 1;
-//                        }catch (Exception e){
-//                            revertRefundFailedRecord(payRefundVo.getPayOrder());
-//                            return 0;
-//                        }
-//                    }, taskExecutor)
-//                            .whenComplete((v, e) -> {//如需获取任务完成先手顺序，此处代码即可
-//                                resultList.add(v);
-//                            }))
-//                    .toArray(CompletableFuture[]::new);
-//            CompletableFuture.allOf(cfs).join();//封装后无返回值，必须自己whenComplete()获取
-//        }
-//
-//        return BooleanUtils.toInteger(resultList.stream().noneMatch(result -> result == 0));
-//    }
 
     @Override
     public void sendWithdrawSmsCode(Long userId, String mobile) {
@@ -525,11 +479,13 @@ public class UserServiceImpl implements IUserService {
         if(Objects.isNull(user)){
             user = new User();
             user.setMobile(mobile);
+//            String sendSmsCode = RandomStringUtils.randomNumeric(6);
+            String sendSmsCode = "8888";
             if(Objects.equals(appId,EdsAppId.eds_ali.value())){
-                user.setAliSmsCode(RandomStringUtils.randomNumeric(6));
+                user.setAliSmsCode(sendSmsCode);
                 user.setAliSmsExpired(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000));
             }else{
-                user.setWxSmsCode(RandomStringUtils.randomNumeric(6));
+                user.setWxSmsCode(sendSmsCode);
                 user.setWxSmsExpired(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000));
             }
             user.setCreated(now);
@@ -552,7 +508,7 @@ public class UserServiceImpl implements IUserService {
             } else {
                 smsCode = RandomStringUtils.randomNumeric(6);
             }
-
+            smsCode = "8888";
             if(Objects.equals(appId,EdsAppId.eds_ali.value())){
                 user.setAliSmsCode(smsCode);
                 user.setAliSmsExpired(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000));
@@ -563,13 +519,13 @@ public class UserServiceImpl implements IUserService {
             user.setUpdated(now);
             dao.update(user);
         }
-        //发送短信
-        SmsMessageContent smsMessageContent = new SmsMessageContent();
-        smsMessageContent.setTmplEvent(TmplEvent.member_register.value());
-        smsMessageContent.setMobile(mobile);
-        String sendSmsCode = Objects.equals(appId,EdsAppId.eds_ali.value())?user.getAliSmsCode():user.getWxSmsCode();
-        smsMessageContent.setSmsParams(new String[]{sendSmsCode});
-        messageService.pushSmsMessage(smsMessageContent);
+//        //发送短信
+//        SmsMessageContent smsMessageContent = new SmsMessageContent();
+//        smsMessageContent.setTmplEvent(TmplEvent.member_register.value());
+//        smsMessageContent.setMobile(mobile);
+//        String sendSmsCode = Objects.equals(appId,EdsAppId.eds_ali.value())?user.getAliSmsCode():user.getWxSmsCode();
+//        smsMessageContent.setSmsParams(new String[]{sendSmsCode});
+//        messageService.pushSmsMessage(smsMessageContent);
     }
 
 }

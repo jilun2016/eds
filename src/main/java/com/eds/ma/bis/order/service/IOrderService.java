@@ -45,9 +45,10 @@ public interface IOrderService {
     /**
      * 查询待退款支付订单列表
      * @param openId
+     * @param aliUid
      * @return
      */
-    List<PayOrder> queryToRefundPayOrder(String openId);
+    List<PayOrder> queryToRefundPayOrder(String openId, String aliUid);
 
     /**
      * 更新微信支付回调

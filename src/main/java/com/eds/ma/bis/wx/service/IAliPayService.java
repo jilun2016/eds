@@ -1,8 +1,6 @@
 package com.eds.ma.bis.wx.service;
 
 
-import com.eds.ma.bis.order.entity.PayOrder;
-
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.util.Map;
@@ -36,13 +34,6 @@ public interface IAliPayService {
      * @param response
      */
     void optAliPayCallback(Map<String, String[]> requestParams, HttpServletResponse response);
-
-    /**
-     * ali退款申请接口
-     * @param payOrder
-     * @param tkFee
-     */
-    void submiteRefund(PayOrder payOrder, BigDecimal tkFee);
 
 }
 

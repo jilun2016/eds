@@ -1,6 +1,7 @@
 package com.eds.ma.bis.wx.service.impl;
 
 import com.eds.ma.bis.order.OrderCodeCreater;
+import com.eds.ma.bis.order.OrderPayTypeEnum;
 import com.eds.ma.bis.order.TransTypeEnum;
 import com.eds.ma.bis.order.entity.FinanceIncome;
 import com.eds.ma.bis.order.entity.PayOrder;
@@ -102,6 +103,7 @@ public class WxPayServiceImpl implements IWxPayService {
         pay.setPayStatus(PayStatusEnum.WAIT_BUYER_PAY.value());
         pay.setUserId(userId);
         pay.setTitle(payTitle);
+        pay.setPayType(OrderPayTypeEnum.S_ZFFS_WX.value());
         orderService.savePayOrder(pay);
 
 

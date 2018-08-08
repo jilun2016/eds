@@ -129,7 +129,9 @@ public class UserResource extends BaseAuthedResource{
 
     /**
      * 查询用户是否已经提现认证过
+     * 改造成手机号登陆,所以不需要进行手机号验证(拦截器直接验证手机号是否存在)
      */
+    @Deprecated
     @GET
     @Path("/wallet/withdraw/auth")
     @Produces(MediaType.APPLICATION_JSON)
@@ -138,6 +140,24 @@ public class UserResource extends BaseAuthedResource{
         Map<String,Boolean> authResult = new HashMap<>(1);
         authResult.put("isAuth",Objects.nonNull(super.getUser().getMobile()));
         return Response.ok(authResult).build();
+    }
+
+    /**
+     * 发送用户提现短信验证码
+     * @param request
+     * @return
+     */
+    @POST
+    @Path("/wallet/withdraw/sms_code")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response sendWithdrawSmsCode(@Valid SendSmsCodeRequest request){
+        logger.debug("UserResource.sendWithdrawSmsCode({},{},{})",super.getOpenId(),super.getUser(),request);
+        userService.sendWithdrawSmsCode(super.getUserId(),request.getMobile());
+        Map<String,Object> resultMap = new HashMap<>();
+        resultMap.put("transCode", OrderCodeCreater.createTradeNO());
+        resultMap.put("transTime",DateFormatUtils.getNow());
+        return Response.status(Response.Status.CREATED).entity(resultMap).build();
     }
 
     /**
@@ -161,9 +181,11 @@ public class UserResource extends BaseAuthedResource{
     }
 
     /**
+     * 改造成手机号登陆,所以不需要进行手机号验证(拦截器直接验证手机号是否存在)
      * 用户提现(使用微信一键认证方式|已经认证过)
      * 提现金额 = 余额+押金
      */
+    @Deprecated
     @POST
     @Path("/wallet/auth/withdraw")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -180,23 +202,7 @@ public class UserResource extends BaseAuthedResource{
         return Response.status(Response.Status.CREATED).entity(resultMap).build();
     }
 
-    /**
-     * 发送用户提现短信验证码
-     * @param request
-     * @return
-     */
-    @POST
-    @Path("/wallet/withdraw/sms_code")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response sendWithdrawSmsCode(@Valid SendSmsCodeRequest request){
-        logger.debug("UserResource.sendWithdrawSmsCode({},{},{})",super.getOpenId(),super.getUser(),request);
-        userService.sendWithdrawSmsCode(super.getUserId(),request.getMobile());
-        Map<String,Object> resultMap = new HashMap<>();
-        resultMap.put("transCode", OrderCodeCreater.createTradeNO());
-        resultMap.put("transTime",DateFormatUtils.getNow());
-        return Response.status(Response.Status.CREATED).entity(resultMap).build();
-    }
+
 
     /**
      * 查询用户的优惠券

@@ -195,6 +195,10 @@ public class DeviceServiceImpl implements IDeviceService {
         //用户的位置和店铺的位置是否在有效距离内
         SpDetailVo spDetailVo = queryNearestbySpByCoordinate(userLat.doubleValue(), userLng.doubleValue(), edsConfig.getNearbyDistance());
 
+        if(Objects.isNull(spDetailVo)){
+            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_SP_NOT_EXIST);
+        }
+
         //查询设备信息进行校验 设备状态是否租借中
         DeviceRentDetailVo deviceRentDetailVo = queryRentDeviceById(deviceId,userId);
         if(Objects.isNull(deviceRentDetailVo)){
@@ -226,9 +230,7 @@ public class DeviceServiceImpl implements IDeviceService {
         BigDecimal deviceLat = BigDecimal.ZERO;
 
 
-        if(Objects.isNull(spDetailVo)){
-            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_SP_NOT_EXIST);
-        }
+
         //验证成功,更新订单,归还设备,更新设备位置信息,设备状态,钱包扣除金额
         Date now = DateFormatUtils.getNow();
         //计算金额

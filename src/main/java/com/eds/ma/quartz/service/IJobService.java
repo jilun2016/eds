@@ -12,4 +12,9 @@ public interface IJobService {
      */
     void couponExpiredRunJob();
 
+    /**
+     * 定时任务微信退款订单查询处理
+     */
+    void wxRefundOrderJob();
+
 }

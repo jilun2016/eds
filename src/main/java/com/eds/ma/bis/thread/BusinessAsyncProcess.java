@@ -2,11 +2,13 @@ package com.eds.ma.bis.thread;
 
 import com.alibaba.fastjson.JSON;
 import com.eds.ma.bis.order.OrderCodeCreater;
+import com.eds.ma.bis.order.OrderPayTypeEnum;
 import com.eds.ma.bis.order.TransTypeEnum;
 import com.eds.ma.bis.order.entity.FinanceIncome;
 import com.eds.ma.bis.order.entity.PayOrder;
 import com.eds.ma.bis.order.service.IOrderService;
 import com.eds.ma.bis.user.vo.PayRefundVo;
+import com.eds.ma.bis.wx.service.IAliRefundPayService;
 import com.eds.ma.bis.wx.service.IWxRefundPayService;
 import com.eds.ma.email.SendMailUtil;
 import com.xcrm.cloud.database.db.util.StringUtil;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**	
  * 业务相关异步线程统一线程池处理类
@@ -34,6 +37,9 @@ public class BusinessAsyncProcess {
 
 	@Autowired
 	private IWxRefundPayService wxRefundPayService;
+
+	@Autowired
+	private IAliRefundPayService aliRefundPayService;
 
 	@Autowired
 	private IOrderService orderService;
@@ -70,7 +76,11 @@ public class BusinessAsyncProcess {
 		if(ListUtil.isNotEmpty(payRefundVos)){
 			payRefundVos.forEach(payRefundVo -> {
 				try {
-					wxRefundPayService.submiteRefund(payRefundVo.getPayOrder(), payRefundVo.getRefundMoney());
+					if(Objects.equals(payRefundVo.getPayOrder().getPayType(),OrderPayTypeEnum.S_ZFFS_WX.value())){
+						wxRefundPayService.submiteRefund(payRefundVo.getPayOrder(), payRefundVo.getRefundMoney());
+					}else{
+						aliRefundPayService.submiteRefund(payRefundVo.getPayOrder(), payRefundVo.getRefundMoney());
+					}
 					//保存提现交易记录
 					FinanceIncome financeIncome = new FinanceIncome();
 					financeIncome.setTransCode(OrderCodeCreater.createTradeNO());

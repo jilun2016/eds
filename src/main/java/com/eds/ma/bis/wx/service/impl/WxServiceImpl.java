@@ -88,37 +88,5 @@ public class WxServiceImpl implements IWxService {
         return null;
     }
 
-    private Map<String,String> getWxMaSessionKey(String code){
-        Map<String,String> result = new HashMap<>();
-        Map<String,Object> sessionParaMap = new HashMap<>();
-        sessionParaMap.put("js_code",code);
-        sessionParaMap.put("appid",sysConfig.getWxMaAppId());
-        sessionParaMap.put("grant_type","authorization_code");
-        sessionParaMap.put("secret",sysConfig.getWxMaAppSecret());
-
-        String resultJson = HTTPUtil.sendGetString(sysConfig.getWxMaSessionUrl(),sessionParaMap);
-        logger.info("WxMinaServiceImpl.queryMaSession.result:{}",resultJson);
-        Map<String,Object> resultJsonMap = HTTPUtil.Json2Map(resultJson);
-        int errorCode = MapUtils.getIntValue(resultJsonMap,"errcode",-1);
-        if(!Objects.equals(errorCode, -1)){
-            logger.error("WxMinaServiceImpl.queryMaSession failed.result:{}",resultJson);
-            throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
-        }
-        String sessionKey = MapUtils.getString(resultJsonMap,"session_key");
-        if(StringUtils.isBlank(sessionKey)){
-            throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
-        }
-
-        String openId = MapUtils.getString(resultJsonMap,"openid");
-        if(StringUtils.isBlank(openId)){
-            throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
-        }
-        result.put("resultJson",resultJson);
-        result.put("openId",openId);
-        result.put("sessionKey",sessionKey);
-        return result;
-    }
-
-
 
 }
