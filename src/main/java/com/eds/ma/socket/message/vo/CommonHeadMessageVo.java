@@ -20,11 +20,18 @@ public class CommonHeadMessageVo {
     private Long deviceCode;
     /**
      * 报文编号
+     * 对于心跳上传命令,该字段未使用
      */
     private Long messageNo;
     /**
      * 报文功能码
      */
     private Long messageType;
+
+    /**
+     * 设备信号强度
+     * 对于非心跳上传命令,该字段未使用
+     */
+    private Long deviceSignalStrength;
 
 }
