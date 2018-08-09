@@ -69,7 +69,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public void saveUserWxMa(UserWxMa userWxMa) {
-        dao.save(userWxMa);
+        dao.create(userWxMa);
     }
 
     @Override

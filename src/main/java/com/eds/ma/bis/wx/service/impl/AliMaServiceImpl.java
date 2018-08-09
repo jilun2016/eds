@@ -111,7 +111,7 @@ public class AliMaServiceImpl implements IAliMaService {
             aliUser.setAliUserRawData(rawData);
             aliUser.setAliTokenRawData(tokenRawData);
             aliUser.setCreated(now);
-            dao.save(aliUser);
+            dao.create(aliUser);
         }
     }
 
