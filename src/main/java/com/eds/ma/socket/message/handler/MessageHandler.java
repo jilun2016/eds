@@ -48,6 +48,11 @@ public class MessageHandler {
             return parseCommonHeadMessage(mesasge);
         }
 
+        //设备历史上传消息：长度44字节
+        if(messageLength == 44){
+            return parseHistoryHeadMessage(mesasge);
+        }
+
        return null;
     }
 
@@ -186,6 +191,75 @@ public class MessageHandler {
     }
 
     /**
+     * 解析历史上传消息
+     * @param commonHeadMessageVo
+     * @param mesasge
+     * @return
+     */
+    public MongoDeviceReport parseHistoryMessage(CommonHeadMessageVo commonHeadMessageVo, String[] mesasge){
+        MongoDeviceReport mongoDeviceReport = new MongoDeviceReport();
+        mongoDeviceReport.setDeviceKind(commonHeadMessageVo.getDeviceKind());
+        mongoDeviceReport.setDeviceCode(commonHeadMessageVo.getDeviceCode());
+
+        //解析检测数据的时间
+        Calendar syncDate = Calendar.getInstance();
+        syncDate.set(H2L(mesasge[9]).intValue()+2000,
+                H2L(mesasge[10]).intValue() - 1,
+                H2L(mesasge[11]).intValue(),
+                H2L(mesasge[12]).intValue(),
+                H2L(mesasge[13]).intValue(),0);
+        syncDate.set(MILLISECOND,0);
+
+
+
+        //解析经纬度
+        //解析纬度
+        StringBuilder deviceLatSb = new StringBuilder();
+        deviceLatSb.append(H2C(mesasge[14]));
+        deviceLatSb.append(H2C(mesasge[15]));
+        deviceLatSb.append(H2C(mesasge[16]));
+        deviceLatSb.append(H2C(mesasge[17]));
+        deviceLatSb.append(H2C(mesasge[18]));
+        deviceLatSb.append(H2C(mesasge[19]));
+        deviceLatSb.append(H2C(mesasge[20]));
+        deviceLatSb.append(H2C(mesasge[21]));
+        deviceLatSb.append(H2C(mesasge[22]));
+        String deviceLatDesc = H2C(mesasge[23]);
+
+        //解析经度
+        StringBuilder deviceLngSb = new StringBuilder();
+        deviceLngSb.append(H2C(mesasge[24]));
+        deviceLngSb.append(H2C(mesasge[25]));
+        deviceLngSb.append(H2C(mesasge[26]));
+        deviceLngSb.append(H2C(mesasge[27]));
+        deviceLngSb.append(H2C(mesasge[28]));
+        deviceLngSb.append(H2C(mesasge[29]));
+        deviceLngSb.append(H2C(mesasge[30]));
+        deviceLngSb.append(H2C(mesasge[31]));
+        deviceLngSb.append(H2C(mesasge[32]));
+        deviceLngSb.append(H2C(mesasge[33]));
+        String deviceLngDesc = H2C(mesasge[34]);
+
+
+        mongoDeviceReport.setCreated(syncDate.getTime());
+
+        Long ASLHighValue = H2L(mesasge[35]);
+        Long ASLLowValue = H2L(mesasge[36]);
+        Long ASLDecimals = H2L(mesasge[37]);
+
+        Long deviceTemperature = H2L(mesasge[38]);
+        Long deviceInTemperature = H2L(mesasge[39]);
+
+
+        Long HCHOHighValue = H2L(mesasge[40]);
+        Long HCHOLowValue = H2L(mesasge[41]);
+        Long HCHOValue = H2L(mesasge[42]);
+
+
+        return mongoDeviceReport;
+    }
+
+    /**
      * 解析注册消息
      * @param commonHeadMessageVo
      * @param mesasge
@@ -266,6 +340,16 @@ public class MessageHandler {
         commonHeadMessageVo.setMessageNo(H2L(mesasge,8,4));
         //解析报文功能码
         commonHeadMessageVo.setMessageType(H2L(mesasge,12,1));
+        return commonHeadMessageVo;
+    }
+
+    private CommonHeadMessageVo parseHistoryHeadMessage(String[] mesasge){
+        logger.debug("parseHistoryHeadMessage({})", mesasge);
+        CommonHeadMessageVo commonHeadMessageVo = new CommonHeadMessageVo();
+        //解析设备种类
+        commonHeadMessageVo.setDeviceKind(H2L(mesasge[0]));
+        //解析设备编号
+        commonHeadMessageVo.setDeviceCode(H2L(mesasge,1,7));
         return commonHeadMessageVo;
     }
 
