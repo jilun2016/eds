@@ -41,7 +41,7 @@ public class AliPayCallBackServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
         try {
             Map<String, String[]> requestParams = request.getParameterMap();
-            logger.info("~~~~~~~~~~~~~~~~~~AliPayCallBackServlet callback_params:" + JSONUtils.toJSONString(requestParams));
+            logger.info("~~~~~~~~~~~~~~~~~~AliPayCallBackServlet callback_params:" + requestParams);
             aliPayService.optAliPayCallback(requestParams,response);
         } catch (Exception e) {
             logger.error("AliPayCallBack occurs exception ",e);
