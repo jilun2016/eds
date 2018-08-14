@@ -55,7 +55,7 @@ public class AliRefundPayServiceImpl implements IAliRefundPayService {
     public void submiteRefund(PayOrder payOrder, BigDecimal tkFee) {
         //实例化客户端
         AlipayClient alipayClient = new DefaultAlipayClient( sysConfig.getAliGatewayUrl(),sysConfig.getAliMaAppId(),
-                sysConfig.getAliGatewayPrivateKey(),"json","UTF-8",sysConfig.getAliGatewayPublicKey(),"RSA2");
+                sysConfig.getAliGatewayPrivateKey(),"json","GBK",sysConfig.getAliGatewayPublicKey(),"RSA2");
         AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();
         AlipayRefund alipayRefund= new AlipayRefund();
         alipayRefund.setOut_trade_no(payOrder.getPayCode());//这个是商户的订单号
@@ -105,7 +105,7 @@ public class AliRefundPayServiceImpl implements IAliRefundPayService {
     public void aliRefundQuery(List<PayRefund> payRefundList) {
         //实例化客户端
         AlipayClient alipayClient = new DefaultAlipayClient( sysConfig.getAliGatewayUrl(),sysConfig.getAliMaAppId(),
-                sysConfig.getAliGatewayPrivateKey(),"json","UTF-8",sysConfig.getAliGatewayPublicKey(),"RSA2");
+                sysConfig.getAliGatewayPrivateKey(),"json","GBK",sysConfig.getAliGatewayPublicKey(),"RSA2");
         for(PayRefund payRefund:payRefundList){
             operateRefundRecord(alipayClient,payRefund);
         }
