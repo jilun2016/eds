@@ -1,12 +1,8 @@
 package com.eds.ma.config;
 
-import com.eds.ma.socket.ByteArrayCodecFactory;
-import com.eds.ma.socket.HCoderFactory;
-import com.eds.ma.socket.handler.ServerHandler;
+import com.eds.ma.socket.message.handler.ServerHandler;
 import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
 import org.apache.mina.core.filterchain.IoFilter;
-import org.apache.mina.filter.codec.ProtocolCodecFilter;
-import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.filter.executor.ExecutorFilter;
 import org.apache.mina.filter.logging.LoggingFilter;
 import org.apache.mina.filter.logging.MdcInjectionFilter;
@@ -19,10 +15,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.beans.PropertyEditor;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.nio.charset.Charset;
 import java.util.*;
 
 /**
@@ -83,15 +77,12 @@ public class SocketConfig {
     }
 
     @Bean(initMethod = "bind",destroyMethod = "unbind")
-    public NioSocketAcceptor nioSocketAcceptor() throws IOException {
+    public NioSocketAcceptor nioSocketAcceptor(){
         NioSocketAcceptor nioSocketAcceptor = new NioSocketAcceptor();
         nioSocketAcceptor.setReuseAddress(true);
         nioSocketAcceptor.setHandler(serviceHandler());
         List<InetSocketAddress> localAddresses = new ArrayList<>();
         localAddresses.add(new InetSocketAddress(9000));
-        localAddresses.add(new InetSocketAddress(9001));
-        localAddresses.add(new InetSocketAddress(9002));
-        localAddresses.add(new InetSocketAddress(9003));
         nioSocketAcceptor.setDefaultLocalAddresses(localAddresses);
         nioSocketAcceptor.setFilterChainBuilder(filterChainBuilder());
         return nioSocketAcceptor;

@@ -4,7 +4,6 @@ import com.eds.ma.bis.device.entity.Device;
 import com.eds.ma.bis.device.entity.DeviceRelation;
 import com.eds.ma.bis.device.entity.UserDeviceRecord;
 import com.eds.ma.bis.device.vo.*;
-import com.eds.ma.socket.vo.DeviceDataVo;
 import com.xcrm.common.page.Pagination;
 
 import java.math.BigDecimal;
@@ -107,12 +106,6 @@ public interface IDeviceService {
      * @param lockStatus 锁定状态 {@link com.eds.ma.socket.SocketConstants}
      */
     void sendDevcieStatusMessage(Long deviceId,Integer lockStatus);
-
-    /**
-     * 异步保存消息
-     * @param deviceDataVo
-     */
-    void asyncSaveMessage(DeviceDataVo deviceDataVo);
 
     /**
      * 异步更新设备锁定状态

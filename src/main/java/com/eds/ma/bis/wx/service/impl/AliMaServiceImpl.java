@@ -3,7 +3,9 @@ package com.eds.ma.bis.wx.service.impl;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.domain.AlipayTradeAppPayModel;
 import com.alipay.api.request.AlipaySystemOauthTokenRequest;
+import com.alipay.api.request.AlipayTradeAppPayRequest;
 import com.alipay.api.request.AlipayUserInfoShareRequest;
 import com.alipay.api.response.AlipaySystemOauthTokenResponse;
 import com.alipay.api.response.AlipayUserInfoShareResponse;
@@ -152,7 +154,7 @@ public class AliMaServiceImpl implements IAliMaService {
         }
     }
 
-    public static void main(String[] args) throws AlipayApiException {
+    public static void main2(String[] args) throws AlipayApiException {
         String aliGatewayPrivateKey="MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCbvpvdt7M4q/ERvj/pn30NVl4lWkjkxNrQGt94A8Yg3mOgdaYCuaMqk5/yAiuQH/GFz1fBl/1hs3vIugrE1sbzQZdJXARC2I63Ade1Janj1/ZgCVffylHpNwV3JkGUsc0ZW9etcSY6N3nuUZpeUzCGkGTkWvrYaC7DJjIlx1tntTl+orhNmtP/N9tt+cAvZ0mkbmj2FEU7Q2ouqHCOiGe3oqGigk40N6yGgEnlc0RdN9luevECKguerb1q0FPLppItU+/YhtXraAR7Ew5BmGuZqzSPGqkLliVvlfhyXvv6nlj8mCZUUm1VLKGEVUIuCm4u/Fe0jAjQzVG0aEOoGRMLAgMBAAECggEBAI3bToLjqIVs7zWXEQXNNAzq5vOkyZI9z4QPhg39egBEL4BeyGfhCEJmlh/LZDxxK/8SPT9jHfJYld3dvqNNcYbt7ktuWZ89OrhsIDqp5JVYBtuwhu6ajIMcj4jYOpGiZUq8wbUDw6rxDslIYI+bvC5E5PCuAZ8NPdKYPsL0U0ggeE9GNB8+F3aWtuZEOCCJuPKz82DyueOBeLrPTrYW4ecdAR3UcQO2Iu3QRuGF3LjvHoqQfbGPZSnVAXt4iix3e/+9DxFucVIzcSQe9EpFmH49DtE7u9q4qtSp7MY79wvU4a5FaUHM/fe9f2JGQ9A8wPXpZ7KjUeZrK2BHTavp95ECgYEAyCuoyCwhOqBmBEDwTSFbwibzabZwiVsXsUw3dx+0GI6OpOATKE27vuIHwd5HCpUjbz2XScZk/WaVxmCSwawNb+Ix4oHiP63PFgcU+stF16Lir/3x1hWMsgcc29+F4ax8sKhu2WUG0+uDKXTM9/Y6g2RfYk/H85UKgTSzV3zo4KkCgYEAxy7l+Qt8gyghbSynm35C7oWuQ0QxkmDJ+I1SIOC7dgc1AAUCFuBtjNTjau4/mtnQVvQgy3wg5+hx39Yp8GZg/WFmNAc3NhMIsPBr+5YnMx+kjaYojsvEIbM4ZzdY7qGAmuwB/Az3lh2u15LC1Vafl52EThYPsXBIho6YB8cgwpMCgYADqLinIBdjaPc0cLNz1X5F6ExezFT2TdH7Dbed19iE8mYtIWN4QyOBc8RMiPGngd5p9ChF0viZoTxvqehE3g5I00uyJkmqfFTixDJf+0NFk9as/OlkznQJ9RNT+ZwK6gpFeG6+Tph3W0DEizwL9FZRfI45z9eJ3lmYzwvQN5pSMQKBgCLuGYxsNEC39+yyaQ4+vTQhI2dOfTcDXEgHWIDFiHpxVx0Sw8QJRYzuBJfLAkKAsiWdmGa29PpWbCnp3971xUqKGydCoK8N9Xc6ImWzdlpj0TK6EeDA4Ttbt6d6MFFg5zHD87ElAQJFYFUTurE5CLHJANvEyKnAXCekuAqdJCSbAoGAZOfEFVTwhXJwYeJnp6KXY2HOW7qKDQx9sLwI8kxVBZ8N7iqVJd6J8Cs/Rgd9XMTt8phTf1Fod7lZBMJ9HNfq6QOJk9/fzXitmiptDesGfsEwpqQ1zqiBcoAkKS/txmEyOhlKDpPok2KaKjdhTZV/yD18n+HCWvOrOwSl4bzTXfQ=";
 
         String       aliGatewayPublicKey="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA02zL7cOKwHpE1zeqRxb9pS79bQ7qL4a0rAx7hLTy/U2oCn5BEJYCIkFGQCR45sPsR6/AasgjxJX2d/l6IxSgDIP8LrS7DG0CZm8hIEhGXN/wpZ0bMwG8zvL1EAmXXrki78vcYgib3yNl8/+TXcc1FXUaMSes8HvtLUoDcWBQrt3X+OAmk8dG25iOCny+YcFLwB+w4z4NgpgVr4t/L1exOKvoHucMsmngyO+v34uIzQQy1xfRnUeJQ2MPNPf/Nnm0JHH6AOwFUcQZEZgw9XiP6+fnqEyuQXi2TvO9E+hqU1Olg5Q6DaQCq8EdgY12+X3a4Ob6zntRLsFNQ/bxt49mtQIDAQAB";
@@ -196,6 +198,36 @@ public class AliMaServiceImpl implements IAliMaService {
             System.out.println("调用失败");
         }
 
+    }
+
+
+    public static void main(String[] args) {
+        String aliGatewayPrivateKey="MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCbvpvdt7M4q/ERvj/pn30NVl4lWkjkxNrQGt94A8Yg3mOgdaYCuaMqk5/yAiuQH/GFz1fBl/1hs3vIugrE1sbzQZdJXARC2I63Ade1Janj1/ZgCVffylHpNwV3JkGUsc0ZW9etcSY6N3nuUZpeUzCGkGTkWvrYaC7DJjIlx1tntTl+orhNmtP/N9tt+cAvZ0mkbmj2FEU7Q2ouqHCOiGe3oqGigk40N6yGgEnlc0RdN9luevECKguerb1q0FPLppItU+/YhtXraAR7Ew5BmGuZqzSPGqkLliVvlfhyXvv6nlj8mCZUUm1VLKGEVUIuCm4u/Fe0jAjQzVG0aEOoGRMLAgMBAAECggEBAI3bToLjqIVs7zWXEQXNNAzq5vOkyZI9z4QPhg39egBEL4BeyGfhCEJmlh/LZDxxK/8SPT9jHfJYld3dvqNNcYbt7ktuWZ89OrhsIDqp5JVYBtuwhu6ajIMcj4jYOpGiZUq8wbUDw6rxDslIYI+bvC5E5PCuAZ8NPdKYPsL0U0ggeE9GNB8+F3aWtuZEOCCJuPKz82DyueOBeLrPTrYW4ecdAR3UcQO2Iu3QRuGF3LjvHoqQfbGPZSnVAXt4iix3e/+9DxFucVIzcSQe9EpFmH49DtE7u9q4qtSp7MY79wvU4a5FaUHM/fe9f2JGQ9A8wPXpZ7KjUeZrK2BHTavp95ECgYEAyCuoyCwhOqBmBEDwTSFbwibzabZwiVsXsUw3dx+0GI6OpOATKE27vuIHwd5HCpUjbz2XScZk/WaVxmCSwawNb+Ix4oHiP63PFgcU+stF16Lir/3x1hWMsgcc29+F4ax8sKhu2WUG0+uDKXTM9/Y6g2RfYk/H85UKgTSzV3zo4KkCgYEAxy7l+Qt8gyghbSynm35C7oWuQ0QxkmDJ+I1SIOC7dgc1AAUCFuBtjNTjau4/mtnQVvQgy3wg5+hx39Yp8GZg/WFmNAc3NhMIsPBr+5YnMx+kjaYojsvEIbM4ZzdY7qGAmuwB/Az3lh2u15LC1Vafl52EThYPsXBIho6YB8cgwpMCgYADqLinIBdjaPc0cLNz1X5F6ExezFT2TdH7Dbed19iE8mYtIWN4QyOBc8RMiPGngd5p9ChF0viZoTxvqehE3g5I00uyJkmqfFTixDJf+0NFk9as/OlkznQJ9RNT+ZwK6gpFeG6+Tph3W0DEizwL9FZRfI45z9eJ3lmYzwvQN5pSMQKBgCLuGYxsNEC39+yyaQ4+vTQhI2dOfTcDXEgHWIDFiHpxVx0Sw8QJRYzuBJfLAkKAsiWdmGa29PpWbCnp3971xUqKGydCoK8N9Xc6ImWzdlpj0TK6EeDA4Ttbt6d6MFFg5zHD87ElAQJFYFUTurE5CLHJANvEyKnAXCekuAqdJCSbAoGAZOfEFVTwhXJwYeJnp6KXY2HOW7qKDQx9sLwI8kxVBZ8N7iqVJd6J8Cs/Rgd9XMTt8phTf1Fod7lZBMJ9HNfq6QOJk9/fzXitmiptDesGfsEwpqQ1zqiBcoAkKS/txmEyOhlKDpPok2KaKjdhTZV/yD18n+HCWvOrOwSl4bzTXfQ=";
+
+        String       aliGatewayPublicKey="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA02zL7cOKwHpE1zeqRxb9pS79bQ7qL4a0rAx7hLTy/U2oCn5BEJYCIkFGQCR45sPsR6/AasgjxJX2d/l6IxSgDIP8LrS7DG0CZm8hIEhGXN/wpZ0bMwG8zvL1EAmXXrki78vcYgib3yNl8/+TXcc1FXUaMSes8HvtLUoDcWBQrt3X+OAmk8dG25iOCny+YcFLwB+w4z4NgpgVr4t/L1exOKvoHucMsmngyO+v34uIzQQy1xfRnUeJQ2MPNPf/Nnm0JHH6AOwFUcQZEZgw9XiP6+fnqEyuQXi2TvO9E+hqU1Olg5Q6DaQCq8EdgY12+X3a4Ob6zntRLsFNQ/bxt49mtQIDAQAB";
+        AlipayClient alipayClient = new DefaultAlipayClient(
+                "https://openapi.alipay.com/gateway.do","2018071160520849",aliGatewayPrivateKey,
+                "json","GBK",aliGatewayPublicKey,"RSA2");
+
+        //实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
+        AlipayTradeAppPayRequest request = new AlipayTradeAppPayRequest();
+        //SDK已经封装掉了公共参数，这里只需要传入业务参数。以下方法为sdk的model入参方式(model和biz_content同时存在的情况下取biz_content)。
+        AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();
+        model.setBody("test");
+        model.setSubject("test");
+        model.setOutTradeNo("v2018081215340462948752777");
+        model.setTimeoutExpress("30m");
+        model.setTotalAmount(String.valueOf(0.01));
+        model.setProductCode("QUICK_MSECURITY_PAY");
+        request.setBizModel(model);
+        request.setNotifyUrl("https://eds.jilunxing.com/eds/v1/ali/pay/callback");
+        try {
+            //这里和普通的接口调用不同，使用的是sdkExecute
+            alipayClient.sdkExecute(request);
+        } catch (Exception e) {
+            logger.error("AliPayServiceImpl.aliPrePay error",e);
+            throw new BizCoreRuntimeException(BizErrorConstants.PAY_SYSTEM_ERROR);
+        }
     }
 
 

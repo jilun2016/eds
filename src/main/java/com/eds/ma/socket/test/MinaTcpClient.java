@@ -32,54 +32,261 @@ public class MinaTcpClient extends IoHandlerAdapter {
 	}
 	public static void main(String[] args) throws Exception {
 		MinaTcpClient client = new MinaTcpClient();
-		for(int j=0;j<1;j++){ // 发送两遍
-//			byte[] bts = new byte[11];
-//			for (int i = 0; i < 11; i++) {
-//				bts[i] = (byte) i;
-//			}
-			byte[] bts = new byte[7];
-			bts[0] =  (byte) 0x18;
-			bts[1] =  (byte) 0x01;
-			bts[2] =  (byte) 0x11;
-			bts[3] =  (byte) 0x00;
-			bts[4] =  (byte) 0xbc;
-			bts[5] =  (byte) 0x61;
-			bts[6] =  (byte) 0x4e;
-			IoBuffer buffer = IoBuffer.allocate(7);
-			// 自动扩容
-			buffer.setAutoExpand(true);
-			// 自动收缩
-			buffer.setAutoShrink(true);
-			buffer.put(bts);
-			buffer.flip();
-			session.write(buffer);
-			Thread.sleep(2000);
+		int b = 5;
+		if(b == 1){
+			heartBeat();
 		}
-		// 关闭会话，待所有线程处理结束后
-//		client.connector.dispose(true);
+		if(b == 2){
+			register();
+		}
+
+		if(b == 3){
+			report();
+		}
+
+		if(b == 4){
+			gps();
+		}
+
+		if(b == 5){
+			control();
+		}
+
 	}
 
-	public static void main22(String[] args) throws InterruptedException {
-		MinaTcpClient client = new MinaTcpClient();
-//		byte[] temp = new byte[] { (byte) 0x18, (byte) 0x01, (byte) 0x11 };
-		byte[] temp = new byte[3];
-		temp[0] =  (byte) 0x18;
-		temp[1] =  (byte) 0x01;
-		temp[2] =  (byte) 0x11;
-
-
-		IoBuffer buffer = IoBuffer.allocate(3);
+	private static void heartBeat(){
+		byte[] bts = new byte[12];
+		bts[0] =  (byte) 0X21;
+		bts[1] =  (byte) 0x32;
+		bts[2] =  (byte) 0x34;
+		bts[3] =  (byte) 0xe4;
+		bts[4] =  (byte) 0xc2;
+		bts[5] =  (byte) 0xa1;
+		bts[6] =  (byte) 0x01;
+		bts[7] =  (byte) 0x04;
+		bts[8] =  (byte) 0xf2;
+		bts[9] =  (byte) 0xff;
+		bts[10] =  (byte) 0x04;
+		bts[11] =  (byte) 0xf4;
+		IoBuffer buffer = IoBuffer.allocate(12);
 		// 自动扩容
 		buffer.setAutoExpand(true);
 		// 自动收缩
 		buffer.setAutoShrink(true);
-		buffer.put(temp);
+		buffer.put(bts);
 		buffer.flip();
 		session.write(buffer);
-		Thread.sleep(2000);
-		// 关闭会话，待所有线程处理结束后
-		client.connector.dispose(true);
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
+
+	private static void register(){
+		byte[] bts = new byte[24];
+		bts[0] =  (byte) 0X21;
+		bts[1] =  (byte) 0x32;
+		bts[2] =  (byte) 0x34;
+		bts[3] =  (byte) 0xe4;
+		bts[4] =  (byte) 0xc2;
+		bts[5] =  (byte) 0xa1;
+		bts[6] =  (byte) 0x01;
+		bts[7] =  (byte) 0x04;
+		bts[8] =  (byte) 0x01;
+		bts[9] =  (byte) 0x01;
+		bts[10] =  (byte) 0x01;
+		bts[11] =  (byte) 0x01;
+		bts[12] =  (byte) 0xf1;
+		bts[13] =  (byte) 0xff;
+		bts[14] =  (byte) 0x04;
+		bts[15] =  (byte) 0xf4;
+		bts[16] =  (byte) 0xff;
+		bts[17] =  (byte) 0x04;
+		bts[18] =  (byte) 0xf4;
+		bts[19] =  (byte) 0xff;
+		bts[20] =  (byte) 0x04;
+		bts[21] =  (byte) 0xf4;
+		bts[22] =  (byte) 0x01;
+		bts[23] =  (byte) 0x00;
+
+		IoBuffer buffer = IoBuffer.allocate(24);
+		// 自动扩容
+		buffer.setAutoExpand(true);
+		// 自动收缩
+		buffer.setAutoShrink(true);
+		buffer.put(bts);
+		buffer.flip();
+		session.write(buffer);
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void report(){
+		byte[] bts = new byte[35];
+		bts[0] =  (byte) 0X21;
+		bts[1] =  (byte) 0x32;
+		bts[2] =  (byte) 0x34;
+		bts[3] =  (byte) 0xe4;
+		bts[4] =  (byte) 0xc2;
+		bts[5] =  (byte) 0xa1;
+		bts[6] =  (byte) 0x01;
+		bts[7] =  (byte) 0x04;
+		bts[8] =  (byte) 0x00;
+		bts[9] =  (byte) 0x00;
+		bts[10] =  (byte) 0x00;
+		bts[11] =  (byte) 0x01;
+		bts[12] =  (byte) 0xb3;
+		bts[13] =  (byte) 0xbb;
+		bts[14] =  (byte) 0xaa;
+		bts[15] =  (byte) 0xdd;
+		bts[16] =  (byte) 0xcc;
+		bts[17] =  (byte) 0x1c;
+		bts[18] =  (byte) 0x16;
+		bts[19] =  (byte) 0x06;
+		bts[20] =  (byte) 0x18;
+		bts[21] =  (byte) 0x64;
+		bts[22] =  (byte) 0x00;
+		bts[23] =  (byte) 0x3f;
+
+		bts[24] =  (byte) 0x02;
+		bts[25] =  (byte) 0x01;
+		bts[26] =  (byte) 0x32;
+		bts[27] =  (byte) 0;
+		bts[28] =  (byte) 0;
+		bts[29] =  (byte) 0;
+		bts[30] =  (byte) 0;
+		bts[31] =  (byte) 0;
+		bts[32] =  (byte) 0;
+		bts[33] =  (byte) 0;
+		bts[34] =  (byte) 0;
+
+		IoBuffer buffer = IoBuffer.allocate(35);
+		// 自动扩容
+		buffer.setAutoExpand(true);
+		// 自动收缩
+		buffer.setAutoShrink(true);
+		buffer.put(bts);
+		buffer.flip();
+		session.write(buffer);
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void gps(){
+		byte[] bts = new byte[35];
+		bts[0] =  (byte) 0X21;
+		bts[1] =  (byte) 0x32;
+		bts[2] =  (byte) 0x34;
+		bts[3] =  (byte) 0xe4;
+		bts[4] =  (byte) 0xc2;
+		bts[5] =  (byte) 0xa1;
+		bts[6] =  (byte) 0x01;
+		bts[7] =  (byte) 0x04;
+		bts[8] =  (byte) 0x00;
+		bts[9] =  (byte) 0x00;
+		bts[10] =  (byte) 0x00;
+		bts[11] =  (byte) 0x01;
+		bts[12] =  (byte) 0xb2;
+		bts[13] =  (byte) 0x32;
+		bts[14] =  (byte) 0x34;
+		bts[15] =  (byte) 0x32;
+		bts[16] =  (byte) 0x36;
+		bts[17] =  (byte) 0x2E;
+		bts[18] =  (byte) 0x30;
+		bts[19] =  (byte) 0x30;
+		bts[20] =  (byte) 0x30;
+		bts[21] =  (byte) 0x30;
+		bts[22] =  (byte) 0x4E;
+		bts[23] =  (byte) 0x31;
+
+		bts[24] =  (byte) 0x31;
+		bts[25] =  (byte) 0x38;
+		bts[26] =  (byte) 0x30;
+		bts[27] =  (byte) 0x34;
+		bts[28] =  (byte) 0x2E;
+		bts[29] =  (byte) 0x30;
+		bts[30] =  (byte) 0x30;
+		bts[31] =  (byte) 0x30;
+		bts[32] =  (byte) 0x30;
+		bts[33] =  (byte) 0x45;
+		bts[34] =  (byte) 0;
+
+		IoBuffer buffer = IoBuffer.allocate(35);
+		// 自动扩容
+		buffer.setAutoExpand(true);
+		// 自动收缩
+		buffer.setAutoShrink(true);
+		buffer.put(bts);
+		buffer.flip();
+		session.write(buffer);
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void control(){
+		byte[] bts = new byte[35];
+		bts[0] =  (byte) 0X21;
+		bts[1] =  (byte) 0x32;
+		bts[2] =  (byte) 0x34;
+		bts[3] =  (byte) 0xe4;
+		bts[4] =  (byte) 0xc2;
+		bts[5] =  (byte) 0xa1;
+		bts[6] =  (byte) 0x01;
+		bts[7] =  (byte) 0x04;
+		bts[8] =  (byte) 0x00;
+		bts[9] =  (byte) 0x00;
+		bts[10] =  (byte) 0x00;
+		bts[11] =  (byte) 0x01;
+		bts[12] =  (byte) 0xB1;
+		bts[13] =  (byte) 0xaa;
+		bts[14] =  (byte) 0xbb;
+		bts[15] =  (byte) 0xcc;
+		bts[16] =  (byte) 0xdd;
+		bts[17] =  (byte) 0x00;
+		bts[18] =  (byte) 0x32;
+		bts[19] =  (byte) 0x12;
+		bts[20] =  (byte) 0x07;
+		bts[21] =  (byte) 0x10;
+		bts[22] =  (byte) 0x12;
+		bts[23] =  (byte) 0x1c;
+
+		bts[24] =  (byte) 0;
+		bts[25] =  (byte) 0;
+		bts[26] =  (byte) 0;
+		bts[27] =  (byte) 0;
+		bts[28] =  (byte) 0;
+		bts[29] =  (byte) 0;
+		bts[30] =  (byte) 0;
+		bts[31] =  (byte) 0;
+		bts[32] =  (byte) 0;
+		bts[33] =  (byte) 0;
+		bts[34] =  (byte) 0;
+
+		IoBuffer buffer = IoBuffer.allocate(35);
+		// 自动扩容
+		buffer.setAutoExpand(true);
+		// 自动收缩
+		buffer.setAutoShrink(true);
+		buffer.put(bts);
+		buffer.flip();
+		session.write(buffer);
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
 	@Override
 	public void messageReceived(IoSession iosession, Object message)
 			throws Exception {
