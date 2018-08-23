@@ -188,4 +188,10 @@ public class SysConfig {
      */
     @Value("${aliPayCallbackUrl}")
     private String aliPayCallbackUrl;
+
+    /**
+     * 硬件socket port
+     */
+    @Value("${socketPort}")
+    private String socketPort;
 }

@@ -37,4 +37,14 @@ public interface MessageTypeConstants {
 	 */
 	Long DEVICE_HISTORY = 243L;
 
+	/**
+	 * 消息流向 硬件--->服务
+	 */
+	Integer MESSAGE_FLOW_RECEIVE = 1;
+
+	/**
+	 * 消息流向 服务--->硬件
+	 */
+	Integer MESSAGE_FLOW_SEND = 2;
+
 }

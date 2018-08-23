@@ -1,6 +1,7 @@
 package com.eds.ma.socket.message.handler;
 
-import com.eds.ma.socket.SessionMap;
+import com.eds.ma.config.SysConfig;
+import com.eds.ma.socket.SessionClient;
 import com.eds.ma.socket.message.MessageTypeConstants;
 import com.eds.ma.socket.message.vo.CommonHeadMessageVo;
 import com.eds.ma.util.SpringUtils;
@@ -11,7 +12,6 @@ import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.net.InetSocketAddress;
 import java.util.Objects;
 
 
@@ -27,6 +27,9 @@ public class ServerHandler extends IoHandlerAdapter {
 
     @Autowired
     private MessageHandler messageHandler;
+
+    @Autowired
+    private SysConfig sysConfig;
 
     public ServerHandler() {
         // TODO Auto-generated constructor stub
@@ -56,8 +59,7 @@ public class ServerHandler extends IoHandlerAdapter {
         }
 
         //保存客户端的会话session
-        SessionMap sessionMap = SessionMap.newInstance();
-        sessionMap.addSession(String.valueOf(((InetSocketAddress) session.getLocalAddress()).getPort()), session);
+        SessionClient.init(session);
     }
 
 
