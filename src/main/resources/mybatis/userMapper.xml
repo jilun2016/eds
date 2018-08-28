@@ -3,14 +3,13 @@
 <mapper namespace="com.eds.user" >
 
     <select id="queryUserByAliWx" resultType="com.eds.ma.bis.user.vo.ContextUser">
-        SELECT eu.id as userId,eu.aliUid,eu.openId,euw.wxUnionId,eu.mobile,euw.nickname as wxNickname,
-              euw.headimgurl as wxHeadimgurl,euw.subscribeCoupon,euw.rawData as wxUseRawData,
-              eua.aliNickname,eua.aliHeadimgurl,eua.aliTokenRawData,eua.aliUserRawData
-              <if test="openId != null">,euw.nickname,euw.headimgurl</if>
-              <if test="aliUid != null">,eua.aliNickname as nickname,eua.aliHeadimgurl as headimgurl</if>
+        SELECT eu.id as userId,eu.aliUid,eu.openId,eu.mobile
+              <if test="openId != null">,euw.wxUnionId,euw.nickname as wxNickname,
+                  euw.headimgurl as wxHeadimgurl,euw.subscribeCoupon,euw.rawData as wxUseRawData,euw.nickname,euw.headimgurl</if>
+              <if test="aliUid != null">,eua.aliNickname,eua.aliHeadimgurl,eua.aliTokenRawData,eua.aliUserRawData,eua.aliNickname as nickname,eua.aliHeadimgurl as headimgurl</if>
         FROM t_eds_user eu
-        left join t_eds_user_ali eua on eu.aliUid = eua.aliUid
-        left join t_eds_user_wxma euw on eu.openId = euw.openId
+        <if test="aliUid != null"> left join t_eds_user_ali eua on eu.aliUid = eua.aliUid</if>
+        <if test="openId != null">left join t_eds_user_wxma euw on eu.openId = euw.openId</if>
         WHERE
               <if test="openId != null">
                   eu.openId = #{openId} and euw.dataStatus = 1 and

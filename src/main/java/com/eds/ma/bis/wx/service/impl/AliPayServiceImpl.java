@@ -206,7 +206,7 @@ public class AliPayServiceImpl implements IAliPayService {
     private AlipayTradeAppPayResponse aliPrePay(String payCode,String payTitle,BigDecimal payMoney){
         //实例化客户端
         AlipayClient alipayClient = new DefaultAlipayClient( sysConfig.getAliGatewayUrl(),sysConfig.getAliMaAppId(),
-                sysConfig.getAliGatewayPrivateKey(),"json","GBK",sysConfig.getAliGatewayPublicKey(),"RSA2");
+                sysConfig.getAliGatewayPrivateKey(),"json","UTF-8",sysConfig.getAliGatewayPublicKey(),"RSA2");
 
         //实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
         AlipayTradeAppPayRequest request = new AlipayTradeAppPayRequest();

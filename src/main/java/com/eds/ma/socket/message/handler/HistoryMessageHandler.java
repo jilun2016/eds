@@ -1,5 +1,6 @@
 package com.eds.ma.socket.message.handler;
 
+import com.eds.ma.mongodb.collection.MongoDeviceControl;
 import com.eds.ma.mongodb.collection.MongoDeviceReport;
 import com.eds.ma.socket.message.vo.CommonHeadMessageVo;
 import com.xcrm.log.Logger;
@@ -24,6 +25,8 @@ public class HistoryMessageHandler extends BaseMessageHandler {
     @Override
     public void processDataMessage(CommonHeadMessageVo commonHeadMessageVo, String[] mesasge) {
         //处理历史报告消息
+        //查询设备检测结果信息
+        MongoDeviceReport mongoDeviceReport = messageHandler.parseHistoryMessage(commonHeadMessageVo, mesasge);
 
     }
 }

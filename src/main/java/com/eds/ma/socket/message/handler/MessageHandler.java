@@ -6,6 +6,9 @@ import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -62,7 +65,7 @@ public class MessageHandler {
      * @param mesasge
      * @return
      */
-    public MongoDeviceHeartBeat parseHeartBeatMessage(CommonHeadMessageVo commonHeadMessageVo,String[] mesasge){
+    public MongoDeviceHeartBeatRecord parseHeartBeatMessage(CommonHeadMessageVo commonHeadMessageVo,String[] mesasge){
         String allDeviceInfoMessage = H2B(mesasge[9]);
         Long deviceReturnStatus = B2L(allDeviceInfoMessage,0,2);
         Long deviceElectricityStatus = B2L(allDeviceInfoMessage,2,1);
@@ -71,7 +74,7 @@ public class MessageHandler {
         Long deviceNTCStatus = B2L(allDeviceInfoMessage,5,1);
         Long deviceReportStatus = B2L(allDeviceInfoMessage,6,1);
         Long deviceUseStatus = B2L(allDeviceInfoMessage,7,1);
-        MongoDeviceHeartBeat mongoDeviceHeartBeat = new MongoDeviceHeartBeat();
+        MongoDeviceHeartBeatRecord mongoDeviceHeartBeat = new MongoDeviceHeartBeatRecord();
         mongoDeviceHeartBeat.setDeviceKind(commonHeadMessageVo.getDeviceKind());
         mongoDeviceHeartBeat.setDeviceCode(commonHeadMessageVo.getDeviceCode());
         mongoDeviceHeartBeat.setDeviceUseStatus(deviceUseStatus);
@@ -86,6 +89,10 @@ public class MessageHandler {
         mongoDeviceHeartBeat.setCreated(now);
         mongoDeviceHeartBeat.setTimestamp(now.getTime());
         mongoTemplate.insert(mongoDeviceHeartBeat);
+
+        Query query = new Query(Criteria.where("deviceCode").is(commonHeadMessageVo.getDeviceCode()));
+        Update update = mongoDeviceHeartBeat.toMongoUpdate();
+        mongoTemplate.findAndModify(query,update,MongoDeviceHeartBeat.class);
         return mongoDeviceHeartBeat;
     }
 
@@ -210,8 +217,6 @@ public class MessageHandler {
                 H2L(mesasge[13]).intValue(),0);
         syncDate.set(MILLISECOND,0);
 
-
-
         //解析经纬度
         //解析纬度
         StringBuilder deviceLatSb = new StringBuilder();
@@ -224,8 +229,9 @@ public class MessageHandler {
         deviceLatSb.append(H2C(mesasge[20]));
         deviceLatSb.append(H2C(mesasge[21]));
         deviceLatSb.append(H2C(mesasge[22]));
+        mongoDeviceReport.setDeviceLat(deviceLatSb.toString());
         String deviceLatDesc = H2C(mesasge[23]);
-
+        mongoDeviceReport.setDeviceLatDesc(deviceLatDesc);
         //解析经度
         StringBuilder deviceLngSb = new StringBuilder();
         deviceLngSb.append(H2C(mesasge[24]));
@@ -239,23 +245,24 @@ public class MessageHandler {
         deviceLngSb.append(H2C(mesasge[32]));
         deviceLngSb.append(H2C(mesasge[33]));
         String deviceLngDesc = H2C(mesasge[34]);
+        mongoDeviceReport.setDeviceLng(deviceLngSb.toString());
+        mongoDeviceReport.setDeviceLngDesc(deviceLngDesc);
 
 
         mongoDeviceReport.setCreated(syncDate.getTime());
 
-        Long ASLHighValue = H2L(mesasge[35]);
-        Long ASLLowValue = H2L(mesasge[36]);
-        Long ASLDecimals = H2L(mesasge[37]);
+        mongoDeviceReport.setASLHighValue(H2L(mesasge[35]));
+        mongoDeviceReport.setASLLowValue(H2L(mesasge[36]));
+        mongoDeviceReport.setASLDecimals(H2L(mesasge[37]));
 
-        Long deviceTemperature = H2L(mesasge[38]);
-        Long deviceInTemperature = H2L(mesasge[39]);
-
-
-        Long HCHOHighValue = H2L(mesasge[40]);
-        Long HCHOLowValue = H2L(mesasge[41]);
-        Long HCHOValue = H2L(mesasge[42]);
+        mongoDeviceReport.setDeviceTemperature(H2L(mesasge[38]));
+        mongoDeviceReport.setDeviceInTemperature(H2L(mesasge[39]));
 
 
+        mongoDeviceReport.setHCHOHighValue(H2L(mesasge[40]));
+        mongoDeviceReport.setHCHOLowValue(H2L(mesasge[41]));
+        mongoDeviceReport.setHCHOValue(H2L(mesasge[42]));
+        mongoTemplate.insert(mongoDeviceReport);
         return mongoDeviceReport;
     }
 

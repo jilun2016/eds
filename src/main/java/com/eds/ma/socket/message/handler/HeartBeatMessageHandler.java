@@ -1,6 +1,7 @@
 package com.eds.ma.socket.message.handler;
 
 import com.eds.ma.mongodb.collection.MongoDeviceHeartBeat;
+import com.eds.ma.mongodb.collection.MongoDeviceHeartBeatRecord;
 import com.eds.ma.socket.message.vo.CommonHeadMessageVo;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,6 @@ public class HeartBeatMessageHandler extends BaseMessageHandler {
     @Override
     public void processDataMessage(CommonHeadMessageVo commonHeadMessageVo, String[] mesasge) {
         //解析心跳消息
-        MongoDeviceHeartBeat mongoDeviceHeartBeat = messageHandler.parseHeartBeatMessage(commonHeadMessageVo, mesasge);
+        MongoDeviceHeartBeatRecord mongoDeviceHeartBeat = messageHandler.parseHeartBeatMessage(commonHeadMessageVo, mesasge);
     }
 }

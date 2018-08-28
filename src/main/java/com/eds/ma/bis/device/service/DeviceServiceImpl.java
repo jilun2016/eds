@@ -20,9 +20,7 @@ import com.eds.ma.bis.order.service.IOrderService;
 import com.eds.ma.bis.user.entity.UserWallet;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.exception.BizCoreRuntimeException;
-import com.eds.ma.mongodb.MongoDbDaoSupport;
 import com.eds.ma.rest.common.BizErrorConstants;
-import com.eds.ma.socket.SessionMap;
 import com.eds.ma.socket.SocketConstants;
 import com.eds.ma.util.DistanceUtil;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
@@ -35,7 +33,6 @@ import com.xcrm.common.util.ListUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,9 +62,6 @@ public class DeviceServiceImpl implements IDeviceService {
 
     @Autowired
     private IEdsConfigService edsConfigService;
-
-    @Autowired
-    private MongoDbDaoSupport mongoDbDaoSupport;
 
 
     @Override
@@ -362,7 +356,6 @@ public class DeviceServiceImpl implements IDeviceService {
     public void sendDevcieStatusMessage(Long deviceId,Integer lockStatus) {
         DeviceRelation deviceRelation = queryDeviceRelationByDeviceId(deviceId);
         if(Objects.nonNull(deviceRelation)){
-            SessionMap sessionMap = SessionMap.newInstance();
 
 //            DeviceDataVo deviceDataVo = sessionMap.sendDevcieStatusMessage(deviceRelation.getPort(),deviceRelation.getOriginDeviceId(),lockStatus);
 //            //保存设备锁状态记录
