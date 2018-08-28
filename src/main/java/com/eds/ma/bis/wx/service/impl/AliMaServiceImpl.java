@@ -235,9 +235,10 @@ public class AliMaServiceImpl implements IAliMaService {
 
         AlipayOpenAppQrcodeCreateRequest request = new AlipayOpenAppQrcodeCreateRequest();
         request.setBizContent("{" +
-                "\"url_param\":\"page/component/index\"," + "\"query_param\":\"spid=2\"," + "\"describe\":\"二维码描述\"" +
+                "\"url_param\":\"page/API/index/index\"," + "\"query_param\":\"spid=2\"," + "\"describe\":\"二维码描述\"" +
                 " }");
         AlipayOpenAppQrcodeCreateResponse response = alipayClient.execute(request);
+        System.out.println(response.getQrCodeUrl());
         if(response.isSuccess()){
             System.out.println("调用成功");
         } else {

@@ -92,14 +92,14 @@ public class JobServiceImpl implements IJobService {
 					.filter(payRefund -> Objects.equals(OrderPayTypeEnum.S_ZFFS_WX.value(),payRefund.getPayType()))
 					.collect(Collectors.toList());
 			if(ListUtil.isNotEmpty(wxPayRefundList)){
-				wxRefundPayService.wxRefundQuery(payRefundList);
+				wxRefundPayService.wxRefundQuery(wxPayRefundList);
 			}
 
 			List<PayRefund> aliPayRefundList = payRefundList.stream()
 					.filter(payRefund -> Objects.equals(OrderPayTypeEnum.S_ZFFS_ZFB.value(),payRefund.getPayType()))
 					.collect(Collectors.toList());
 			if(ListUtil.isNotEmpty(aliPayRefundList)){
-                aliRefundPayService.aliRefundQuery(payRefundList);
+                aliRefundPayService.aliRefundQuery(aliPayRefundList);
 			}
 		}
 	}

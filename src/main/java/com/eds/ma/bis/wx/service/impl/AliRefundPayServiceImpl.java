@@ -124,7 +124,7 @@ public class AliRefundPayServiceImpl implements IAliRefundPayService {
         log.setReqData("{\"trade_no\":"+payRefund.getPayTradeNo()+"}");
         try {
             AlipayTradeFastpayRefundQueryRequest request = new AlipayTradeFastpayRefundQueryRequest();
-            request.setBizContent("{" +
+            request.setBizContent("{" + "\"out_request_no\":\""+payRefund.getOrderTkCode()+"\","+
                     "\"trade_no\":\""+payRefund.getPayTradeNo()+"\"}");
             AlipayTradeFastpayRefundQueryResponse response = alipayClient.execute(request);
             if(response.isSuccess()){
