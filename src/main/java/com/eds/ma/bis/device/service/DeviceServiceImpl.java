@@ -132,6 +132,7 @@ public class DeviceServiceImpl implements IDeviceService {
 
     @Override
     public void deviceRent(Long deviceId, Long userId, BigDecimal userLat, BigDecimal userLng) {
+
         //查询设备信息进行校验
         DeviceRentDetailVo deviceRentDetailVo = queryRentDeviceById(deviceId, null);
         if(Objects.isNull(deviceRentDetailVo)){
