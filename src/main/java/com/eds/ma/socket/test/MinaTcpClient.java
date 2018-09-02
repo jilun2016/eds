@@ -1,7 +1,9 @@
 package com.eds.ma.socket.test;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
+import java.util.List;
 
+import com.eds.ma.socket.util.SocketMessageUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.service.IoConnector;
@@ -32,7 +34,7 @@ public class MinaTcpClient extends IoHandlerAdapter {
 	}
 	public static void main(String[] args) throws Exception {
 		MinaTcpClient client = new MinaTcpClient();
-		int b = 5;
+		int b = 15;
 		if(b == 1){
 			heartBeat();
 		}
@@ -50,6 +52,21 @@ public class MinaTcpClient extends IoHandlerAdapter {
 
 		if(b == 5){
 			control();
+		}
+
+		byte[] bts = SocketMessageUtils.L2Bytes(14131905958052100L,8);
+		IoBuffer buffer = IoBuffer.allocate(bts.length);
+		// 自动扩容
+		buffer.setAutoExpand(true);
+		// 自动收缩
+		buffer.setAutoShrink(true);
+		buffer.put(bts);
+		buffer.flip();
+		session.write(buffer);
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 
 	}

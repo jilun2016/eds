@@ -7,9 +7,9 @@ public interface ISocketMessageService {
 
     /**
      * 查询设备状态信息
-     * @param deviceCode
+     * @param deviceOriginCode
      * @return
      */
-    MongoDeviceHeartBeat queryDeviceStatusInfo(String deviceCode);
+    MongoDeviceHeartBeat queryDeviceStatusInfo(String deviceOriginCode);
 
 }

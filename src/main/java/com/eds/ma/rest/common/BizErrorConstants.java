@@ -136,6 +136,9 @@ public interface BizErrorConstants {
 	 */
 	String USER_COUPON_UNSUBSCRIBE_CLAIM_ERROR = "E10025";
 
-
+	/**
+	 * 设备状态错误,无法租借,请联系客服
+	 */
+	String DEVICE_RENT_STATUS_ERROR = "E10026";
 
 }

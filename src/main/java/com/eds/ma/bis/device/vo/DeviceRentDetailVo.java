@@ -1,5 +1,7 @@
 package com.eds.ma.bis.device.vo;
 
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -8,12 +10,18 @@ import java.util.Date;
  * @Author gaoyan
  * @Date: 2017/12/24
  */
+@Data
 public class DeviceRentDetailVo {
 
     /**
      * 设备id
      */
     private Long deviceId;
+
+    /**
+     * 设备原始code
+     */
+    private String deviceOriginCode;
 
     /**
      * 商户id
@@ -48,100 +56,12 @@ public class DeviceRentDetailVo {
     private Long orderId;
 
     /**
-     * 设备精度
+     * 店铺位置精度
      */
-    private BigDecimal deviceLng;
+    private BigDecimal spLng;
 
     /**
-     * 设备纬度
+     * 店铺位置纬度
      */
-    private BigDecimal deviceLat;
-
-    public Long getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(Long deviceId) {
-        this.deviceId = deviceId;
-    }
-
-    public Long getSpId() {
-        return spId;
-    }
-
-    public void setSpId(Long spId) {
-        this.spId = spId;
-    }
-
-    public String getDeviceStatus() {
-        return deviceStatus;
-    }
-
-    public void setDeviceStatus(String deviceStatus) {
-        this.deviceStatus = deviceStatus;
-    }
-
-    public String getOrderStatus() {
-        return orderStatus;
-    }
-
-    public void setOrderStatus(String orderStatus) {
-        this.orderStatus = orderStatus;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Date getRentTime() {
-        return rentTime;
-    }
-
-    public void setRentTime(Date rentTime) {
-        this.rentTime = rentTime;
-    }
-
-    public Long getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
-    }
-
-    public BigDecimal getDeviceLng() {
-        return deviceLng;
-    }
-
-    public void setDeviceLng(BigDecimal deviceLng) {
-        this.deviceLng = deviceLng;
-    }
-
-    public BigDecimal getDeviceLat() {
-        return deviceLat;
-    }
-
-    public void setDeviceLat(BigDecimal deviceLat) {
-        this.deviceLat = deviceLat;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("DeviceRentDetailVo{");
-        sb.append("deviceId=").append(deviceId);
-        sb.append(", spId=").append(spId);
-        sb.append(", deviceStatus='").append(deviceStatus).append('\'');
-        sb.append(", orderStatus='").append(orderStatus).append('\'');
-        sb.append(", userId=").append(userId);
-        sb.append(", rentTime=").append(rentTime);
-        sb.append(", orderId=").append(orderId);
-        sb.append(", deviceLng=").append(deviceLng);
-        sb.append(", deviceLat=").append(deviceLat);
-        sb.append('}');
-        return sb.toString();
-    }
+    private BigDecimal spLat;
 }

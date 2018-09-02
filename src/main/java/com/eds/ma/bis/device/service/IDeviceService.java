@@ -121,4 +121,10 @@ public interface IDeviceService {
      * @return
      */
     Pagination queryDeviceFaq(Integer pageNo, Integer pageSize);
+
+    /**
+     * 向硬件发送查询位置指令
+     * @param deviceId
+     */
+    void queryDevicePosition(Long deviceId);
 }

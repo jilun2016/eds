@@ -56,7 +56,7 @@ public class UserResource extends BaseAuthedResource{
 	@Produces(MediaType.APPLICATION_JSON)
     @NoAuth
 	public Response test(@QueryParam("message") String  message) {
-//        SessionMap.newInstance().sendMessage(new String[]{"9000"},message);
+//        SessionClient.newInstance().sendMessage(new String[]{"9000"},message);
 
         return Response.ok().build();
 	}

@@ -1,10 +1,16 @@
 package com.eds.ma.socket.message.handler;
 
 import com.eds.ma.mongodb.collection.MongoDeviceGPS;
+import com.eds.ma.socket.message.MessageTypeConstants;
 import com.eds.ma.socket.message.vo.CommonHeadMessageVo;
+import com.eds.ma.socket.util.SocketMessageUtils;
+import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
+
+import java.util.Date;
 
 
 /**
@@ -18,11 +24,78 @@ public class GPSMessageHandler extends BaseMessageHandler {
     private static Logger logger = Logger.getLogger(GPSMessageHandler.class);
 
     @Autowired
-    private MessageHandler messageHandler;
+    protected MongoTemplate mongoTemplate;
+
+    @Override
+    public Long getMessageType() {
+        return MessageTypeConstants.DEVICE_GPS;
+    }
 
     @Override
     public void processDataMessage(CommonHeadMessageVo commonHeadMessageVo, String[] mesasge) {
         //解析位置消息
-        MongoDeviceGPS mongoDeviceGPS = messageHandler.parseGPSMessage(commonHeadMessageVo, mesasge);
+        MongoDeviceGPS mongoDeviceGPS = parseGPSMessage(commonHeadMessageVo, mesasge);
+    }
+
+    /**
+     * mesasgeField 定义为无效
+     * @param commonHeadMessageVo
+     * @param mesasgeField
+     */
+    @Override
+    public void sendDataMessage(CommonHeadMessageVo commonHeadMessageVo, String... mesasgeField) {
+
+
+    }
+
+
+    /**
+     * 解析查询报告消息
+     * @param commonHeadMessageVo
+     * @param mesasge
+     * @return
+     */
+    private MongoDeviceGPS parseGPSMessage(CommonHeadMessageVo commonHeadMessageVo, String[] mesasge){
+        MongoDeviceGPS mongoDeviceGPS = new MongoDeviceGPS();
+        mongoDeviceGPS.setDeviceKind(commonHeadMessageVo.getDeviceKind());
+        mongoDeviceGPS.setDeviceCode(commonHeadMessageVo.getDeviceCode());
+        mongoDeviceGPS.setMessageNo(commonHeadMessageVo.getMessageNo());
+        //解析经纬度
+        //解析纬度
+        StringBuilder deviceLatSb = new StringBuilder();
+        deviceLatSb.append(SocketMessageUtils.H2C(mesasge[13]));
+        deviceLatSb.append(SocketMessageUtils.H2C(mesasge[14]));
+        deviceLatSb.append(SocketMessageUtils.H2C(mesasge[15]));
+        deviceLatSb.append(SocketMessageUtils.H2C(mesasge[16]));
+        deviceLatSb.append(SocketMessageUtils.H2C(mesasge[17]));
+        deviceLatSb.append(SocketMessageUtils.H2C(mesasge[18]));
+        deviceLatSb.append(SocketMessageUtils.H2C(mesasge[19]));
+        deviceLatSb.append(SocketMessageUtils.H2C(mesasge[20]));
+        deviceLatSb.append(SocketMessageUtils.H2C(mesasge[21]));
+        String deviceLatDesc = SocketMessageUtils.H2C(mesasge[22]);
+        mongoDeviceGPS.setDeviceLat(deviceLatSb.toString());
+        mongoDeviceGPS.setDeviceLatDesc(deviceLatDesc);
+
+        //解析经度
+        StringBuilder deviceLngSb = new StringBuilder();
+        deviceLngSb.append(SocketMessageUtils.H2C(mesasge[23]));
+        deviceLngSb.append(SocketMessageUtils.H2C(mesasge[24]));
+        deviceLngSb.append(SocketMessageUtils.H2C(mesasge[25]));
+        deviceLngSb.append(SocketMessageUtils.H2C(mesasge[26]));
+        deviceLngSb.append(SocketMessageUtils.H2C(mesasge[27]));
+        deviceLngSb.append(SocketMessageUtils.H2C(mesasge[28]));
+        deviceLngSb.append(SocketMessageUtils.H2C(mesasge[29]));
+        deviceLngSb.append(SocketMessageUtils.H2C(mesasge[30]));
+        deviceLngSb.append(SocketMessageUtils.H2C(mesasge[31]));
+        deviceLngSb.append(SocketMessageUtils.H2C(mesasge[32]));
+        String deviceLngDesc = SocketMessageUtils.H2C(mesasge[33]);
+        mongoDeviceGPS.setDeviceLng(deviceLngSb.toString());
+        mongoDeviceGPS.setDeviceLngDesc(deviceLngDesc);
+
+        Date now = DateFormatUtils.getNow();
+        mongoDeviceGPS.setCreated(now);
+        mongoDeviceGPS.setTimestamp(now.getTime());
+        mongoTemplate.insert(mongoDeviceGPS);
+        return mongoDeviceGPS;
     }
 }

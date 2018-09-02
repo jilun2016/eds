@@ -20,8 +20,14 @@ import com.eds.ma.bis.order.service.IOrderService;
 import com.eds.ma.bis.user.entity.UserWallet;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.exception.BizCoreRuntimeException;
+import com.eds.ma.mongodb.collection.MongoDeviceHeartBeat;
 import com.eds.ma.rest.common.BizErrorConstants;
 import com.eds.ma.socket.SocketConstants;
+import com.eds.ma.socket.message.MessageTypeConstants;
+import com.eds.ma.socket.message.handler.BaseMessageHandler;
+import com.eds.ma.socket.message.handler.CommonMessageHandler;
+import com.eds.ma.socket.message.service.ISocketMessageService;
+import com.eds.ma.socket.message.vo.CommonHeadMessageVo;
 import com.eds.ma.util.DistanceUtil;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
 import com.xcrm.cloud.database.db.query.QueryBuilder;
@@ -63,6 +69,11 @@ public class DeviceServiceImpl implements IDeviceService {
     @Autowired
     private IEdsConfigService edsConfigService;
 
+    @Autowired
+    private ISocketMessageService socketMessageService;
+
+    @Autowired
+    private CommonMessageHandler commonMessageHandler;
 
     @Override
     public Device queryDeviceById(Long deviceId) {
@@ -134,11 +145,25 @@ public class DeviceServiceImpl implements IDeviceService {
 
         EdsConfig edsConfig = edsConfigService.queryEdsConfig();
         //设备,用户位置校验
-        double checkDistance = DistanceUtil.getDistance(deviceRentDetailVo.getDeviceLng().doubleValue()
-                ,deviceRentDetailVo.getDeviceLat().doubleValue()
+        double checkDistance = DistanceUtil.getDistance(deviceRentDetailVo.getSpLng().doubleValue()
+                ,deviceRentDetailVo.getSpLat().doubleValue()
                 ,userLng.doubleValue(), userLat.doubleValue());
         if(checkDistance >edsConfig.getValidDistance()){
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RENT_OUT_RANGE);
+        }
+        //获取设备的位置
+
+
+        //查询设备状态
+        MongoDeviceHeartBeat deviceHeartBeat = socketMessageService.queryDeviceStatusInfo(deviceRentDetailVo.getDeviceOriginCode());
+        if(Objects.isNull(deviceHeartBeat)
+                || Objects.equals(deviceHeartBeat.getDeviceUseStatus(),1L)
+                || Objects.equals(deviceHeartBeat.getDeviceNTCStatus(),1L)
+                || Objects.equals(deviceHeartBeat.getDeviceTemperatureStatus(),1L)
+                || Objects.equals(deviceHeartBeat.getDeviceIntakeValveStatus(),1L)
+                || Objects.equals(deviceHeartBeat.getDeviceElectricityStatus(),1L)
+                || (!Objects.equals(deviceHeartBeat.getDeviceReturnStatus(),3L))){
+            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RENT_STATUS_ERROR);
         }
 
         //对用户信息,钱包进行校验
@@ -167,8 +192,8 @@ public class DeviceServiceImpl implements IDeviceService {
         UserDeviceRecord userDeviceRecord = new UserDeviceRecord();
         userDeviceRecord.setCreated(now);
         userDeviceRecord.setDeviceId(deviceId);
-        userDeviceRecord.setDeviceLat(deviceRentDetailVo.getDeviceLat());
-        userDeviceRecord.setDeviceLng(deviceRentDetailVo.getDeviceLng());
+//        userDeviceRecord.setDeviceLat(deviceRentDetailVo.getDeviceLat());
+//        userDeviceRecord.setDeviceLng(deviceRentDetailVo.getDeviceLng());
         userDeviceRecord.setDeviceStatus(DeviceStatusEnum.S_SPZT_SYZ.value());
         userDeviceRecord.setOpTime(now);
         userDeviceRecord.setOrderId(order.getId());
@@ -380,6 +405,23 @@ public class DeviceServiceImpl implements IDeviceService {
                 .setParam("pageSize", pageSize);
         queryOrderListSqb.setIncludeTotalCount(true);
         return dao.findForPage(queryOrderListSqb);
+    }
+
+    @Override
+    public void queryDevicePosition(Long deviceId) {
+        Device device = queryDeviceById(deviceId);
+        if(Objects.isNull(device)){
+            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_NOT_EXIST_ERROR);
+        }
+
+        //根据消息的报文功能码不同,走不同处理
+        BaseMessageHandler messageHandler = commonMessageHandler.getMessageHandler(MessageTypeConstants.DEVICE_GPS);
+        if(Objects.nonNull(messageHandler)){
+            CommonHeadMessageVo commonHeadMessageVo = messageHandler.buildHeadMessage(device.getDeviceOriginCode());
+            messageHandler.sendDataMessage(commonHeadMessageVo);
+        }
+
+
     }
 
 

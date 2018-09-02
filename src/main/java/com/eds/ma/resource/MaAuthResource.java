@@ -34,13 +34,7 @@ public class MaAuthResource extends BaseAuthedResource {
 	private static Logger logger = Logger.getLogger(MaAuthResource.class);
 
 	@Autowired
-	private IAliMaService aliMaService;
-
-	@Autowired
 	private IUserService userService;
-
-	@Autowired
-	private SysConfig sysConfig;
 
 	/**
 	 * 发送短信验证码

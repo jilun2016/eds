@@ -8,6 +8,12 @@ package com.eds.ma.socket;
 public interface SocketConstants {
 
 	/**
+	 * 设备类型-甲醛检测仪
+	 */
+	Long DEVICE_KIND_HCHO = 33L;
+
+
+	/**
 	 *  指令 硬件上传
 	 */
 	Integer DEVICE_FLOW_CLIENT_UPLOAD = 1;

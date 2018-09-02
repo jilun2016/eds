@@ -146,6 +146,10 @@ public class AliMaServiceImpl implements IAliMaService {
             //已过期
             throw new BizCoreRuntimeException(BizErrorConstants.SMSCODE_EXPIRED);
         } else {
+            Ssqb updateInvalidUidSqb = Ssqb.create("com.eds.user.updateInvalidAliUid")
+                    .setParam("aliUid", aliUid);
+            dao.updateByMybatis(updateInvalidUidSqb);
+
             Ssqb query = Ssqb.create("com.eds.user.updateAliMemberLoginSuc")
                     .setParam("loginTime", new Timestamp(System.currentTimeMillis()))
                     .setParam("aliUid", aliUid)

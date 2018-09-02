@@ -26,7 +26,7 @@ public class ServerHandler extends IoHandlerAdapter {
     private static Logger logger = Logger.getLogger(ServerHandler.class);
 
     @Autowired
-    private MessageHandler messageHandler;
+    private CommonMessageHandler commonMessageHandler;
 
     @Autowired
     private SysConfig sysConfig;
@@ -48,20 +48,18 @@ public class ServerHandler extends IoHandlerAdapter {
         IoBuffer bbuf = (IoBuffer) message;
         logger.info("收到消息：" + bbuf.getHexDump());
         String[] mesasgeArray = bbuf.getHexDump().split(" ");
-        CommonHeadMessageVo commonHeadMessageVo = messageHandler.parseHeadMessage(mesasgeArray);
+        CommonHeadMessageVo commonHeadMessageVo = commonMessageHandler.parseHeadMessage(mesasgeArray);
         //如果字节错误,那么忽略消息
         if(Objects.nonNull(commonHeadMessageVo)){
             //根据消息的报文功能码不同,走不同处理
-            BaseMessageHandler messageHandler = getMessageHandler(commonHeadMessageVo.getMessageType());
+            BaseMessageHandler messageHandler = commonMessageHandler.getMessageHandler(commonHeadMessageVo.getMessageType());
             if(Objects.nonNull(messageHandler)){
                 messageHandler.processDataMessage(commonHeadMessageVo,mesasgeArray);
             }
+            //保存客户端的会话session
+            SessionClient.addSession(commonHeadMessageVo.getDeviceCode(),session);
         }
-
-        //保存客户端的会话session
-        SessionClient.init(session);
     }
-
 
     @Override
     public void messageSent(IoSession session, Object message) {
@@ -96,32 +94,6 @@ public class ServerHandler extends IoHandlerAdapter {
             targets[i] = (byte) ((lo >>> offset) & 0xFF);
         }
         return targets;
-    }
-
-    private BaseMessageHandler getMessageHandler(Long messageType){
-        //心跳消息处理
-        if(Objects.equals(messageType,MessageTypeConstants.DEVICE_HEARTBEAT)){
-            return SpringUtils.getBean("heartBeatMessageHandler");
-        }
-        //注册消息处理
-        if(Objects.equals(messageType,MessageTypeConstants.DEVICE_REGISTER)){
-            return SpringUtils.getBean("registerMessageHandler");
-        }
-        //报告消息处理
-        if(Objects.equals(messageType,MessageTypeConstants.DEVICE_REPORT)){
-            return SpringUtils.getBean("reportMessageHandler");
-        }
-
-        //GPS消息处理
-        if(Objects.equals(messageType,MessageTypeConstants.DEVICE_GPS)){
-            return SpringUtils.getBean("gpsMessageHandler");
-        }
-
-        //设备控制消息处理
-        if(Objects.equals(messageType,MessageTypeConstants.DEVICE_CONTROL)){
-            return SpringUtils.getBean("deviceControlHandler");
-        }
-        return null;
     }
 
     public static void main(String[] args) {

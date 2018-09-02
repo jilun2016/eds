@@ -58,4 +58,17 @@ class SHA1 {
 			throw new AesException(AesException.ComputeSignatureError);
 		}
 	}
+
+	public static void main(String[] args) {
+
+		long i = 33;
+		System.out.println("Number = " + i);
+		System.out.println("Hex = " + Long.toHexString(i));
+		byte[] bts = new byte[13];
+		bts[0] =  (byte) (i & 0xFF);
+		bts[1] =  (byte) (0x21);
+		System.out.println(bts[0]);
+
+
+	}
 }

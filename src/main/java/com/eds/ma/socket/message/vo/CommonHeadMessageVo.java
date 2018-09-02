@@ -34,4 +34,23 @@ public class CommonHeadMessageVo {
      */
     private Long deviceSignalStrength;
 
+    public byte[] toBytes(){
+
+        byte[] bts = new byte[13];
+        bts[0] =  (byte) deviceKind.intValue();
+        bts[1] =  (byte) deviceCode.intValue();
+        bts[2] =  (byte) 0x34;
+        bts[3] =  (byte) 0xe4;
+        bts[4] =  (byte) 0xc2;
+        bts[5] =  (byte) 0xa1;
+        bts[6] =  (byte) 0x01;
+        bts[7] =  (byte) 0x04;
+        bts[8] =  (byte) 0x01;
+        bts[9] =  (byte) 0x01;
+        bts[10] =  (byte) 0x01;
+        bts[11] =  (byte) 0x01;
+        bts[12] =  (byte) 0xf1;
+        return bts;
+    }
+
 }

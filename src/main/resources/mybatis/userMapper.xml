@@ -72,10 +72,18 @@
         WHERE id=#{userId} AND dataStatus=1
     </update>
 
+    <update id="updateInvalidAliUid">
+        UPDATE t_eds_user SET aliUid = null WHERE aliUid=#{aliUid}
+    </update>
+
     <update id="updateWxMemberLoginSuc">
         UPDATE t_eds_user
         SET openId = #{openId},wxUnionId = #{wxUnionId},wxLoginTime = #{loginTime},wxSmsCode = '',wxSmsExpired = null
         WHERE id=#{userId} AND dataStatus=1
+    </update>
+
+    <update id="updateInvalidWxUid">
+        UPDATE t_eds_user SET openId = null,wxUnionId=null WHERE openId=#{openId} or wxUnionId=#{wxUnionId}
     </update>
 
 </mapper>

@@ -15,6 +15,7 @@ import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -38,6 +39,19 @@ public class DeviceResource extends BaseAuthedResource{
 
 	@Autowired
 	private IEdsConfigService edsConfigService;
+
+	/**
+	 * 查询设备的位置信息
+	 */
+	@GET
+	@Path("/{deviceId}/position")
+	@Produces(MediaType.APPLICATION_JSON)
+	@NoAuth
+	public Response queryDevicePosition(@NotNull(message="设备id不允许为空") @PathParam("deviceId") Long deviceId) {
+		logger.debug("----DeviceResource.queryDevicePosition({})----", deviceId);
+		deviceService.queryDevicePosition(deviceId);
+		return Response.ok().build();
+	}
 
 	/**
 	 * 查询指定范围的设备

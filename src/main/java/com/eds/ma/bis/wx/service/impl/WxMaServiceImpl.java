@@ -102,6 +102,11 @@ public class WxMaServiceImpl implements IWxMaService {
             //已过期
             throw new BizCoreRuntimeException(BizErrorConstants.SMSCODE_EXPIRED);
         } else {
+            Ssqb updateInvalidUidSqb = Ssqb.create("com.eds.user.updateInvalidWxUid")
+                    .setParam("wxUnionId", userWxMa.getWxUnionId())
+                    .setParam("openId", openId);
+            dao.updateByMybatis(updateInvalidUidSqb);
+
             Ssqb query = Ssqb.create("com.eds.user.updateWxMemberLoginSuc")
                     .setParam("loginTime", new Timestamp(System.currentTimeMillis()))
                     .setParam("wxUnionId", userWxMa.getWxUnionId())
