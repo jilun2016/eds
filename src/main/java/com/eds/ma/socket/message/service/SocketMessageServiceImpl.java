@@ -1,6 +1,7 @@
 package com.eds.ma.socket.message.service;
 
 import com.eds.ma.config.SysConfig;
+import com.eds.ma.mongodb.collection.MongoDeviceGPS;
 import com.eds.ma.mongodb.collection.MongoDeviceHeartBeat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,5 +30,12 @@ public class SocketMessageServiceImpl implements ISocketMessageService {
         Query query = new Query();
         query.addCriteria(Criteria.where("deviceCode").is(deviceOriginCode));
         return mongoTemplate.findOne(query,MongoDeviceHeartBeat.class);
+    }
+
+    @Override
+    public MongoDeviceGPS queryMessageGPS(Long messageNo) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("messageNo").is(messageNo));
+        return mongoTemplate.findOne(query,MongoDeviceGPS.class);
     }
 }

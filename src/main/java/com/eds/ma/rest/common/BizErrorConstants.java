@@ -141,4 +141,9 @@ public interface BizErrorConstants {
 	 */
 	String DEVICE_RENT_STATUS_ERROR = "E10026";
 
+	/**
+	 * 设备位置信息未获取到,请稍后再试
+	 */
+	String DEVICE_POSITISON_ERROR = "E10027";
+
 }

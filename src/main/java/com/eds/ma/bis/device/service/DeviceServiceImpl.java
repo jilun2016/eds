@@ -20,6 +20,7 @@ import com.eds.ma.bis.order.service.IOrderService;
 import com.eds.ma.bis.user.entity.UserWallet;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.exception.BizCoreRuntimeException;
+import com.eds.ma.mongodb.collection.MongoDeviceGPS;
 import com.eds.ma.mongodb.collection.MongoDeviceHeartBeat;
 import com.eds.ma.rest.common.BizErrorConstants;
 import com.eds.ma.socket.SocketConstants;
@@ -72,8 +73,6 @@ public class DeviceServiceImpl implements IDeviceService {
     @Autowired
     private ISocketMessageService socketMessageService;
 
-    @Autowired
-    private CommonMessageHandler commonMessageHandler;
 
     @Override
     public Device queryDeviceById(Long deviceId) {
@@ -152,7 +151,10 @@ public class DeviceServiceImpl implements IDeviceService {
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RENT_OUT_RANGE);
         }
         //获取设备的位置
-
+        MongoDeviceGPS mongoDeviceGPS = socketMessageService.queryMessageGPS(1L);
+        if(Objects.isNull(mongoDeviceGPS)){
+            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_POSITISON_ERROR);
+        }
 
         //查询设备状态
         MongoDeviceHeartBeat deviceHeartBeat = socketMessageService.queryDeviceStatusInfo(deviceRentDetailVo.getDeviceOriginCode());
@@ -414,12 +416,12 @@ public class DeviceServiceImpl implements IDeviceService {
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_NOT_EXIST_ERROR);
         }
 
-        //根据消息的报文功能码不同,走不同处理
-        BaseMessageHandler messageHandler = commonMessageHandler.getMessageHandler(MessageTypeConstants.DEVICE_GPS);
-        if(Objects.nonNull(messageHandler)){
-            CommonHeadMessageVo commonHeadMessageVo = messageHandler.buildHeadMessage(device.getDeviceOriginCode());
-            messageHandler.sendDataMessage(commonHeadMessageVo);
-        }
+//        //根据消息的报文功能码不同,走不同处理
+//        BaseMessageHandler messageHandler = commonMessageHandler.getMessageHandler(MessageTypeConstants.DEVICE_GPS);
+//        if(Objects.nonNull(messageHandler)){
+//            CommonHeadMessageVo commonHeadMessageVo = messageHandler.buildHeadMessage(device.getDeviceOriginCode());
+//            messageHandler.sendDataMessage(commonHeadMessageVo);
+//        }
 
 
     }
