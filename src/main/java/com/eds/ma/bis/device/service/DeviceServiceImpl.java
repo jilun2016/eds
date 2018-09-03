@@ -195,8 +195,8 @@ public class DeviceServiceImpl implements IDeviceService {
         UserDeviceRecord userDeviceRecord = new UserDeviceRecord();
         userDeviceRecord.setCreated(now);
         userDeviceRecord.setDeviceId(deviceId);
-//        userDeviceRecord.setDeviceLat(deviceRentDetailVo.getDeviceLat());
-//        userDeviceRecord.setDeviceLng(deviceRentDetailVo.getDeviceLng());
+        userDeviceRecord.setDeviceLat(BigDecimal.valueOf(Double.valueOf(mongoDeviceGPS.getDeviceLat())));
+        userDeviceRecord.setDeviceLng(BigDecimal.valueOf(Double.valueOf(mongoDeviceGPS.getDeviceLat())));
         userDeviceRecord.setDeviceStatus(DeviceStatusEnum.S_SPZT_SYZ.value());
         userDeviceRecord.setOpTime(now);
         userDeviceRecord.setOrderId(order.getId());

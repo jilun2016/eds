@@ -28,61 +28,63 @@ import java.util.Map;
 
 /**
  * 支付宝小程序处理
+ *
  * @Author gaoyan
  * @Date: 2018/7/17
  */
 @Path("/ali/ma")
 public class AliMaResource extends BaseAuthedResource {
-	
-	private static Logger logger = Logger.getLogger(AliMaResource.class);
 
-	@Autowired
-	private IAliMaService aliMaService;
+    private static Logger logger = Logger.getLogger(AliMaResource.class);
 
-	@Autowired
-	private SysConfig sysConfig;
+    @Autowired
+    private IAliMaService aliMaService;
+
+    @Autowired
+    private SysConfig sysConfig;
 
 
-	/**
-	 * 获取小程序用户信息
-	 * @param code 登陆code
-	 */
-	@GET
-	@Path("/auth/{code}")
-	@Produces(MediaType.APPLICATION_JSON)
-	@NoAuth
-	public AliUserInfoVo queryAliUserInfo(@NotNull(message = "授权code不允许为空") @PathParam("code") String code,
-										  @Context HttpServletRequest request, @Context HttpServletResponse response) {
+    /**
+     * 获取小程序用户信息
+     *
+     * @param code 登陆code
+     */
+    @GET
+    @Path("/auth/{code}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoAuth
+    public AliUserInfoVo queryAliUserInfo(@NotNull(message = "授权code不允许为空") @PathParam("code") String code,
+                                          @Context HttpServletRequest request, @Context HttpServletResponse response) {
 
-		logger.debug("----AliMaResource.queryAliUserInfo({})",code);
-		return aliMaService.queryAliUserInfo(code);
-	}
+        logger.debug("----AliMaResource.queryAliUserInfo({})", code);
+        return aliMaService.queryAliUserInfo(code);
+    }
 
-	/**
-	 * 支付宝小程序登陆
-	 * @param req
-	 * @param request
-	 * @param response
-	 * @return
-	 */
-	@POST
-	@Path("/authorization")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@NoAuth
-	public Response authorization(@Valid AuthorizationRequest req,
-								  @Context HttpServletRequest request,
-								  @Context HttpServletResponse response) {
+    /**
+     * 支付宝小程序登陆
+     *
+     * @param req
+     * @param request
+     * @param response
+     * @return
+     */
+    @POST
+    @Path("/authorization")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoAuth
+    public Response authorization(@Valid AuthorizationRequest req,
+                                  @Context HttpServletRequest request,
+                                  @Context HttpServletResponse response) {
 
-		logger.debug("AliMaResource.authorization.params:{}", req);
-		aliMaService.aliMaLogin(req.getAliUid(),req.getMobile(),req.getSmsCode());
-		CookieUtils.addCookie(request,response,  CommonConstants.ALI_UID_COOKIE, req.getAliUid(),
-				null, sysConfig.getEdsAliCookieHost());
-		Map<String,String> resultMap = new HashMap<>();
-		resultMap.put("aliUid",req.getAliUid());
-		return Response.status(Response.Status.CREATED).entity(resultMap).build();
-	}
-
+        logger.debug("AliMaResource.authorization.params:{}", req);
+        aliMaService.aliMaLogin(req.getAliUid(), req.getMobile(), req.getSmsCode());
+        CookieUtils.addCookie(request, response, CommonConstants.ALI_UID_COOKIE, req.getAliUid(),
+                null, sysConfig.getEdsAliCookieHost());
+        Map<String, String> resultMap = new HashMap<>();
+        resultMap.put("aliUid", req.getAliUid());
+        return Response.status(Response.Status.CREATED).entity(resultMap).build();
+    }
 
 
 }
