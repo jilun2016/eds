@@ -51,7 +51,7 @@ public class AuthoricationDevFilter implements ContainerRequestFilter,ContainerR
             requestContext.setProperty(CommonConstants.EDS_USER, contextUser);
             requestContext.setProperty(CommonConstants.WX_OPEN_ID_COOKIE, openId);
         }else{
-            String aliUid = "2088002071082530";
+            String aliUid = "2088812431136221";
             ContextUser contextUser = userService.queryUserByAliUid(aliUid);
             logger.debug("AuthoricationFilter.contextUser({})",contextUser);
             if (Objects.isNull(contextUser) || Objects.isNull(contextUser.getUserId())) {

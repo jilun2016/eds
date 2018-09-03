@@ -28,7 +28,7 @@ public class SocketMessageServiceImpl implements ISocketMessageService {
     @Override
     public MongoDeviceHeartBeat queryDeviceStatusInfo(String deviceOriginCode) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("deviceCode").is(deviceOriginCode));
+        query.addCriteria(Criteria.where("deviceCode").is(Long.valueOf(deviceOriginCode)));
         return mongoTemplate.findOne(query,MongoDeviceHeartBeat.class);
     }
 
