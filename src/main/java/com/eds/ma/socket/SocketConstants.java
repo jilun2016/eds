@@ -19,6 +19,13 @@ public interface SocketConstants {
 
 
 	/**
+	 *  校验码异或标准值 0XA5
+	 */
+	Long XOR_CHECK_CODE = 165L;
+
+
+
+	/**
 	 *  指令 硬件上传
 	 */
 	Integer DEVICE_FLOW_CLIENT_UPLOAD = 1;

@@ -122,8 +122,6 @@ public class SocketMessageUtils {
 		return combineBytes;
 	}
 
-
-
 	public static void main(String[] args) {
 		System.out.println(L2Bytes(14131905958052100L,0));
 	}

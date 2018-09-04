@@ -24,6 +24,11 @@ public class DeviceRentDetailVo {
     private String deviceOriginCode;
 
     /**
+     * 设备GPS位置信息消息编号
+     */
+    private Long deviceGpsNo;
+
+    /**
      * 商户id
      */
     private Long spId;

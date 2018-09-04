@@ -45,6 +45,10 @@ public class CommonHeadMessageVo {
         return SocketMessageUtils.combineBytes(deviceKindBytes,deviceCodeBytes,messageNoBytes,messageTypeBytes);
     }
 
+    public Long sum(){
+        return deviceKind+deviceCode+messageNo+messageType;
+    }
+
     public static void main(String[] args) {
         CommonHeadMessageVo commonHeadMessageVo = new CommonHeadMessageVo();
         commonHeadMessageVo.setMessageType(1L);

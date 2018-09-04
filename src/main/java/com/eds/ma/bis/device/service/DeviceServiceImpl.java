@@ -156,9 +156,17 @@ public class DeviceServiceImpl implements IDeviceService {
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RENT_OUT_RANGE);
         }
         //获取设备的位置
-        MongoDeviceGPS mongoDeviceGPS = socketMessageService.queryMessageGPS(1L);
+        MongoDeviceGPS mongoDeviceGPS = socketMessageService.queryMessageGPS(deviceRentDetailVo.getDeviceGpsNo());
         if(Objects.isNull(mongoDeviceGPS)){
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_POSITISON_ERROR);
+        }
+
+        //设备,用户位置校验
+        double checkDeviceDistance = DistanceUtil.getDistance(deviceRentDetailVo.getSpLng().doubleValue()
+                ,deviceRentDetailVo.getSpLat().doubleValue()
+                ,Double.valueOf(mongoDeviceGPS.getDeviceLng()), Double.valueOf(mongoDeviceGPS.getDeviceLat()));
+        if(checkDeviceDistance >edsConfig.getValidDistance()){
+            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RENT_OUT_RANGE);
         }
 
         //查询设备状态
@@ -427,7 +435,6 @@ public class DeviceServiceImpl implements IDeviceService {
             CommonHeadMessageVo commonHeadMessageVo = messageHandler.buildHeadMessage(device.getDeviceOriginCode());
             messageHandler.sendDataMessage(commonHeadMessageVo);
         }
-
 
     }
 

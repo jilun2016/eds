@@ -1,10 +1,15 @@
 package com.eds.ma.socket.message.handler;
 
+import com.eds.ma.bis.device.entity.Device;
 import com.eds.ma.mongodb.collection.MongoDeviceGPS;
+import com.eds.ma.socket.SessionClient;
 import com.eds.ma.socket.SocketConstants;
 import com.eds.ma.socket.message.MessageTypeConstants;
 import com.eds.ma.socket.message.vo.CommonHeadMessageVo;
 import com.eds.ma.socket.util.SocketMessageUtils;
+import com.xcrm.cloud.database.db.BaseDaoSupport;
+import com.xcrm.cloud.database.db.query.QueryBuilder;
+import com.xcrm.cloud.database.db.query.expression.Restrictions;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +32,9 @@ public class GPSMessageHandler extends BaseMessageHandler {
     @Autowired
     protected MongoTemplate mongoTemplate;
 
+    @Autowired
+    protected BaseDaoSupport dao;
+
     @Override
     public Long getMessageType() {
         return MessageTypeConstants.DEVICE_GPS;
@@ -48,7 +56,26 @@ public class GPSMessageHandler extends BaseMessageHandler {
         byte[] headBytes = commonHeadMessageVo.toBytes();
         byte[] messageTypeBytes  =  SocketMessageUtils.L2Bytes(MessageTypeConstants.DEVICE_GPS,1);
         byte[] checkBytes  =  SocketMessageUtils.L2Bytes(SocketConstants.GPS_REQUEST_CHECK_CODE,4);
+        byte[] reserveBytes = SocketMessageUtils.buildZeroBytes(17);
+        byte[] checkByte = buildMessageCheckByte(commonHeadMessageVo.sum(),MessageTypeConstants.DEVICE_GPS,SocketConstants.GPS_REQUEST_CHECK_CODE);
+        byte[] messageBytes = SocketMessageUtils.combineBytes(headBytes,messageTypeBytes,checkBytes,reserveBytes,checkByte);
+        SessionClient.sendMessage(commonHeadMessageVo.getDeviceCode(),messageBytes);
+        //发送消息完成后,将消息编号保存到db中
+        QueryBuilder updateQb = QueryBuilder.where(Restrictions.eq("deviceOriginCode",commonHeadMessageVo.getDeviceCode()))
+                .and(Restrictions.eq("dataStatus",1));
+        Device updateDevice = new Device();
+        updateDevice.setDeviceGpsNo(commonHeadMessageVo.getMessageNo());
+        dao.updateByQuery(updateDevice,updateQb);
+    }
 
+    private byte[] buildMessageCheckByte(Long headSum,Long... messageValues){
+        Long checkByteSum = headSum;
+        for (Long messageValue : messageValues) {
+            checkByteSum +=messageValue;
+        }
+        Long  xorValue = checkByteSum^SocketConstants.XOR_CHECK_CODE;
+        //将异或值转换成1个字节
+        return SocketMessageUtils.L2Bytes(xorValue,1);
     }
 
 
