@@ -12,6 +12,11 @@ public interface SocketConstants {
 	 */
 	Long DEVICE_KIND_HCHO = 33L;
 
+	/**
+	 *  查询GPS 位置信息 请求硬件验证码 0xdd 0xcc 0xbb 0xaa
+	 */
+	Long GPS_REQUEST_CHECK_CODE = 3721182122L;
+
 
 	/**
 	 *  指令 硬件上传

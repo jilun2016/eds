@@ -1,6 +1,7 @@
 package com.eds.ma.socket.message.handler;
 
 import com.eds.ma.mongodb.collection.MongoDeviceGPS;
+import com.eds.ma.socket.SocketConstants;
 import com.eds.ma.socket.message.MessageTypeConstants;
 import com.eds.ma.socket.message.vo.CommonHeadMessageVo;
 import com.eds.ma.socket.util.SocketMessageUtils;
@@ -44,7 +45,9 @@ public class GPSMessageHandler extends BaseMessageHandler {
      */
     @Override
     public void sendDataMessage(CommonHeadMessageVo commonHeadMessageVo, String... mesasgeField) {
-
+        byte[] headBytes = commonHeadMessageVo.toBytes();
+        byte[] messageTypeBytes  =  SocketMessageUtils.L2Bytes(MessageTypeConstants.DEVICE_GPS,1);
+        byte[] checkBytes  =  SocketMessageUtils.L2Bytes(SocketConstants.GPS_REQUEST_CHECK_CODE,4);
 
     }
 

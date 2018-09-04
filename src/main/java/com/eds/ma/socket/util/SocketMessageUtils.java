@@ -80,16 +80,51 @@ public class SocketMessageUtils {
 		return Long.toHexString(decMessage);
 	}
 
-	public static byte[] L2Bytes(long x,int capacity) {
-		ByteBuffer buffer = ByteBuffer.allocate(capacity);
+	public static byte[] L2Bytes(long x,int size) {
+		ByteBuffer buffer = ByteBuffer.allocate(8);
 		buffer.putLong(0, x);
-		return buffer.array();
+		byte[] bytes =  buffer.array();
+		byte[] bts  = new byte[size];
+		for (int i = size - 1; i >= 0; i--) {
+			bts[i] = bytes[bytes.length - size + i];
+		}
+		return bts;
 	}
 
-	public static long Bytes2L(byte[] bytes,int capacity) {
-		ByteBuffer buffer = ByteBuffer.allocate(capacity);
+	public static long Bytes2L(byte[] bytes) {
+		ByteBuffer buffer = ByteBuffer.allocate(8);
 		buffer.put(bytes, 0, bytes.length);
 		buffer.flip();//need flip
 		return buffer.getLong();
+	}
+
+	public static byte[] buildZeroBytes(int size) {
+		byte[] emptyBytes = new byte[size];
+		for (int i = 0; i < emptyBytes.length; i++) {
+			emptyBytes[i] = 0;
+		}
+		return emptyBytes;
+	}
+
+	public static byte[] combineBytes(byte[]... bytes){
+		int combineByteLength = 0;
+		for (byte[] aByte : bytes) {
+			combineByteLength += aByte.length;
+		}
+		byte[] combineBytes = new byte[combineByteLength];
+		int stepByteLength = 0;
+		for (byte[] aByte : bytes) {
+			for (int i = 0; i < aByte.length; i++) {
+				combineBytes[i+stepByteLength] = aByte[i];
+			}
+			stepByteLength += aByte.length;
+		}
+		return combineBytes;
+	}
+
+
+
+	public static void main(String[] args) {
+		System.out.println(L2Bytes(14131905958052100L,0));
 	}
 }

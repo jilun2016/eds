@@ -74,6 +74,10 @@ public class DeviceServiceImpl implements IDeviceService {
     private ISocketMessageService socketMessageService;
 
 
+    @Autowired
+    private CommonMessageHandler commonMessageHandler;
+
+
     @Override
     public Device queryDeviceById(Long deviceId) {
         return dao.queryById(deviceId,Device.class);
@@ -417,12 +421,12 @@ public class DeviceServiceImpl implements IDeviceService {
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_NOT_EXIST_ERROR);
         }
 
-//        //根据消息的报文功能码不同,走不同处理
-//        BaseMessageHandler messageHandler = commonMessageHandler.getMessageHandler(MessageTypeConstants.DEVICE_GPS);
-//        if(Objects.nonNull(messageHandler)){
-//            CommonHeadMessageVo commonHeadMessageVo = messageHandler.buildHeadMessage(device.getDeviceOriginCode());
-//            messageHandler.sendDataMessage(commonHeadMessageVo);
-//        }
+        //根据消息的报文功能码不同,走不同处理
+        BaseMessageHandler messageHandler = commonMessageHandler.getMessageHandler(MessageTypeConstants.DEVICE_GPS);
+        if(Objects.nonNull(messageHandler)){
+            CommonHeadMessageVo commonHeadMessageVo = messageHandler.buildHeadMessage(device.getDeviceOriginCode());
+            messageHandler.sendDataMessage(commonHeadMessageVo);
+        }
 
 
     }

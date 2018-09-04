@@ -1,5 +1,6 @@
 package com.eds.ma.socket.message.vo;
 
+import com.eds.ma.socket.util.SocketMessageUtils;
 import lombok.Data;
 
 /**
@@ -36,21 +37,21 @@ public class CommonHeadMessageVo {
 
     public byte[] toBytes(){
 
-        byte[] bts = new byte[13];
-        bts[0] =  (byte) deviceKind.intValue();
-        bts[1] =  (byte) deviceCode.intValue();
-        bts[2] =  (byte) 0x34;
-        bts[3] =  (byte) 0xe4;
-        bts[4] =  (byte) 0xc2;
-        bts[5] =  (byte) 0xa1;
-        bts[6] =  (byte) 0x01;
-        bts[7] =  (byte) 0x04;
-        bts[8] =  (byte) 0x01;
-        bts[9] =  (byte) 0x01;
-        bts[10] =  (byte) 0x01;
-        bts[11] =  (byte) 0x01;
-        bts[12] =  (byte) 0xf1;
-        return bts;
+        byte[] deviceKindBytes  =  SocketMessageUtils.L2Bytes(deviceKind,1);
+        byte[] deviceCodeBytes = SocketMessageUtils.L2Bytes(deviceCode,7);
+        byte[] messageNoBytes = SocketMessageUtils.L2Bytes(messageNo,4);
+        byte[] messageTypeBytes = SocketMessageUtils.L2Bytes(messageType,1);
+
+        return SocketMessageUtils.combineBytes(deviceKindBytes,deviceCodeBytes,messageNoBytes,messageTypeBytes);
+    }
+
+    public static void main(String[] args) {
+        CommonHeadMessageVo commonHeadMessageVo = new CommonHeadMessageVo();
+        commonHeadMessageVo.setMessageType(1L);
+        commonHeadMessageVo.setMessageNo(123L);
+        commonHeadMessageVo.setDeviceKind(1L);
+        commonHeadMessageVo.setDeviceCode(123L);
+        System.out.println(commonHeadMessageVo.toBytes());
     }
 
 }
