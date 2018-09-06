@@ -146,4 +146,9 @@ public interface BizErrorConstants {
 	 */
 	String DEVICE_POSITISON_ERROR = "E10027";
 
+	/**
+	 * 设备状态错误,无法归还,请联系客服
+	 */
+	String DEVICE_RETURN_STATUS_ERROR = "E10028";
+
 }

@@ -1,7 +1,6 @@
 package com.eds.ma.bis.device.service;
 
 import com.eds.ma.bis.device.entity.Device;
-import com.eds.ma.bis.device.entity.DeviceRelation;
 import com.eds.ma.bis.device.entity.UserDeviceRecord;
 import com.eds.ma.bis.device.vo.*;
 import com.xcrm.common.page.Pagination;
@@ -94,25 +93,11 @@ public interface IDeviceService {
     void saveUserDeviceRecord(UserDeviceRecord userDeviceRecord);
 
     /**
-     * 根据设备id查询硬件设备信息
-     * @param deviceId
-     * @return
-     */
-    DeviceRelation queryDeviceRelationByDeviceId(Long deviceId);
-
-    /**
      * 发送设备锁定消息到客户端
-     * @param deviceId 设备id
+     * @param deviceRentDetailVo 设备id
      * @param lockStatus 锁定状态 {@link com.eds.ma.socket.SocketConstants}
      */
-    void sendDevcieStatusMessage(Long deviceId,Integer lockStatus);
-
-    /**
-     * 异步更新设备锁定状态
-     * @param deviceId
-     * @param lockStatus
-     */
-    void asyncUpdateDeviceStatus(Long deviceId,Integer lockStatus);
+    void sendDevcieStatusMessage(DeviceRentDetailVo deviceRentDetailVo, Long lockStatus);
 
     /**
      * 查询设备常见问题

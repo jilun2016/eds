@@ -28,7 +28,8 @@
     <select id="queryRentDeviceById" resultType="com.eds.ma.bis.device.vo.DeviceRentDetailVo">
         SELECT ed.id AS deviceId,ed.deviceOriginCode,ed.deviceGpsNo,
             es.spLng,es.spLat,ed.deviceStatus,ed.spId,
-            ed.orderId,ed.userId,eo.rentTime,eo.orderStatus
+            ed.orderId,ed.userId,eo.rentTime,eo.orderStatus,
+            ed.adjustParamA1,ed.adjustParamA2,ed.adjustParamA3,ed.adjustParamB1,ed.adjustParamB2,ed.adjustParamB3
         FROM t_eds_device ed
         LEFT JOIN t_eds_sp es ON ed.spId = es.id
         left join t_eds_order eo on eo.id = ed.orderId

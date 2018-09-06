@@ -42,7 +42,7 @@ public class HistoryMessageHandler extends BaseMessageHandler {
     }
 
     @Override
-    public void sendDataMessage(CommonHeadMessageVo commonHeadMessageVo, String... mesasgeField) {
+    public void sendDataMessage(CommonHeadMessageVo commonHeadMessageVo, Long... mesasgeField) {
 
     }
 

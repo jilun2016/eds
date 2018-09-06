@@ -1,11 +1,19 @@
 package com.eds.ma.socket.message.handler;
 
+import com.eds.ma.bis.device.entity.Device;
 import com.eds.ma.mongodb.collection.MongoDeviceControl;
+import com.eds.ma.socket.SessionClient;
+import com.eds.ma.socket.SocketConstants;
 import com.eds.ma.socket.message.MessageTypeConstants;
 import com.eds.ma.socket.message.vo.CommonHeadMessageVo;
 import com.eds.ma.socket.util.SocketMessageUtils;
+import com.xcrm.cloud.database.db.BaseDaoSupport;
+import com.xcrm.cloud.database.db.query.QueryBuilder;
+import com.xcrm.cloud.database.db.query.expression.Restrictions;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.log.Logger;
+import org.apache.commons.lang.time.DateUtils;
+import org.joda.time.DateTimeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -30,6 +38,9 @@ public class DeviceControlHandler extends BaseMessageHandler {
     @Autowired
     protected MongoTemplate mongoTemplate;
 
+    @Autowired
+    protected BaseDaoSupport dao;
+
     @Override
     public Long getMessageType() {
         return MessageTypeConstants.DEVICE_CONTROL;
@@ -41,9 +52,72 @@ public class DeviceControlHandler extends BaseMessageHandler {
         MongoDeviceControl mongoDeviceControl = parseControlMessage(commonHeadMessageVo, mesasge);
     }
 
-    @Override
-    public void sendDataMessage(CommonHeadMessageVo commonHeadMessageVo, String... mesasgeField) {
+    public static void main(String[] args) {
+        byte[] syncTimeYear = SocketMessageUtils.L2Bytes(Calendar.getInstance().get(Calendar.YEAR ) -2000,1);
+        byte[] syncTimeMonth = SocketMessageUtils.L2Bytes( Calendar.getInstance().get(Calendar.MONTH )+1,1);
+        byte[] syncTimeDay = SocketMessageUtils.L2Bytes(Calendar.getInstance().get(Calendar.DAY_OF_MONTH ),1);
+        byte[] syncTimeHour = SocketMessageUtils.L2Bytes(Calendar.getInstance().get(Calendar.HOUR ),1);
+        byte[] syncTimeMiniute = SocketMessageUtils.L2Bytes(Calendar.getInstance().get(Calendar.MINUTE ),1);
+    }
 
+    /**
+     * 发送设备控制信息
+     * @param commonHeadMessageVo
+     * @param mesasgeField [0]指令设备控制 0xa5|0x5a
+     *                     [1]使用时长
+     *                     [2]补偿数据A整数位
+     *                     [3]补偿数据A小数位
+     *                     [4]补偿数据A小数位
+     *                     [5]补偿数据B整数位
+     *                     [6]补偿数据B小数位
+     *                     [7]补偿数据B小数位
+     */
+    @Override
+    public void sendDataMessage(CommonHeadMessageVo commonHeadMessageVo, Long... mesasgeField) {
+        byte[] headBytes = commonHeadMessageVo.toBytes();
+        byte[] messageTypeBytes  =  SocketMessageUtils.L2Bytes(MessageTypeConstants.DEVICE_CONTROL,1);
+        byte[] checkBytes  =  SocketMessageUtils.L2Bytes(SocketConstants.CONTROL_REQUEST_CHECK_CODE,4);
+        byte[] controlStatusBytes = SocketMessageUtils.L2Bytes(mesasgeField[0],1);
+        byte[] syncTimeYear = SocketMessageUtils.L2Bytes(Calendar.getInstance().get(Calendar.YEAR ) - 2000,1);
+        byte[] syncTimeMonth = SocketMessageUtils.L2Bytes( Calendar.getInstance().get(Calendar.MONTH )+1,1);
+        byte[] syncTimeDay = SocketMessageUtils.L2Bytes(Calendar.getInstance().get(Calendar.DAY_OF_MONTH ),1);
+        byte[] syncTimeHour = SocketMessageUtils.L2Bytes(Calendar.getInstance().get(Calendar.HOUR ),1);
+        byte[] syncTimeMiniute = SocketMessageUtils.L2Bytes(Calendar.getInstance().get(Calendar.MINUTE ),1);
+        byte[] useTime = SocketMessageUtils.L2Bytes(mesasgeField[1],1);
+
+        byte[] adjustParamAIntegerByte = SocketMessageUtils.L2Bytes(mesasgeField[2],1);
+        byte[] adjustParamA1DecByte = SocketMessageUtils.L2Bytes(mesasgeField[3],1);
+        byte[] adjustParamA2DecByte = SocketMessageUtils.L2Bytes(mesasgeField[4],1);
+
+        byte[] adjustParamBIntegerByte = SocketMessageUtils.L2Bytes(mesasgeField[5],1);
+        byte[] adjustParamB1DecByte = SocketMessageUtils.L2Bytes(mesasgeField[6],1);
+        byte[] adjustParamB2DecByte = SocketMessageUtils.L2Bytes(mesasgeField[7],1);
+        byte[] reserveBytes = SocketMessageUtils.buildZeroBytes(4);
+
+        byte[] checkByte = buildMessageCheckByte(commonHeadMessageVo.sum(),MessageTypeConstants.DEVICE_GPS,SocketConstants.GPS_REQUEST_CHECK_CODE);
+        byte[] messageBytes = SocketMessageUtils.combineBytes(headBytes,messageTypeBytes,checkBytes,
+                controlStatusBytes,
+                syncTimeYear,
+                syncTimeMonth,
+                syncTimeDay,
+                syncTimeHour,
+                syncTimeMiniute,
+                useTime,
+                adjustParamAIntegerByte,
+                adjustParamA1DecByte,
+                adjustParamA2DecByte,
+                adjustParamBIntegerByte,
+                adjustParamB1DecByte,
+                adjustParamB2DecByte,
+                reserveBytes,
+                checkByte);
+        SessionClient.sendMessage(commonHeadMessageVo.getDeviceCode(),messageBytes);
+        //发送消息完成后,将消息编号保存到db中
+        QueryBuilder updateQb = QueryBuilder.where(Restrictions.eq("deviceOriginCode",commonHeadMessageVo.getDeviceCode()))
+                .and(Restrictions.eq("dataStatus",1));
+        Device updateDevice = new Device();
+        updateDevice.setDeviceControlNo(commonHeadMessageVo.getMessageNo());
+        dao.updateByQuery(updateDevice,updateQb);
     }
 
     /**

@@ -10,7 +10,6 @@ import com.eds.ma.bis.coupon.service.ICouponService;
 import com.eds.ma.bis.device.DeviceStatusEnum;
 import com.eds.ma.bis.device.OrderStatusEnum;
 import com.eds.ma.bis.device.entity.Device;
-import com.eds.ma.bis.device.entity.DeviceRelation;
 import com.eds.ma.bis.device.entity.UserDeviceRecord;
 import com.eds.ma.bis.device.vo.*;
 import com.eds.ma.bis.order.OrderCodeCreater;
@@ -25,15 +24,11 @@ import com.eds.ma.mongodb.collection.MongoDeviceHeartBeat;
 import com.eds.ma.rest.common.BizErrorConstants;
 import com.eds.ma.socket.SocketConstants;
 import com.eds.ma.socket.message.MessageTypeConstants;
-import com.eds.ma.socket.message.handler.BaseMessageHandler;
 import com.eds.ma.socket.message.handler.CommonMessageHandler;
 import com.eds.ma.socket.message.service.ISocketMessageService;
-import com.eds.ma.socket.message.vo.CommonHeadMessageVo;
 import com.eds.ma.util.DistanceUtil;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
-import com.xcrm.cloud.database.db.query.QueryBuilder;
 import com.xcrm.cloud.database.db.query.Ssqb;
-import com.xcrm.cloud.database.db.query.expression.Restrictions;
 import com.xcrm.common.page.Pagination;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.common.util.ListUtil;
@@ -218,7 +213,7 @@ public class DeviceServiceImpl implements IDeviceService {
         userDeviceRecord.setUserLng(userLng);
         saveUserDeviceRecord(userDeviceRecord);
         //硬件发送指令解锁
-        sendDevcieStatusMessage(deviceId,SocketConstants.DEVICE_LOCK_UNLOCK);
+        sendDevcieStatusMessage(deviceRentDetailVo,SocketConstants.DEVICE_LOCK_UNLOCK);
     }
 
     @Override
@@ -248,6 +243,19 @@ public class DeviceServiceImpl implements IDeviceService {
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_ON_RETURN_STATUS_ERROR);
         }
 
+        //查询设备状态
+        MongoDeviceHeartBeat deviceHeartBeat = socketMessageService.queryDeviceStatusInfo(deviceRentDetailVo.getDeviceOriginCode());
+        if(Objects.isNull(deviceHeartBeat)
+                || Objects.equals(deviceHeartBeat.getDeviceUseStatus(),1L)
+                || Objects.equals(deviceHeartBeat.getDeviceNTCStatus(),1L)
+                || Objects.equals(deviceHeartBeat.getDeviceTemperatureStatus(),1L)
+                || Objects.equals(deviceHeartBeat.getDeviceIntakeValveStatus(),1L)
+                || Objects.equals(deviceHeartBeat.getDeviceElectricityStatus(),1L)
+                || (!Objects.equals(deviceHeartBeat.getDeviceReturnStatus(),1L)
+                    && !Objects.equals(deviceHeartBeat.getDeviceReturnStatus(),0L))){
+            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_STATUS_ERROR);
+        }
+
         //获取设备的位置信息和用户的位置信息是否在有效距离内
         //设备,用户位置校验
         double checkDistance = DistanceUtil.getDistance(spDetailVo.getSpLng().doubleValue()
@@ -258,11 +266,18 @@ public class DeviceServiceImpl implements IDeviceService {
         }
 
         //获取设备的位置信息和店铺的位置是否在有效距离内(硬件指令获取硬件位置)
-        BigDecimal deviceLng = BigDecimal.ZERO;
-
-        BigDecimal deviceLat = BigDecimal.ZERO;
-
-
+        //获取设备的位置
+        MongoDeviceGPS mongoDeviceGPS = socketMessageService.queryMessageGPS(deviceRentDetailVo.getDeviceGpsNo());
+        if(Objects.isNull(mongoDeviceGPS)){
+            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_POSITISON_ERROR);
+        }
+        //设备,用户位置校验
+        double checkDeviceDistance = DistanceUtil.getDistance(deviceRentDetailVo.getSpLng().doubleValue()
+                ,deviceRentDetailVo.getSpLat().doubleValue()
+                ,Double.valueOf(mongoDeviceGPS.getDeviceLng()), Double.valueOf(mongoDeviceGPS.getDeviceLat()));
+        if(checkDeviceDistance > edsConfig.getValidDistance()){
+            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RENT_OUT_RANGE);
+        }
 
         //验证成功,更新订单,归还设备,更新设备位置信息,设备状态,钱包扣除金额
         Date now = DateFormatUtils.getNow();
@@ -332,7 +347,6 @@ public class DeviceServiceImpl implements IDeviceService {
             if(ListUtil.isNotEmpty(saveOrderCouponList)){
                 dao.batchSave(saveOrderCouponList,OrderCoupon.class);
             }
-
         }
 
         //更新设备位置信息,及设备状态
@@ -365,8 +379,8 @@ public class DeviceServiceImpl implements IDeviceService {
         UserDeviceRecord userDeviceRecord = new UserDeviceRecord();
         userDeviceRecord.setCreated(now);
         userDeviceRecord.setDeviceId(deviceId);
-        userDeviceRecord.setDeviceLat(deviceLat);
-        userDeviceRecord.setDeviceLng(deviceLng);
+        userDeviceRecord.setDeviceLat(BigDecimal.valueOf(Double.valueOf(mongoDeviceGPS.getDeviceLat())));
+        userDeviceRecord.setDeviceLng(BigDecimal.valueOf(Double.valueOf(mongoDeviceGPS.getDeviceLng())));
         userDeviceRecord.setDeviceStatus(DeviceStatusEnum.S_SPZT_DZJ.value());
         userDeviceRecord.setOpTime(now);
         userDeviceRecord.setOrderId(deviceRentDetailVo.getOrderId());
@@ -376,7 +390,7 @@ public class DeviceServiceImpl implements IDeviceService {
         userDeviceRecord.setSpId(spDetailVo.getSpId());
         saveUserDeviceRecord(userDeviceRecord);
         //硬件发送指令上锁
-        sendDevcieStatusMessage(deviceId,SocketConstants.DEVICE_LOCK_LOCK);
+        sendDevcieStatusMessage(deviceRentDetailVo,SocketConstants.DEVICE_LOCK_LOCK);
         return orderId;
     }
 
@@ -386,31 +400,12 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
-    public DeviceRelation queryDeviceRelationByDeviceId(Long deviceId) {
-        QueryBuilder queryDeviceQb = QueryBuilder.where(Restrictions.eq("deviceId",deviceId))
-                .and(Restrictions.eq("dataStatus",1));
-        return dao.query(queryDeviceQb,DeviceRelation.class);
-    }
-
-    @Override
-    public void sendDevcieStatusMessage(Long deviceId,Integer lockStatus) {
-        DeviceRelation deviceRelation = queryDeviceRelationByDeviceId(deviceId);
-        if(Objects.nonNull(deviceRelation)){
-
-//            DeviceDataVo deviceDataVo = sessionMap.sendDevcieStatusMessage(deviceRelation.getPort(),deviceRelation.getOriginDeviceId(),lockStatus);
-//            //保存设备锁状态记录
-//            if(Objects.nonNull(deviceDataVo)){
-//                asyncSaveMessage(deviceDataVo);
-//            }
-        }
-    }
-
-    @Override
-    public void asyncUpdateDeviceStatus(Long originDeviceId, Integer lockStatus) {
-        QueryBuilder updateDeviceStatusQb = QueryBuilder.where(Restrictions.eq("originDeviceId",originDeviceId));
-        DeviceRelation deviceRelation = new DeviceRelation();
-        deviceRelation.setLockStatus(lockStatus);
-        dao.updateByQuery(deviceRelation,updateDeviceStatusQb);
+    public void sendDevcieStatusMessage(DeviceRentDetailVo deviceRentDetailVo, Long lockStatus) {
+        commonMessageHandler.sendDataMessage(MessageTypeConstants.DEVICE_CONTROL,
+                deviceRentDetailVo.getDeviceOriginCode(),
+                lockStatus,
+                48L,deviceRentDetailVo.getAdjustParamA1(),deviceRentDetailVo.getAdjustParamA2(),deviceRentDetailVo.getAdjustParamA3(),
+                deviceRentDetailVo.getAdjustParamB1(),deviceRentDetailVo.getAdjustParamB2(),deviceRentDetailVo.getAdjustParamB3());
     }
 
     @Override
@@ -430,11 +425,7 @@ public class DeviceServiceImpl implements IDeviceService {
         }
 
         //根据消息的报文功能码不同,走不同处理
-        BaseMessageHandler messageHandler = commonMessageHandler.getMessageHandler(MessageTypeConstants.DEVICE_GPS);
-        if(Objects.nonNull(messageHandler)){
-            CommonHeadMessageVo commonHeadMessageVo = messageHandler.buildHeadMessage(device.getDeviceOriginCode());
-            messageHandler.sendDataMessage(commonHeadMessageVo);
-        }
+        commonMessageHandler.sendDataMessage(MessageTypeConstants.DEVICE_GPS,device.getDeviceOriginCode());
 
     }
 

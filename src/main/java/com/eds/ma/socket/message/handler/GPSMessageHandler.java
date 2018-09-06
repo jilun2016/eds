@@ -52,7 +52,7 @@ public class GPSMessageHandler extends BaseMessageHandler {
      * @param mesasgeField
      */
     @Override
-    public void sendDataMessage(CommonHeadMessageVo commonHeadMessageVo, String... mesasgeField) {
+    public void sendDataMessage(CommonHeadMessageVo commonHeadMessageVo, Long... mesasgeField) {
         byte[] headBytes = commonHeadMessageVo.toBytes();
         byte[] messageTypeBytes  =  SocketMessageUtils.L2Bytes(MessageTypeConstants.DEVICE_GPS,1);
         byte[] checkBytes  =  SocketMessageUtils.L2Bytes(SocketConstants.GPS_REQUEST_CHECK_CODE,4);
@@ -67,17 +67,6 @@ public class GPSMessageHandler extends BaseMessageHandler {
         updateDevice.setDeviceGpsNo(commonHeadMessageVo.getMessageNo());
         dao.updateByQuery(updateDevice,updateQb);
     }
-
-    private byte[] buildMessageCheckByte(Long headSum,Long... messageValues){
-        Long checkByteSum = headSum;
-        for (Long messageValue : messageValues) {
-            checkByteSum +=messageValue;
-        }
-        Long  xorValue = checkByteSum^SocketConstants.XOR_CHECK_CODE;
-        //将异或值转换成1个字节
-        return SocketMessageUtils.L2Bytes(xorValue,1);
-    }
-
 
     /**
      * 解析查询报告消息

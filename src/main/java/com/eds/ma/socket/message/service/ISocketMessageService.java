@@ -11,7 +11,7 @@ public interface ISocketMessageService {
      * @param deviceOriginCode
      * @return
      */
-    MongoDeviceHeartBeat queryDeviceStatusInfo(String deviceOriginCode);
+    MongoDeviceHeartBeat queryDeviceStatusInfo(Long deviceOriginCode);
 
     /**
      * 查询设备位置信息

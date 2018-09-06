@@ -17,33 +17,29 @@ public interface SocketConstants {
 	 */
 	Long GPS_REQUEST_CHECK_CODE = 3721182122L;
 
+	/**
+	 *  设备控制信息 请求硬件验证码 0xaa 0xbb 0xcc 0xdd
+	 */
+	Long CONTROL_REQUEST_CHECK_CODE = 2864434397L;
+
+	/**
+	 *  设备报告信息 请求硬件验证码 0xbb 0xaa 0xdd 0xcc
+	 */
+	Long REPORT_REQUEST_CHECK_CODE = 3148537292L;
 
 	/**
 	 *  校验码异或标准值 0XA5
 	 */
 	Long XOR_CHECK_CODE = 165L;
 
-
+	/**
+	 * 指令 设备控制 0xa5 允许
+	 */
+	Long DEVICE_LOCK_LOCK = 165L;
 
 	/**
-	 *  指令 硬件上传
+	 * 指令 设备控制 0x5a 锁定
 	 */
-	Integer DEVICE_FLOW_CLIENT_UPLOAD = 1;
-
-	/**
-	 * 指令 服务端发送
-	 */
-	Integer DEVICE_FLOW_SERVER_SEND = 2;
-
-
-	/**
-	 * 指令 锁定仪表
-	 */
-	Integer DEVICE_LOCK_LOCK = 5;
-
-	/**
-	 * 指令 解锁仪表
-	 */
-	Integer DEVICE_LOCK_UNLOCK = 6;
+	Long DEVICE_LOCK_UNLOCK = 90L;
 
 }

@@ -21,7 +21,7 @@ public class DeviceRentDetailVo {
     /**
      * 设备原始code
      */
-    private String deviceOriginCode;
+    private Long deviceOriginCode;
 
     /**
      * 设备GPS位置信息消息编号
@@ -69,4 +69,34 @@ public class DeviceRentDetailVo {
      * 店铺位置纬度
      */
     private BigDecimal spLat;
+
+    /**
+     * 补偿数据A1整数位
+     */
+    private Long adjustParamA1;
+
+    /**
+     * 补偿数据A2小数位
+     */
+    private Long adjustParamA2;
+
+    /**
+     * 补偿数据A3小数位
+     */
+    private Long adjustParamA3;
+
+    /**
+     * 补偿数据B1整数位
+     */
+    private Long adjustParamB1;
+
+    /**
+     * 补偿数据B2小数位
+     */
+    private Long adjustParamB2;
+
+    /**
+     * 补偿数据B3小数位
+     */
+    private Long adjustParamB3;
 }

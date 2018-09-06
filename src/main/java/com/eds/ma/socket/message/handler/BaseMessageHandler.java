@@ -2,6 +2,7 @@ package com.eds.ma.socket.message.handler;
 
 import com.eds.ma.socket.SocketConstants;
 import com.eds.ma.socket.message.vo.CommonHeadMessageVo;
+import com.eds.ma.socket.util.SocketMessageUtils;
 
 /**
  * 基础消息解析处理
@@ -12,7 +13,7 @@ public abstract class BaseMessageHandler {
 
     public abstract void processDataMessage(CommonHeadMessageVo commonHeadMessageVo, String[] mesasge);
 
-    public abstract void sendDataMessage(CommonHeadMessageVo commonHeadMessageVo, String... mesasgeField);
+    public abstract void sendDataMessage(CommonHeadMessageVo commonHeadMessageVo, Long... mesasgeField);
 
     public abstract Long getMessageType();
 
@@ -24,6 +25,16 @@ public abstract class BaseMessageHandler {
         commonHeadMessageVo.setMessageNo(System.nanoTime());
         commonHeadMessageVo.setMessageType(getMessageType());
         return commonHeadMessageVo;
+    }
+
+    public byte[] buildMessageCheckByte(Long headSum,Long... messageValues){
+        Long checkByteSum = headSum;
+        for (Long messageValue : messageValues) {
+            checkByteSum +=messageValue;
+        }
+        Long  xorValue = checkByteSum^SocketConstants.XOR_CHECK_CODE;
+        //将异或值转换成1个字节
+        return SocketMessageUtils.L2Bytes(xorValue,1);
     }
 
 }

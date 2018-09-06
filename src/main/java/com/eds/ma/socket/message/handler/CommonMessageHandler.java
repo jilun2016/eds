@@ -91,6 +91,14 @@ public class CommonMessageHandler {
         return commonHeadMessageVo;
     }
 
+    public void sendDataMessage(Long messageType,Long deviceCode, Long... mesasgeField){
+        BaseMessageHandler messageHandler = getMessageHandler(messageType);
+        if(Objects.nonNull(messageHandler)){
+            CommonHeadMessageVo commonHeadMessageVo = messageHandler.buildHeadMessage(deviceCode);
+            messageHandler.sendDataMessage(commonHeadMessageVo,mesasgeField);
+        }
+    }
+
 
     public BaseMessageHandler getMessageHandler(Long messageType){
         //心跳消息处理
