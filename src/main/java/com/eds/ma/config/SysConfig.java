@@ -22,6 +22,12 @@ public class SysConfig {
     private String projectProfile;
 
     /**
+     * 是否加入设备交互处理
+     */
+    @Value("${deviceEnable}")
+    private Boolean deviceEnable;
+
+    /**
      * 阿里云oss accessKeyId
      */
     @Value("${accessKeyId}")

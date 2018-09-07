@@ -18,6 +18,7 @@ import com.eds.ma.bis.order.entity.OrderCoupon;
 import com.eds.ma.bis.order.service.IOrderService;
 import com.eds.ma.bis.user.entity.UserWallet;
 import com.eds.ma.bis.user.service.IUserService;
+import com.eds.ma.config.SysConfig;
 import com.eds.ma.exception.BizCoreRuntimeException;
 import com.eds.ma.mongodb.collection.MongoDeviceGPS;
 import com.eds.ma.mongodb.collection.MongoDeviceHeartBeat;
@@ -68,6 +69,8 @@ public class DeviceServiceImpl implements IDeviceService {
     @Autowired
     private ISocketMessageService socketMessageService;
 
+    @Autowired
+    private SysConfig sysConfig;
 
     @Autowired
     private CommonMessageHandler commonMessageHandler;
@@ -151,7 +154,7 @@ public class DeviceServiceImpl implements IDeviceService {
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RENT_OUT_RANGE);
         }
         //获取设备的位置
-        MongoDeviceGPS mongoDeviceGPS = socketMessageService.queryMessageGPS(deviceRentDetailVo.getDeviceGpsNo());
+        MongoDeviceGPS mongoDeviceGPS = socketMessageService.queryMessageGPS(sysConfig.getDeviceEnable()?deviceRentDetailVo.getDeviceGpsNo():1L);
         if(Objects.isNull(mongoDeviceGPS)){
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_POSITISON_ERROR);
         }
@@ -165,15 +168,17 @@ public class DeviceServiceImpl implements IDeviceService {
         }
 
         //查询设备状态
-        MongoDeviceHeartBeat deviceHeartBeat = socketMessageService.queryDeviceStatusInfo(deviceRentDetailVo.getDeviceOriginCode());
-        if(Objects.isNull(deviceHeartBeat)
-                || Objects.equals(deviceHeartBeat.getDeviceUseStatus(),1L)
-                || Objects.equals(deviceHeartBeat.getDeviceNTCStatus(),1L)
-                || Objects.equals(deviceHeartBeat.getDeviceTemperatureStatus(),1L)
-                || Objects.equals(deviceHeartBeat.getDeviceIntakeValveStatus(),1L)
-                || Objects.equals(deviceHeartBeat.getDeviceElectricityStatus(),1L)
-                || (!Objects.equals(deviceHeartBeat.getDeviceReturnStatus(),3L))){
-            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RENT_STATUS_ERROR);
+        if(sysConfig.getDeviceEnable()){
+            MongoDeviceHeartBeat deviceHeartBeat = socketMessageService.queryDeviceStatusInfo(deviceRentDetailVo.getDeviceOriginCode());
+            if(Objects.isNull(deviceHeartBeat)
+                    || Objects.equals(deviceHeartBeat.getDeviceUseStatus(),1L)
+                    || Objects.equals(deviceHeartBeat.getDeviceNTCStatus(),1L)
+                    || Objects.equals(deviceHeartBeat.getDeviceTemperatureStatus(),1L)
+                    || Objects.equals(deviceHeartBeat.getDeviceIntakeValveStatus(),1L)
+                    || Objects.equals(deviceHeartBeat.getDeviceElectricityStatus(),1L)
+                    || (!Objects.equals(deviceHeartBeat.getDeviceReturnStatus(),3L))){
+                throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RENT_STATUS_ERROR);
+            }
         }
 
         //对用户信息,钱包进行校验
@@ -212,8 +217,10 @@ public class DeviceServiceImpl implements IDeviceService {
         userDeviceRecord.setUserLat(userLat);
         userDeviceRecord.setUserLng(userLng);
         saveUserDeviceRecord(userDeviceRecord);
-        //硬件发送指令解锁
-        sendDevcieStatusMessage(deviceRentDetailVo,SocketConstants.DEVICE_LOCK_UNLOCK);
+        if(sysConfig.getDeviceEnable()){
+            //硬件发送指令解锁
+            sendDevcieStatusMessage(deviceRentDetailVo,SocketConstants.DEVICE_LOCK_UNLOCK);
+        }
     }
 
     @Override
@@ -244,16 +251,18 @@ public class DeviceServiceImpl implements IDeviceService {
         }
 
         //查询设备状态
-        MongoDeviceHeartBeat deviceHeartBeat = socketMessageService.queryDeviceStatusInfo(deviceRentDetailVo.getDeviceOriginCode());
-        if(Objects.isNull(deviceHeartBeat)
-                || Objects.equals(deviceHeartBeat.getDeviceUseStatus(),1L)
-                || Objects.equals(deviceHeartBeat.getDeviceNTCStatus(),1L)
-                || Objects.equals(deviceHeartBeat.getDeviceTemperatureStatus(),1L)
-                || Objects.equals(deviceHeartBeat.getDeviceIntakeValveStatus(),1L)
-                || Objects.equals(deviceHeartBeat.getDeviceElectricityStatus(),1L)
-                || (!Objects.equals(deviceHeartBeat.getDeviceReturnStatus(),1L)
+        if(sysConfig.getDeviceEnable()){
+            MongoDeviceHeartBeat deviceHeartBeat = socketMessageService.queryDeviceStatusInfo(deviceRentDetailVo.getDeviceOriginCode());
+            if(Objects.isNull(deviceHeartBeat)
+                    || Objects.equals(deviceHeartBeat.getDeviceUseStatus(),1L)
+                    || Objects.equals(deviceHeartBeat.getDeviceNTCStatus(),1L)
+                    || Objects.equals(deviceHeartBeat.getDeviceTemperatureStatus(),1L)
+                    || Objects.equals(deviceHeartBeat.getDeviceIntakeValveStatus(),1L)
+                    || Objects.equals(deviceHeartBeat.getDeviceElectricityStatus(),1L)
+                    || (!Objects.equals(deviceHeartBeat.getDeviceReturnStatus(),1L)
                     && !Objects.equals(deviceHeartBeat.getDeviceReturnStatus(),0L))){
-            throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_STATUS_ERROR);
+                throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_RETURN_STATUS_ERROR);
+            }
         }
 
         //获取设备的位置信息和用户的位置信息是否在有效距离内
@@ -267,7 +276,7 @@ public class DeviceServiceImpl implements IDeviceService {
 
         //获取设备的位置信息和店铺的位置是否在有效距离内(硬件指令获取硬件位置)
         //获取设备的位置
-        MongoDeviceGPS mongoDeviceGPS = socketMessageService.queryMessageGPS(deviceRentDetailVo.getDeviceGpsNo());
+        MongoDeviceGPS mongoDeviceGPS = socketMessageService.queryMessageGPS(sysConfig.getDeviceEnable()?deviceRentDetailVo.getDeviceGpsNo():1L);
         if(Objects.isNull(mongoDeviceGPS)){
             throw new BizCoreRuntimeException(BizErrorConstants.DEVICE_POSITISON_ERROR);
         }
@@ -390,7 +399,9 @@ public class DeviceServiceImpl implements IDeviceService {
         userDeviceRecord.setSpId(spDetailVo.getSpId());
         saveUserDeviceRecord(userDeviceRecord);
         //硬件发送指令上锁
-        sendDevcieStatusMessage(deviceRentDetailVo,SocketConstants.DEVICE_LOCK_LOCK);
+        if(sysConfig.getDeviceEnable()){
+            sendDevcieStatusMessage(deviceRentDetailVo,SocketConstants.DEVICE_LOCK_LOCK);
+        }
         return orderId;
     }
 
