@@ -124,6 +124,12 @@ public class SysConfig {
     private String wxMaTemplateUrl;
 
     /**
+     * 公众号发送模板消息的Url
+     */
+    @Value("${wxTemplateUrl}")
+    private String wxTemplateUrl;
+
+    /**
      * 微信小程序appid
      */
     @Value("${wxMaAppId}")

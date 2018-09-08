@@ -2,6 +2,7 @@ package com.eds.ma.bis.message.service;
 
 import com.alibaba.fastjson.JSON;
 import com.eds.ma.bis.message.MessagePushTypeEnum;
+import com.eds.ma.bis.message.TmplEvent;
 import com.eds.ma.bis.message.entity.MessageRecord;
 import com.eds.ma.bis.message.entity.SysMessageTmpl;
 import com.eds.ma.bis.message.vo.SmsMessageContent;
@@ -30,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.MessageFormat;
 import java.util.*;
 
+import static com.eds.ma.bis.message.TmplEvent.device_check_message;
+
 @Service
 @Transactional
 public class MessageServiceImpl implements IMessageService {
@@ -47,30 +50,35 @@ public class MessageServiceImpl implements IMessageService {
     @Autowired
     private SysConfig sysConfig;
 
+
     @Override
-    public void pushWxMaMessage(String openId, String tmplEvent) {
-        SysMessageTmpl sysMessageTmpl = querySysMessageTmpl(tmplEvent);
+    public void pushWxMessage(String openId, TmplEvent tmplEvent,String... parameters) {
+        SysMessageTmpl sysMessageTmpl = querySysMessageTmpl(tmplEvent.value());
 
         Map<String,String> result = new HashMap<>();
         Map<String,Object> templateParaMap = new HashMap<>();
         templateParaMap.put("touser",openId);
-        templateParaMap.put("template_id",sysMessageTmpl.getMaTmplShortId());
-        templateParaMap.put("form_id",123456);
-        templateParaMap.put("data",sysMessageTmpl.getMaWxTmpl());
+        templateParaMap.put("template_id",sysMessageTmpl.getTmplShortId());
+        templateParaMap.put("url",parameters[2]);
+        Map<String, Object> checkmessageContent = null;
+        switch (tmplEvent) {
+            case device_check_message:
+                checkmessageContent = MessageContentBuilder.buildDeviceCheckMessage(parameters[0], Integer.valueOf(parameters[1]),parameters[2]);
+            break;
+        }
+        templateParaMap.put("data",checkmessageContent);
 
         //查询token
-        QueryBuilder queryWxAccessTokenQb = QueryBuilder.where(Restrictions.eq("appId",sysConfig.getWxMaAppId()))
+        QueryBuilder queryWxAccessTokenQb = QueryBuilder.where(Restrictions.eq("appId",sysConfig.getWxAppId()))
                 .and(Restrictions.eq("dataStatus",1));
         WxAccessToken wxAccessToken = dao.query(queryWxAccessTokenQb,WxAccessToken.class);
-        String resultJson = HTTPUtil.sendGetString(sysConfig.getWxMaTemplateUrl()+wxAccessToken.getToken(),templateParaMap);
+        String resultJson = HTTPUtil.sendPostJsonHttp(sysConfig.getWxTemplateUrl()+wxAccessToken.getToken(),templateParaMap);
         logger.info("MessageServiceImpl.pushWxMaMessage.result:{}",resultJson);
         Map<String,Object> resultJsonMap = HTTPUtil.Json2Map(resultJson);
         int errorCode = MapUtils.getIntValue(resultJsonMap,"errcode",-1);
         if(!Objects.equals(errorCode, -1)){
             logger.error("MessageServiceImpl.pushWxMaMessage failed.result:{}",resultJson);
-            throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
         }
-
     }
 
     @Override

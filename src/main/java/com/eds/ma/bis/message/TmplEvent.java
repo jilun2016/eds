@@ -14,7 +14,12 @@ public enum TmplEvent {
 	/**
 	 * 钱包提现提醒
 	 */
-	wallet_withdraw_check("wallet_withdraw_check");
+	wallet_withdraw_check("wallet_withdraw_check"),
+
+	/**
+	 * 检测结果消息推送
+	 */
+	device_check_message("device_check_message");
 
 
 	private final String value;

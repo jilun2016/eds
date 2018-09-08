@@ -41,7 +41,7 @@ public class AuthoricationDevFilter implements ContainerRequestFilter,ContainerR
         }
         //如果是微信访问,那么读取openId
         if(Objects.equals(EdsAppId.eds_wx.value(),appId)){
-            String openId = "oiyZc5Y2cmsHPUeOBUufSrFSBn9E";
+            String openId = "oiyZc5Qn8pe8wnO_BDl142Ozj6eE";
             ContextUser contextUser = userService.queryUserByOpenId(openId);
             logger.debug("AuthoricationFilter.contextUser({})",contextUser);
             if (Objects.isNull(contextUser) || Objects.isNull(contextUser.getUserId())) {

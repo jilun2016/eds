@@ -4,6 +4,8 @@ import com.eds.ma.bis.coupon.service.ICouponService;
 import com.eds.ma.bis.coupon.vo.UserCouponClaimStatusVo;
 import com.eds.ma.bis.device.service.IDeviceService;
 import com.eds.ma.bis.device.vo.UserDeviceVo;
+import com.eds.ma.bis.message.TmplEvent;
+import com.eds.ma.bis.message.service.IMessageService;
 import com.eds.ma.bis.order.OrderCodeCreater;
 import com.eds.ma.bis.user.entity.User;
 import com.eds.ma.bis.user.service.IUserService;
@@ -51,13 +53,16 @@ public class UserResource extends BaseAuthedResource{
     @Autowired
     private IDeviceService deviceService;
 
+    @Autowired
+    private IMessageService messageService;
+
 	@GET
 	@Path("/test")
 	@Produces(MediaType.APPLICATION_JSON)
     @NoAuth
 	public Response test(@QueryParam("message") String  message) {
 //        SessionClient.newInstance().sendMessage(new String[]{"9000"},message);
-
+        messageService.pushWxMessage("otPUw0QBiLBqPVHZPqozBx2iO5vs",TmplEvent.device_check_message,"叮叮咚咚","1","https://www.soso.com");
         return Response.ok().build();
 	}
 

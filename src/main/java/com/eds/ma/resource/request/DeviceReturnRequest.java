@@ -54,7 +54,7 @@ public class DeviceReturnRequest {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("WxPrePayRequest{");
+        final StringBuilder sb = new StringBuilder("DeviceReturnRequest{");
         sb.append("deviceId=").append(deviceId);
         sb.append(", userLng=").append(userLng);
         sb.append(", userLat=").append(userLat);
