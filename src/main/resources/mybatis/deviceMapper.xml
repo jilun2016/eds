@@ -51,6 +51,8 @@
         SELECT ed.id as deviceId, ed.deviceCode,ed.borrowTimes
         FROM t_eds_device ed
         WHERE ed.spId = #{spId} and ed.userId is null and ed.orderId is null AND ed.deviceStatus = 'S_SPZT_DZJ' AND ed.dataStatus = 1
+        order by ed.borrowTimes desc
+        limit 1
     </select>
 
     <select id="queryUserDeviceList" resultType="com.eds.ma.bis.device.vo.UserDeviceVo">

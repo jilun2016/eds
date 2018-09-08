@@ -62,6 +62,7 @@ public class AliMaServiceImpl implements IAliMaService {
             tokenResponse = alipayClient.execute(request);
             logger.info("AliMaServiceImpl.queryAliUserInfo.OauthToken result:{}",tokenResponse.getBody());
         } catch (Exception e) {
+            logger.info("AliMaServiceImpl.queryAliUserInfo.OauthToken result:{}",code);
             throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
         }
         if(tokenResponse.isSuccess()){
@@ -78,12 +79,14 @@ public class AliMaServiceImpl implements IAliMaService {
                     aliUserInfoVo.setNickName(aliNickname);
                     saveAliUser(aliUid, aliNickname, aliHeadimgurl, userResponse.getBody(), tokenResponse.getBody());
                 } else {
+                    logger.info("AliMaServiceImpl.userResponse fail.userInfo result:{}",userResponse.getBody());
                     throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
                 }
             } catch (Exception e) {
                 throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
             }
         } else {
+            logger.info("AliMaServiceImpl.queryAliUserInfo.fail result:{}",tokenResponse.getBody());
             throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
         }
         return aliUserInfoVo;
