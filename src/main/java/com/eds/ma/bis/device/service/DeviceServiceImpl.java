@@ -436,7 +436,10 @@ public class DeviceServiceImpl implements IDeviceService {
         }
 
         //根据消息的报文功能码不同,走不同处理
-        commonMessageHandler.sendDataMessage(MessageTypeConstants.DEVICE_GPS,device.getDeviceOriginCode());
+        if(sysConfig.getDeviceEnable()){
+            commonMessageHandler.sendDataMessage(MessageTypeConstants.DEVICE_GPS,device.getDeviceOriginCode());
+        }
+
 
     }
 

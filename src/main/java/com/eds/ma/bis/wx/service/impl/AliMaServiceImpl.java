@@ -62,7 +62,7 @@ public class AliMaServiceImpl implements IAliMaService {
             tokenResponse = alipayClient.execute(request);
             logger.info("AliMaServiceImpl.queryAliUserInfo.OauthToken result:{}",tokenResponse.getBody());
         } catch (Exception e) {
-            logger.info("AliMaServiceImpl.queryAliUserInfo.OauthToken result:{}",code);
+            logger.info("AliMaServiceImpl.queryAliUserInfo.OauthToken result:{}",e);
             throw new BizCoreRuntimeException(BizErrorConstants.WX_MA_SESSION_QUERY_ERROR);
         }
         if(tokenResponse.isSuccess()){
