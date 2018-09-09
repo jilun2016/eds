@@ -65,6 +65,8 @@ public class MessageServiceImpl implements IMessageService {
             case device_check_message:
                 checkmessageContent = MessageContentBuilder.buildDeviceCheckMessage(parameters[0], Integer.valueOf(parameters[1]),parameters[2]);
             break;
+            default:
+            break;
         }
         templateParaMap.put("data",checkmessageContent);
 
