@@ -151,4 +151,20 @@ public interface BizErrorConstants {
 	 */
 	String DEVICE_RETURN_STATUS_ERROR = "E10028";
 
+	/**
+	 * 店铺信息不存在
+	 */
+	String SP_NOT_EXIST_ERROR = "E10029";
+
+    /**
+     * 当前店铺存在空闲设备,请及时租借
+     */
+    String SP_DEVICE_EXIST_IDLE_ERROR = "E10030";
+
+    /**
+     * 您已经预约该店铺的设备,请耐心等待设备空闲通知
+     */
+    String SP_DEVICE_RESERVE_DUPLICATE_ERROR = "E10031";
+
+
 }

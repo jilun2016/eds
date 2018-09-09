@@ -241,7 +241,7 @@ public class WordUtil2007 {
     public static void main(String[] args) throws Exception {
         Map<String, Object> param = new HashMap<String, Object>();
         param.put("${nickName}", "高岩");
-        param.put("${deviceCode}", "E1021");
+        param.put("${deviceCode}", "仪器编号: E1021");
 
 //      Map<String, Object> twocode = new HashMap<String, Object>();
 //      twocode.put("width", 100);
@@ -260,7 +260,6 @@ public class WordUtil2007 {
         WordUtil2007.processParagraphs(doc.getParagraphs(), param, doc);
         FileOutputStream fopts = new FileOutputStream("d:\\2007-2.docx");
         doc.write(fopts);
-
     }
 
 }
