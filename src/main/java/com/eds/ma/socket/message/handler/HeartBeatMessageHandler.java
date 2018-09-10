@@ -34,6 +34,9 @@ public class HeartBeatMessageHandler extends BaseMessageHandler {
     @Autowired
     protected MongoTemplate mongoTemplate;
 
+    @Autowired
+    private CommonMessageHandler commonMessageHandler;
+
     @Override
     public Long getMessageType() {
         return MessageTypeConstants.DEVICE_HEARTBEAT;
@@ -43,6 +46,10 @@ public class HeartBeatMessageHandler extends BaseMessageHandler {
     public void processDataMessage(CommonHeadMessageVo commonHeadMessageVo, String[] mesasge) {
         //解析心跳消息
         MongoDeviceHeartBeatRecord mongoDeviceHeartBeat = parseHeartBeatMessage(commonHeadMessageVo, mesasge);
+        //如果是数据有更新,需要发送获取检测报告消息
+        if(mongoDeviceHeartBeat.getDeviceReportStatus() == 1){
+            commonMessageHandler.sendDataMessage(MessageTypeConstants.DEVICE_REPORT,commonHeadMessageVo.getDeviceCode());
+        }
     }
 
     @Override

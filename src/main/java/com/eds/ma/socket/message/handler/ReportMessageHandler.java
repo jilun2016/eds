@@ -42,19 +42,14 @@ public class ReportMessageHandler extends BaseMessageHandler {
     public void processDataMessage(CommonHeadMessageVo commonHeadMessageVo, String[] mesasge) {
         //查询设备检测结果信息
         MongoDeviceReport mongoDeviceReport = parseReportMessage(commonHeadMessageVo, mesasge);
+        //根据设备原始code,查询是否存在租借中的订单
+
     }
 
     /**
      * 发送设备报告信息
      * @param commonHeadMessageVo
-     * @param mesasgeField [0]指令设备控制 0xa5|0x5a
-     *                     [1]使用时长
-     *                     [2]补偿数据A整数位
-     *                     [3]补偿数据A小数位
-     *                     [4]补偿数据A小数位
-     *                     [5]补偿数据B整数位
-     *                     [6]补偿数据B小数位
-     *                     [7]补偿数据B小数位
+     * @param mesasgeField 空
      */
     @Override
     public void sendDataMessage(CommonHeadMessageVo commonHeadMessageVo, Long... mesasgeField) {
@@ -119,20 +114,20 @@ public class ReportMessageHandler extends BaseMessageHandler {
         mongoDeviceReport.setMessageCheckCode(checkCode);
         Long deviceTemperature = SocketMessageUtils.H2L(mesasge[17]);
         Long deviceInTemperature = SocketMessageUtils.H2L(mesasge[18]);
-        Long HCHOHighValue = SocketMessageUtils.H2L(mesasge[19]);
-        Long HCHOLowValue = SocketMessageUtils.H2L(mesasge[20]);
-        Long HCHOValue = SocketMessageUtils.H2L(mesasge[21]);
-        Long ASLHighValue = SocketMessageUtils.H2L(mesasge[22]);
-        Long ASLLowValue = SocketMessageUtils.H2L(mesasge[23]);
-        Long ASLDecimals = SocketMessageUtils.H2L(mesasge[24]);
+        Long HCHOIntegerValue = SocketMessageUtils.H2L(mesasge[19]);
+        Long HCHOHighDecimal = SocketMessageUtils.H2L(mesasge[20]);
+        Long HCHOLowDecimal = SocketMessageUtils.H2L(mesasge[21]);
+        Long ASLIntegerValue = SocketMessageUtils.H2L(mesasge[22]);
+        Long ASLHighDecimal = SocketMessageUtils.H2L(mesasge[23]);
+        Long ASLLowDecimal = SocketMessageUtils.H2L(mesasge[24]);
         mongoDeviceReport.setDeviceTemperature(deviceTemperature);
         mongoDeviceReport.setDeviceInTemperature(deviceInTemperature);
-        mongoDeviceReport.setHCHOHighValue(HCHOHighValue);
-        mongoDeviceReport.setHCHOLowValue(HCHOLowValue);
-        mongoDeviceReport.setHCHOValue(HCHOValue);
-        mongoDeviceReport.setASLHighValue(ASLHighValue);
-        mongoDeviceReport.setASLLowValue(ASLLowValue);
-        mongoDeviceReport.setASLDecimals(ASLDecimals);
+        mongoDeviceReport.setHCHOIntegerValue(HCHOIntegerValue);
+        mongoDeviceReport.setHCHOHighDecimal(HCHOHighDecimal);
+        mongoDeviceReport.setHCHOLowDecimal(HCHOLowDecimal);
+        mongoDeviceReport.setASLIntegerValue(ASLIntegerValue);
+        mongoDeviceReport.setASLHighDecimal(ASLHighDecimal);
+        mongoDeviceReport.setASLLowDecimal(ASLLowDecimal);
 
         String allDeviceInfoMessage = SocketMessageUtils.H2B(mesasge[25]);
         Long deviceReturnStatus = SocketMessageUtils.B2L(allDeviceInfoMessage,0,2);

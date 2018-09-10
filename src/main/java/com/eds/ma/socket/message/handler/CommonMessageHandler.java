@@ -1,5 +1,6 @@
 package com.eds.ma.socket.message.handler;
 
+import com.eds.ma.bis.device.HchoResultEnum;
 import com.eds.ma.socket.message.MessageTypeConstants;
 import com.eds.ma.socket.message.vo.CommonHeadMessageVo;
 import com.eds.ma.socket.util.SocketMessageUtils;
@@ -9,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Objects;
 
 
@@ -124,6 +127,23 @@ public class CommonMessageHandler {
             return SpringUtils.getBean("deviceControlHandler");
         }
         return null;
+    }
+
+    public static HchoResultEnum checkHchoResult(Long HCHOIntegerValue,Long HCHOHighDecimal,Long HCHOLowDecimal){
+        //计算甲醛的含量值
+        BigDecimal hchoValue = BigDecimal.valueOf(HCHOIntegerValue)
+                .add(BigDecimal.valueOf(HCHOHighDecimal).divide(BigDecimal.valueOf(100),2,RoundingMode.HALF_UP))
+                .add(BigDecimal.valueOf(HCHOLowDecimal).divide(BigDecimal.valueOf(1000),2,RoundingMode.HALF_UP));
+        if(hchoValue.compareTo(BigDecimal.valueOf(0.1))<=0){
+            return HchoResultEnum.HCHO_RESULT_OK;
+        }else if(hchoValue.compareTo(BigDecimal.valueOf(0.3))<=0){
+            return HchoResultEnum.HCHO_RESULT_LIGHT;
+        }else if(hchoValue.compareTo(BigDecimal.valueOf(0.8))<=0){
+            return HchoResultEnum.HCHO_RESULT_HEAVY;
+        }else {
+            return HchoResultEnum.HCHO_RESULT_EXTREME;
+        }
+
     }
 
     public static void main(String[] args) {

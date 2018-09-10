@@ -102,17 +102,17 @@ public class HistoryMessageHandler extends BaseMessageHandler {
 
         mongoDeviceReport.setCreated(syncDate.getTime());
 
-        mongoDeviceReport.setASLHighValue(SocketMessageUtils.H2L(mesasge[35]));
-        mongoDeviceReport.setASLLowValue(SocketMessageUtils.H2L(mesasge[36]));
-        mongoDeviceReport.setASLDecimals(SocketMessageUtils.H2L(mesasge[37]));
+        mongoDeviceReport.setASLIntegerValue(SocketMessageUtils.H2L(mesasge[35]));
+        mongoDeviceReport.setASLHighDecimal(SocketMessageUtils.H2L(mesasge[36]));
+        mongoDeviceReport.setASLLowDecimal(SocketMessageUtils.H2L(mesasge[37]));
 
         mongoDeviceReport.setDeviceTemperature(SocketMessageUtils.H2L(mesasge[38]));
         mongoDeviceReport.setDeviceInTemperature(SocketMessageUtils.H2L(mesasge[39]));
 
 
-        mongoDeviceReport.setHCHOHighValue(SocketMessageUtils.H2L(mesasge[40]));
-        mongoDeviceReport.setHCHOLowValue(SocketMessageUtils.H2L(mesasge[41]));
-        mongoDeviceReport.setHCHOValue(SocketMessageUtils.H2L(mesasge[42]));
+        mongoDeviceReport.setHCHOIntegerValue(SocketMessageUtils.H2L(mesasge[40]));
+        mongoDeviceReport.setHCHOHighDecimal(SocketMessageUtils.H2L(mesasge[41]));
+        mongoDeviceReport.setHCHOLowDecimal(SocketMessageUtils.H2L(mesasge[42]));
         mongoTemplate.insert(mongoDeviceReport);
         return mongoDeviceReport;
     }
