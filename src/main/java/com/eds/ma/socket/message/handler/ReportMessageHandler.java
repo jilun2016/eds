@@ -1,6 +1,9 @@
 package com.eds.ma.socket.message.handler;
 
 import com.eds.ma.bis.device.entity.Device;
+import com.eds.ma.bis.device.vo.DeviceRentWxDetailVo;
+import com.eds.ma.bis.message.TmplEvent;
+import com.eds.ma.bis.message.service.IMessageService;
 import com.eds.ma.mongodb.collection.MongoDeviceReport;
 import com.eds.ma.socket.SessionClient;
 import com.eds.ma.socket.SocketConstants;
@@ -9,6 +12,7 @@ import com.eds.ma.socket.message.vo.CommonHeadMessageVo;
 import com.eds.ma.socket.util.SocketMessageUtils;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
 import com.xcrm.cloud.database.db.query.QueryBuilder;
+import com.xcrm.cloud.database.db.query.Ssqb;
 import com.xcrm.cloud.database.db.query.expression.Restrictions;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.log.Logger;
@@ -19,6 +23,7 @@ import org.springframework.stereotype.Component;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -36,6 +41,9 @@ public class ReportMessageHandler extends BaseMessageHandler {
     protected MongoTemplate mongoTemplate;
 
     @Autowired
+    protected IMessageService messageService;
+
+    @Autowired
     protected BaseDaoSupport dao;
 
     @Override
@@ -43,7 +51,13 @@ public class ReportMessageHandler extends BaseMessageHandler {
         //查询设备检测结果信息
         MongoDeviceReport mongoDeviceReport = parseReportMessage(commonHeadMessageVo, mesasge);
         //根据设备原始code,查询是否存在租借中的订单
-
+        Ssqb queryDeviceRentWxDetailSqb = Ssqb.create("com.eds.device.queryDeviceRentWxDetail")
+                .setParam("deviceCode",mongoDeviceReport.getDeviceCode());
+        //如果是租借中的订单,那么发送公众号消息提醒
+        DeviceRentWxDetailVo deviceRentWxDetailVo = dao.findForObj(queryDeviceRentWxDetailSqb, DeviceRentWxDetailVo.class);
+        if(Objects.nonNull(deviceRentWxDetailVo)){
+            messageService.pushWxMessage(deviceRentWxDetailVo.getOpenId(),TmplEvent.device_check_message,deviceRentWxDetailVo.getNickName(),"1","https://www.soso.com");
+        }
     }
 
     /**

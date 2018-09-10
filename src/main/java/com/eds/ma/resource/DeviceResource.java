@@ -85,7 +85,7 @@ public class DeviceResource extends BaseAuthedResource{
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deviceRent(@Valid DeviceRentRequest request) {
-		logger.debug("WxMaResource.deviceRent({},{})",super.getOpenId(), request);
+		logger.debug("DeviceResource.deviceRent({},{})",super.getOpenId(), request);
         deviceService.deviceRent(request.getDeviceId(),super.getUserId(),request.getUserLat(),request.getUserLng());
 		return Response.status(Response.Status.CREATED).build();
 	}
@@ -99,12 +99,13 @@ public class DeviceResource extends BaseAuthedResource{
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deviceReturn(@Valid DeviceReturnRequest request) {
-		logger.debug("WxMaResource.deviceReturn({},{},{})",super.getOpenId(),super.getUser(), request);
+		logger.debug("DeviceResource.deviceReturn({},{},{})",super.getOpenId(),super.getUser(), request);
 		Long orderId = deviceService.deviceReturn(request.getDeviceId(),super.getUserId(),request.getUserLat(),request.getUserLng());
 		Map<String,Long> resultMap = new HashMap<>(1);
 		resultMap.put("orderId",orderId);
 		return Response.status(Response.Status.CREATED).entity(resultMap).build();
 	}
+
 
 	/**
 	 * 查询设备常见问题

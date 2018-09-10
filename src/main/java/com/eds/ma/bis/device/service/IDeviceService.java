@@ -112,4 +112,10 @@ public interface IDeviceService {
      * @param deviceId
      */
     void queryDevicePosition(Long deviceId);
+
+    /**
+     * 设备归还预约通知
+     * @param spId
+     */
+    void deviceReturnReserveNotice(Long spId);
 }

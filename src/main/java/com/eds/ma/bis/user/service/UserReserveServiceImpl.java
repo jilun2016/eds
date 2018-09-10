@@ -5,11 +5,13 @@ import com.eds.ma.bis.device.entity.Sp;
 import com.eds.ma.bis.device.service.IDeviceService;
 import com.eds.ma.bis.device.vo.IdleDeviceVo;
 import com.eds.ma.bis.message.service.IMessageService;
+import com.eds.ma.bis.user.entity.AliUser;
 import com.eds.ma.bis.user.entity.UserReserve;
 import com.eds.ma.exception.BizCoreRuntimeException;
 import com.eds.ma.rest.common.BizErrorConstants;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
 import com.xcrm.cloud.database.db.query.QueryBuilder;
+import com.xcrm.cloud.database.db.query.Ssqb;
 import com.xcrm.cloud.database.db.query.expression.Restrictions;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.common.util.ListUtil;
@@ -78,7 +80,6 @@ public class UserReserveServiceImpl implements IUserReserveService {
             String sendSmsCode = "8888";
             userReserve.setReserveSmsCode(sendSmsCode);
             userReserve.setReserveSmsExpired(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000));
-            userReserve.setReserveTimes(1);
             userReserve.setCreated(now);
             userReserve.setReserveSpId(spId);
             dao.save(userReserve);
@@ -104,7 +105,6 @@ public class UserReserveServiceImpl implements IUserReserveService {
             userReserve.setReserveSmsCode(smsCode);
             userReserve.setReserveSmsExpired(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000));
             userReserve.setUpdated(now);
-            userReserve.setReserveTimes(userReserve.getReserveTimes() + 1);
             dao.update(userReserve);
         }
 //        //发送短信
@@ -114,6 +114,12 @@ public class UserReserveServiceImpl implements IUserReserveService {
 //        String sendSmsCode = Objects.equals(appId,EdsAppId.eds_ali.value())?user.getAliSmsCode():user.getWxSmsCode();
 //        smsMessageContent.setSmsParams(new String[]{sendSmsCode});
 //        messageService.pushSmsMessage(smsMessageContent);
+
+    }
+
+    @Override
+    public void userReserveConfirm(Long spId, String mobile, String smsCode) {
+        UserReserve userReserve = queryUserReserveByMobile(mobile,spId);
 
     }
 

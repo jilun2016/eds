@@ -13,4 +13,12 @@ public interface IUserReserveService {
      * @param spId
      */
     void sendUserReserveSmsCode(String mobile, Long spId);
+
+    /**
+     * 用户预约确认
+     * @param spId
+     * @param mobile
+     * @param smsCode
+     */
+    void userReserveConfirm(Long spId, String mobile, String smsCode);
 }

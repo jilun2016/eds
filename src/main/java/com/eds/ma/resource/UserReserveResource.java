@@ -3,6 +3,7 @@ package com.eds.ma.resource;
 import com.eds.ma.bis.user.service.IUserReserveService;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.resource.request.SendReserveSmsCodeRequest;
+import com.eds.ma.resource.request.UserReserveRequest;
 import com.eds.ma.rest.integration.annotation.NoAuth;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,22 @@ public class UserReserveResource extends BaseAuthedResource{
     public Response sendUserReserveSmsCode(@Valid SendReserveSmsCodeRequest request){
         logger.debug("UserReserveResource.sendUserReserveSmsCode({})",request);
         userReserveService.sendUserReserveSmsCode(request.getMobile(),request.getSpId());
+        return Response.status(Response.Status.CREATED).build();
+    }
+
+    /**
+     * 用户设备预约
+     * @param request
+     * @return
+     */
+    @POST
+    @Path("/reserve/confirm")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoAuth
+    public Response userReserveConfirm(@Valid UserReserveRequest request){
+        logger.debug("UserReserveResource.userReserveConfirm({})",request);
+        userReserveService.userReserveConfirm(request.getSpId(),request.getMobile(),request.getSmsCode());
         return Response.status(Response.Status.CREATED).build();
     }
 

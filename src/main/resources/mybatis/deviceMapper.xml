@@ -89,20 +89,18 @@
         </if>
     </select>
 
-    <select id="queryDeviceRentWxDetail" resultType="com.eds.ma.bis.device.vo.DeviceFaqInfoVo">
-        SELECT df.title,df.detail
-        FROM t_eds_device_faq df
-        WHERE  df.dataStatus = 1
-        order by priority desc
-        <if test="start != null and start >= 0 and pageSize != null and pageSize >= 0">
-            LIMIT #{start}, #{pageSize}
-        </if>
-        <if test="pageSize != null and pageSize > 0 and start == null">
-            LIMIT #{pageSize}
-        </if>
+    <select id="queryDeviceRentWxDetail" resultType="com.eds.ma.bis.device.vo.DeviceRentWxDetailVo">
+        SELECT euw.openId,euw.nickname
+        FROM t_eds_device ed
+        LEFT JOIN t_eds_user eu ON ed.userId = eu.id
+        LEFT JOIN t_eds_user_wxma euw ON eu.wxUnionId = euw.wxUnionId
+        WHERE ed.dataStatus = 1 AND ed.deviceOriginCode = #{deviceCode}  AND ed.orderId IS NOT NULL  AND ed.userId IS NOT NULL
     </select>
 
 
+
+
+    
 
 
 
