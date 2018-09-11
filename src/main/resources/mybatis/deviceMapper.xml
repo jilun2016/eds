@@ -97,7 +97,11 @@
         WHERE ed.dataStatus = 1 AND ed.deviceOriginCode = #{deviceCode}  AND ed.orderId IS NOT NULL  AND ed.userId IS NOT NULL
     </select>
 
-
+    <update id="updateDeviceReserveSuc">
+        UPDATE t_eds_user_reserve
+        SET reserveSmsCode = '',reserveSmsExpired = null,reserveTimes = reserveTimes + 1,isReserveValid = 1,updated = now()
+        where mobile = #{mobile} and reserveSpId = #{reserveSpId} and dataStatus = 1
+    </update>
 
 
     

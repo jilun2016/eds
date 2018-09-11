@@ -114,8 +114,24 @@ public interface IDeviceService {
     void queryDevicePosition(Long deviceId);
 
     /**
-     * 设备归还预约通知
+     * 发送设备预约的短信验证码
+     * @param mobile
      * @param spId
      */
-    void deviceReturnReserveNotice(Long spId);
+    void sendUserReserveSmsCode(String mobile, Long spId);
+
+    /**
+     * 用户预约确认
+     * @param spId
+     * @param mobile
+     * @param smsCode
+     */
+    void userReserveConfirm(Long spId, String mobile, String smsCode);
+
+    /**
+     * 设备空闲预约确认
+     * @param spId
+     */
+    void deviceReserveIdleConfirm(Long spId);
+
 }

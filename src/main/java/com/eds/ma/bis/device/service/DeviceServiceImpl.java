@@ -10,12 +10,18 @@ import com.eds.ma.bis.coupon.service.ICouponService;
 import com.eds.ma.bis.device.DeviceStatusEnum;
 import com.eds.ma.bis.device.OrderStatusEnum;
 import com.eds.ma.bis.device.entity.Device;
+import com.eds.ma.bis.device.entity.Sp;
 import com.eds.ma.bis.device.entity.UserDeviceRecord;
 import com.eds.ma.bis.device.vo.*;
+import com.eds.ma.bis.message.TmplEvent;
+import com.eds.ma.bis.message.service.IMessageService;
+import com.eds.ma.bis.message.vo.SmsMessageContent;
 import com.eds.ma.bis.order.OrderCodeCreater;
 import com.eds.ma.bis.order.entity.Order;
 import com.eds.ma.bis.order.entity.OrderCoupon;
 import com.eds.ma.bis.order.service.IOrderService;
+import com.eds.ma.bis.user.entity.UserReserve;
+import com.eds.ma.bis.user.entity.UserReserveRecord;
 import com.eds.ma.bis.user.entity.UserWallet;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.config.SysConfig;
@@ -29,21 +35,29 @@ import com.eds.ma.socket.message.handler.CommonMessageHandler;
 import com.eds.ma.socket.message.service.ISocketMessageService;
 import com.eds.ma.util.DistanceUtil;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
+import com.xcrm.cloud.database.db.query.QueryBuilder;
 import com.xcrm.cloud.database.db.query.Ssqb;
+import com.xcrm.cloud.database.db.query.expression.Restrictions;
 import com.xcrm.common.page.Pagination;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.common.util.ListUtil;
+import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -74,6 +88,9 @@ public class DeviceServiceImpl implements IDeviceService {
 
     @Autowired
     private CommonMessageHandler commonMessageHandler;
+
+    @Autowired
+    private IMessageService messageService;
 
 
     @Override
@@ -402,6 +419,8 @@ public class DeviceServiceImpl implements IDeviceService {
         if(sysConfig.getDeviceEnable()){
             sendDevcieStatusMessage(deviceRentDetailVo,SocketConstants.DEVICE_LOCK_LOCK);
         }
+        //当前店铺的预约进行推送
+        deviceReserveIdleConfirm(spDetailVo.getSpId());
         return orderId;
     }
 
@@ -444,9 +463,141 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
-    public void deviceReturnReserveNotice(Long spId) {
+    public void sendUserReserveSmsCode(String mobile, Long spId) {
+        Sp sp = dao.queryById(spId,Sp.class);
+        if(Objects.isNull(sp)){
+            throw new BizCoreRuntimeException(BizErrorConstants.SP_NOT_EXIST_ERROR);
+        }
+        List<IdleDeviceVo> idleDeviceVos = queryIdleDeviceListBySpId(spId);
+        if(ListUtil.isNotEmpty(idleDeviceVos)){
+            throw new BizCoreRuntimeException(BizErrorConstants.SP_DEVICE_EXIST_IDLE_ERROR);
+        }
+
+        UserReserve userReserve = queryUserReserveByMobile(mobile,spId);
+        if(Objects.nonNull(userReserve) && userReserve.getIsReserveValid()){
+            throw new BizCoreRuntimeException(BizErrorConstants.SP_DEVICE_RESERVE_DUPLICATE_ERROR);
+        }
+
+        Date now = DateFormatUtils.getNow();
+        if(Objects.isNull(userReserve)){
+            userReserve = new UserReserve();
+            userReserve.setMobile(mobile);
+//            String sendSmsCode = RandomStringUtils.randomNumeric(6);
+            String sendSmsCode = "8888";
+            userReserve.setReserveSmsCode(sendSmsCode);
+            userReserve.setReserveSmsExpired(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000));
+            userReserve.setCreated(now);
+            userReserve.setReserveSpId(spId);
+            dao.save(userReserve);
+        }else{
+            Date smsExpired = userReserve.getReserveSmsExpired();
+            String smsCode = userReserve.getReserveSmsCode();
+
+            if(smsExpired != null && StringUtils.isNotEmpty(smsCode)) {
+                DateTime activationCodeExpired2 = new DateTime(smsExpired);
+                if(activationCodeExpired2.isBeforeNow()) {
+                    //短信码已经失效则发送新的验证码
+                    smsCode = RandomStringUtils.randomNumeric(6);
+                }
+                Date lastSendTime = new Timestamp(smsExpired.getTime() - 30 * 60 * 1000);
+                if(System.currentTimeMillis() - lastSendTime.getTime() < 30 * 1000){
+                    //频率小于30秒
+                    throw new BizCoreRuntimeException(BizErrorConstants.SMS_CHECK_FREQUENCY_ERROR);
+                }
+            } else {
+                smsCode = RandomStringUtils.randomNumeric(6);
+            }
+            smsCode = "8888";
+            userReserve.setReserveSmsCode(smsCode);
+            userReserve.setReserveSmsExpired(new Timestamp(System.currentTimeMillis() + 30 * 60 * 1000));
+            userReserve.setUpdated(now);
+            dao.update(userReserve);
+        }
+//        //发送短信
+//        SmsMessageContent smsMessageContent = new SmsMessageContent();
+//        smsMessageContent.setTmplEvent(TmplEvent.member_register.value());
+//        smsMessageContent.setMobile(mobile);
+//        String sendSmsCode = Objects.equals(appId,EdsAppId.eds_ali.value())?user.getAliSmsCode():user.getWxSmsCode();
+//        smsMessageContent.setSmsParams(new String[]{sendSmsCode});
+//        messageService.pushSmsMessage(smsMessageContent);
 
     }
 
+    @Override
+    public void userReserveConfirm(Long spId, String mobile, String smsCode) {
+        UserReserve userReserve = queryUserReserveByMobile(mobile,spId);
+
+        if (Objects.isNull(userReserve)) {
+            throw new BizCoreRuntimeException(BizErrorConstants.USER_RESERVE_NOT_EXIST_ERROR);
+        }
+
+        String dbSmsCode = userReserve.getReserveSmsCode();
+        long now = System.currentTimeMillis();
+        Date activeExpired = userReserve.getReserveSmsExpired();
+        if(StringUtils.isEmpty(dbSmsCode)) {
+            //验证码错误
+            throw new BizCoreRuntimeException(BizErrorConstants.SMSCODE_ERROR);
+        }
+        if(!dbSmsCode.equals(smsCode)) {
+            //验证码错误
+            throw new BizCoreRuntimeException(BizErrorConstants.SMSCODE_ERROR);
+        } else if(activeExpired != null && activeExpired.getTime() < now){
+            //已过期
+            throw new BizCoreRuntimeException(BizErrorConstants.SMSCODE_EXPIRED);
+        } else {
+            Ssqb updateDeviceReserveSqb = Ssqb.create("com.eds.device.updateDeviceReserveSuc")
+                    .setParam("reserveSpId", spId)
+                    .setParam("mobile", mobile);
+            dao.updateByMybatis(updateDeviceReserveSqb);
+        }
+    }
+
+    @Async
+    @Override
+    public void deviceReserveIdleConfirm(Long spId) {
+        //查询店铺信息
+        Sp sp = dao.queryById(spId,Sp.class);
+        if(Objects.nonNull(sp) && sp.getDataStatus()){
+            //通过spid查询当前店铺的所有预约记录
+            QueryBuilder queryReserveIdleQb = QueryBuilder.where(Restrictions.eq("reserveSpId",spId))
+                    .and(Restrictions.eq("isReserveValid",1))
+                    .and(Restrictions.eq("dataStatus",1));
+            List<UserReserve> userReserveList = dao.queryList(queryReserveIdleQb,UserReserve.class);
+            if(ListUtil.isNotEmpty(userReserveList)){
+                List<Long> reserveIdList = userReserveList.stream().map(UserReserve::getId).collect(Collectors.toList());
+                String reserveMobiles = userReserveList.stream().map(UserReserve::getMobile).collect(Collectors.joining(","));;
+                //将预约通知记录修改为无效,通知进行短信通知
+                QueryBuilder updateReserveQb = QueryBuilder.where(Restrictions.in("id",reserveIdList));
+                UserReserve updateUserReserve = new UserReserve();
+                updateUserReserve.setIsReserveValid(false);
+                dao.updateByQuery(updateUserReserve,updateReserveQb);
+                Date now = DateFormatUtils.getNow();
+                //增加t_eds_user_reserve_record
+                List<UserReserveRecord> userReserveRecordList = new ArrayList<>();
+                userReserveList.forEach(userReserve -> {
+                    UserReserveRecord userReserveRecord = new UserReserveRecord();
+                    userReserveRecord.setMobile(userReserve.getMobile());
+                    userReserveRecord.setReserveNoticeTime(now);
+                    userReserveRecord.setReserveSpId(spId);
+                    userReserveRecord.setReserveTime(userReserve.getCreated());
+                    userReserveRecordList.add(userReserveRecord);
+                });
+                dao.batchSave(userReserveRecordList,UserReserveRecord.class);
+                //发送验证码短信
+                SmsMessageContent smsMessageContent = new SmsMessageContent();
+                smsMessageContent.setTmplEvent(TmplEvent.device_reserve_idle_confirm.value());
+                smsMessageContent.setMobile(reserveMobiles);
+                smsMessageContent.setSmsParams(new String[]{sp.getSpName()});
+                messageService.pushSmsMessage(smsMessageContent);
+            }
+        }
+    }
+
+    private UserReserve queryUserReserveByMobile(String mobile, Long spId) {
+        QueryBuilder queryUserReserveQb = QueryBuilder.where(Restrictions.eq("mobile",mobile))
+                .and(Restrictions.eq("dataStatus",1))
+                .and(Restrictions.eq("reserveSpId",spId));
+        return dao.query(queryUserReserveQb,UserReserve.class);
+    }
 
 }

@@ -166,5 +166,8 @@ public interface BizErrorConstants {
      */
     String SP_DEVICE_RESERVE_DUPLICATE_ERROR = "E10031";
 
-
+	/**
+	 * 用户预约不存在
+	 */
+	String USER_RESERVE_NOT_EXIST_ERROR = "E10032";
 }

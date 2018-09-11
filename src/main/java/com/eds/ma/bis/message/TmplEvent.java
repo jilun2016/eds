@@ -19,7 +19,12 @@ public enum TmplEvent {
 	/**
 	 * 检测结果消息推送
 	 */
-	device_check_message("device_check_message");
+	device_check_message("device_check_message"),
+
+	/**
+	 * 设备预约空闲通知
+	 */
+	device_reserve_idle_confirm("device_reserve_idle_confirm");
 
 
 	private final String value;

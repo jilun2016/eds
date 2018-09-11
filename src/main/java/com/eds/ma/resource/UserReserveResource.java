@@ -1,6 +1,6 @@
 package com.eds.ma.resource;
 
-import com.eds.ma.bis.user.service.IUserReserveService;
+import com.eds.ma.bis.device.service.IDeviceService;
 import com.eds.ma.bis.user.service.IUserService;
 import com.eds.ma.resource.request.SendReserveSmsCodeRequest;
 import com.eds.ma.resource.request.UserReserveRequest;
@@ -27,7 +27,7 @@ public class UserReserveResource extends BaseAuthedResource{
 	private static Logger logger = Logger.getLogger(UserReserveResource.class);
 
 	@Autowired
-	private IUserReserveService userReserveService;
+	private IDeviceService deviceService;
 
     /**
      * 发送用户设备预约短信验证码
@@ -41,7 +41,7 @@ public class UserReserveResource extends BaseAuthedResource{
     @NoAuth
     public Response sendUserReserveSmsCode(@Valid SendReserveSmsCodeRequest request){
         logger.debug("UserReserveResource.sendUserReserveSmsCode({})",request);
-        userReserveService.sendUserReserveSmsCode(request.getMobile(),request.getSpId());
+        deviceService.sendUserReserveSmsCode(request.getMobile(),request.getSpId());
         return Response.status(Response.Status.CREATED).build();
     }
 
@@ -57,7 +57,7 @@ public class UserReserveResource extends BaseAuthedResource{
     @NoAuth
     public Response userReserveConfirm(@Valid UserReserveRequest request){
         logger.debug("UserReserveResource.userReserveConfirm({})",request);
-        userReserveService.userReserveConfirm(request.getSpId(),request.getMobile(),request.getSmsCode());
+        deviceService.userReserveConfirm(request.getSpId(),request.getMobile(),request.getSmsCode());
         return Response.status(Response.Status.CREATED).build();
     }
 
