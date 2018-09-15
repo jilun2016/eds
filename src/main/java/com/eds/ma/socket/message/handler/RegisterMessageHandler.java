@@ -6,8 +6,10 @@ import com.eds.ma.socket.SocketConstants;
 import com.eds.ma.socket.message.MessageTypeConstants;
 import com.eds.ma.socket.message.vo.CommonHeadMessageVo;
 import com.eds.ma.socket.util.SocketMessageUtils;
+import com.xcrm.cloud.database.db.util.StringUtil;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.log.Logger;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -53,7 +55,7 @@ public class RegisterMessageHandler extends BaseMessageHandler {
 //        byte[] checkByte = buildMessageCheckByte(mongoDeviceRegister.sum(),MessageTypeConstants.DEVICE_REGISTER,shortDeviceICCID);
 //        sendByte[23] = checkByte[0];
         asyncTaskExecutor.execute(()->{
-            byte[] sendByte = SocketMessageUtils.HBytes("21F628852BB8C60100000001F1898604332318200034730D");
+            byte[] sendByte = SocketMessageUtils.HBytes(StringUtils.join(mesasge,""));
 //            byte[] sendByte = SocketMessageUtils.HBytes(mesasge);
             SessionClient.sendMessage(mongoDeviceRegister.getDeviceCode(),sendByte);
         });
