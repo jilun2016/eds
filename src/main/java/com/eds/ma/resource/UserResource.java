@@ -18,6 +18,8 @@ import com.eds.ma.resource.request.SendSmsCodeRequest;
 import com.eds.ma.resource.request.UserWithdrawRequest;
 import com.eds.ma.rest.common.BizErrorConstants;
 import com.eds.ma.rest.integration.annotation.NoAuth;
+import com.eds.ma.socket.SessionClient;
+import com.eds.ma.socket.util.SocketMessageUtils;
 import com.xcrm.common.page.Pagination;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.log.Logger;
@@ -62,7 +64,9 @@ public class UserResource extends BaseAuthedResource{
     @NoAuth
 	public Response test(@QueryParam("message") String  message) {
 //        SessionClient.newInstance().sendMessage(new String[]{"9000"},message);
-        messageService.pushWxMessage("otPUw0QBiLBqPVHZPqozBx2iO5vs",TmplEvent.device_check_message,"叮叮咚咚","1","https://www.soso.com");
+        byte[] bts = SocketMessageUtils.HBytes("21F628852BB8C60100000001F1898604332318200034730D");
+        SessionClient.test(bts);
+//        messageService.pushWxMessage("otPUw0QBiLBqPVHZPqozBx2iO5vs",TmplEvent.device_check_message,"叮叮咚咚","1","https://www.soso.com");
         return Response.ok().build();
 	}
 

@@ -5,8 +5,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -40,6 +42,28 @@ public class SessionClient {
 		log.debug("获取会话从SessionMap单例---key=" + key);
 		return sessionMap.get(key);
 	}
+
+    /**
+     * 发送消息到客户端
+     * @param messageBytes
+     */
+    public static void test(byte[] messageBytes){
+        Object[] longSet = sessionMap.keySet().toArray();
+        IoSession session = getSession((Long) longSet[0]);
+        log.debug("反向发送消息到客户端Session---key=" + "----------消息=" + messageBytes);
+        log.debug("反向发送消息到客户端长度" + messageBytes.length);
+        if(session == null){
+            return;
+        }
+        IoBuffer buffer = IoBuffer.allocate(messageBytes.length);
+//		// 自动扩容
+//		buffer.setAutoExpand(true);
+//		// 自动收缩
+//		buffer.setAutoShrink(true);
+        buffer.put(messageBytes);
+        buffer.flip();
+        session.write(buffer);
+    }
 
 	/**
 	 * 发送消息到客户端
