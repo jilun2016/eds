@@ -54,18 +54,13 @@ public class SessionClient {
 			return;
 		}
 		IoBuffer buffer = IoBuffer.allocate(messageBytes.length);
-		// 自动扩容
-		buffer.setAutoExpand(true);
-		// 自动收缩
-		buffer.setAutoShrink(true);
+//		// 自动扩容
+//		buffer.setAutoExpand(true);
+//		// 自动收缩
+//		buffer.setAutoShrink(true);
 		buffer.put(messageBytes);
 		buffer.flip();
 		session.write(buffer);
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 	}
 
 	/**

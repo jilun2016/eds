@@ -46,10 +46,10 @@ public class RegisterMessageHandler extends BaseMessageHandler {
     }
 
     public void sendDataMessage(MongoDeviceRegister mongoDeviceRegister,String[] mesasge) {
-        Long shortDeviceICCID = SocketMessageUtils.H2L(mesasge,16,7);
-        byte[] checkByte = buildMessageCheckByte(mongoDeviceRegister.sum(),MessageTypeConstants.DEVICE_REGISTER,shortDeviceICCID);
         byte[] sendByte = SocketMessageUtils.HBytes(mesasge);
-        sendByte[23] = checkByte[0];
+//        Long shortDeviceICCID = SocketMessageUtils.H2L(mesasge,16,7);
+//        byte[] checkByte = buildMessageCheckByte(mongoDeviceRegister.sum(),MessageTypeConstants.DEVICE_REGISTER,shortDeviceICCID);
+//        sendByte[23] = checkByte[0];
         SessionClient.sendMessage(mongoDeviceRegister.getDeviceCode(),sendByte);
     }
 
