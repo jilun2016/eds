@@ -9,6 +9,7 @@ import com.eds.ma.socket.util.SocketMessageUtils;
 import com.xcrm.common.util.DateFormatUtils;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +31,7 @@ public class RegisterMessageHandler extends BaseMessageHandler {
     protected MongoTemplate mongoTemplate;
 
     @Autowired
-    private CommonMessageHandler commonMessageHandler;
+    private AsyncTaskExecutor asyncTaskExecutor;
 
 
     @Override
@@ -46,11 +47,15 @@ public class RegisterMessageHandler extends BaseMessageHandler {
     }
 
     public void sendDataMessage(MongoDeviceRegister mongoDeviceRegister,String[] mesasge) {
-        byte[] sendByte = SocketMessageUtils.HBytes(mesasge);
+
+//        sendByte = SocketMessageUtils.HBytes("21F628852BB8C60100000001F1898604332318200034730D")
 //        Long shortDeviceICCID = SocketMessageUtils.H2L(mesasge,16,7);
 //        byte[] checkByte = buildMessageCheckByte(mongoDeviceRegister.sum(),MessageTypeConstants.DEVICE_REGISTER,shortDeviceICCID);
 //        sendByte[23] = checkByte[0];
-        SessionClient.sendMessage(mongoDeviceRegister.getDeviceCode(),sendByte);
+        asyncTaskExecutor.execute(()->{
+            byte[] sendByte = SocketMessageUtils.HBytes(mesasge);
+            SessionClient.sendMessage(mongoDeviceRegister.getDeviceCode(),sendByte);
+        });
     }
 
     @Override
