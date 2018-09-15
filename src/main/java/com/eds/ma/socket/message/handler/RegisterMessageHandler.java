@@ -2,6 +2,7 @@ package com.eds.ma.socket.message.handler;
 
 import com.eds.ma.mongodb.collection.MongoDeviceRegister;
 import com.eds.ma.socket.SessionClient;
+import com.eds.ma.socket.SocketConstants;
 import com.eds.ma.socket.message.MessageTypeConstants;
 import com.eds.ma.socket.message.vo.CommonHeadMessageVo;
 import com.eds.ma.socket.util.SocketMessageUtils;
@@ -41,11 +42,15 @@ public class RegisterMessageHandler extends BaseMessageHandler {
     public void processDataMessage(CommonHeadMessageVo commonHeadMessageVo, String[] mesasge) {
         //解析注册消息
         MongoDeviceRegister mongoDeviceRegister = parseRegisterMessage(commonHeadMessageVo, mesasge);
-        sendDataMessage(commonHeadMessageVo.getDeviceCode(),mesasge);
+        sendDataMessage(mongoDeviceRegister,mesasge);
     }
 
-    public void sendDataMessage(Long deviceCode,String[] mesasge) {
-        SessionClient.sendMessage(deviceCode,SocketMessageUtils.HBytes(mesasge));
+    public void sendDataMessage(MongoDeviceRegister mongoDeviceRegister,String[] mesasge) {
+        Long shortDeviceICCID = SocketMessageUtils.H2L(mesasge,16,7);
+        byte[] checkByte = buildMessageCheckByte(mongoDeviceRegister.sum(),MessageTypeConstants.DEVICE_REGISTER,shortDeviceICCID);
+        byte[] sendByte = SocketMessageUtils.HBytes(mesasge);
+        sendByte[23] = checkByte[0];
+        SessionClient.sendMessage(mongoDeviceRegister.getDeviceCode(),sendByte);
     }
 
     @Override
