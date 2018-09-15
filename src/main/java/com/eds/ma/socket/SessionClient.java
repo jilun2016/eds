@@ -73,7 +73,6 @@ public class SessionClient {
 	 */
 	public static void sendMessage(Long key, IoBuffer buffer){
 		IoSession session = getSession(key);
-		buffer.flip();
 		session.write(buffer);
 	}
 

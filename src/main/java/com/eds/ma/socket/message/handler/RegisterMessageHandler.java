@@ -41,11 +41,6 @@ public class RegisterMessageHandler extends BaseMessageHandler {
     public void processDataMessage(CommonHeadMessageVo commonHeadMessageVo, String[] mesasge) {
         //解析注册消息
         MongoDeviceRegister mongoDeviceRegister = parseRegisterMessage(commonHeadMessageVo, mesasge);
-        sendDataMessage(commonHeadMessageVo.getDeviceCode(),null);
-    }
-
-    public void sendDataMessage(Long deviceCode, byte[] mesasge) {
-        SessionClient.sendMessage(deviceCode,mesasge);
     }
 
     @Override

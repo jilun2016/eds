@@ -34,7 +34,7 @@ public class MinaTcpClient extends IoHandlerAdapter {
 	}
 	public static void main(String[] args) throws Exception {
 		MinaTcpClient client = new MinaTcpClient();
-		int b = 15;
+		int b = 2;
 		if(b == 1){
 			heartBeat();
 		}
