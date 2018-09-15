@@ -34,7 +34,7 @@ public class MinaTcpClient extends IoHandlerAdapter {
 	}
 	public static void main(String[] args) throws Exception {
 		MinaTcpClient client = new MinaTcpClient();
-		int b = 2;
+		int b = 200;
 		if(b == 1){
 			heartBeat();
 		}
@@ -54,11 +54,8 @@ public class MinaTcpClient extends IoHandlerAdapter {
 			control();
 		}
 
-		byte[] bts1 = SocketMessageUtils.L2Bytes(	14131905958052100L,7);
-		byte[] bts  = new byte[7];
-		for (int i = 1; i < bts1.length; i++) {
-			bts[i -1] = bts1[i];
-		}
+		byte[] bts = SocketMessageUtils.HBytes("F1","A8986043323182000347");
+
 
 		IoBuffer buffer = IoBuffer.allocate(bts.length);
 		// 自动扩容

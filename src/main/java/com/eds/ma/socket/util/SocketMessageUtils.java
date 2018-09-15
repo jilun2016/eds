@@ -1,8 +1,10 @@
 package com.eds.ma.socket.util;
 
 import com.eds.ma.socket.SocketConstants;
+import com.xcrm.common.util.ListUtil;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class SocketMessageUtils {
 
@@ -100,6 +102,28 @@ public class SocketMessageUtils {
 		return buffer.getLong();
 	}
 
+    public static byte[] HBytes(String... hexStringArray) {
+	    byte[] resultByteArray = null;
+	    if(hexStringArray !=null && hexStringArray.length > 0){
+            for (String hexString : hexStringArray) {
+                hexString = hexString.replaceAll("^0[x|X]", "");
+                int len = hexString.length();
+                byte[] data = new byte[len / 2];
+                try {
+                    for (int i = 0; i < len; i += 2) {
+                        data[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4)
+                                + Character.digit(hexString.charAt(i+1), 16));
+                    }
+                } catch (Exception e) {
+                    //Log.d("", "Argument(s) for hexStringToByteArray(String s)"+ "was not a hex string");
+                }
+                resultByteArray = combineBytes(resultByteArray,data);
+            }
+        }
+
+        return resultByteArray;
+    }
+
 	public static byte[] buildZeroBytes(int size) {
 		byte[] emptyBytes = new byte[size];
 		for (int i = 0; i < emptyBytes.length; i++) {
@@ -109,17 +133,23 @@ public class SocketMessageUtils {
 	}
 
 	public static byte[] combineBytes(byte[]... bytes){
+
 		int combineByteLength = 0;
 		for (byte[] aByte : bytes) {
-			combineByteLength += aByte.length;
+		    if(aByte != null){
+                combineByteLength += aByte.length;
+            }
+
 		}
 		byte[] combineBytes = new byte[combineByteLength];
 		int stepByteLength = 0;
 		for (byte[] aByte : bytes) {
-			for (int i = 0; i < aByte.length; i++) {
-				combineBytes[i+stepByteLength] = aByte[i];
-			}
-			stepByteLength += aByte.length;
+            if(aByte != null){
+                for (int i = 0; i < aByte.length; i++) {
+                    combineBytes[i+stepByteLength] = aByte[i];
+                }
+                stepByteLength += aByte.length;
+            }
 		}
 		return combineBytes;
 	}
@@ -136,5 +166,7 @@ public class SocketMessageUtils {
 
 	public static void main(String[] args) {
 		System.out.println(L2Bytes(14131905958052100L,0));
+
+        HBytes("A8986043323182000347");
 	}
 }
