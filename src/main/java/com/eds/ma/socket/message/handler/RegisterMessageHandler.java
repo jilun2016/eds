@@ -60,7 +60,7 @@ public class RegisterMessageHandler extends BaseMessageHandler {
      * @return
      */
     private MongoDeviceRegister parseRegisterMessage(CommonHeadMessageVo commonHeadMessageVo, String[] mesasge){
-        String deviceICCID = SocketMessageUtils.H2S(mesasge,13,10);
+        Long deviceICCID = SocketMessageUtils.H2L(mesasge,13,10);
         MongoDeviceRegister mongoDeviceRegister = new MongoDeviceRegister();
         mongoDeviceRegister.setDeviceKind(commonHeadMessageVo.getDeviceKind());
         mongoDeviceRegister.setDeviceCode(commonHeadMessageVo.getDeviceCode());
