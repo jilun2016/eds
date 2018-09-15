@@ -1,5 +1,7 @@
 package com.eds.ma.socket.util;
 
+import com.eds.ma.socket.SocketConstants;
+
 import java.nio.ByteBuffer;
 
 public class SocketMessageUtils {
@@ -120,6 +122,16 @@ public class SocketMessageUtils {
 			stepByteLength += aByte.length;
 		}
 		return combineBytes;
+	}
+
+	public static byte[] buildMessageCheckByte(Long headSum,Long... messageValues){
+		Long checkByteSum = headSum;
+		for (Long messageValue : messageValues) {
+			checkByteSum +=messageValue;
+		}
+		Long  xorValue = checkByteSum^SocketConstants.XOR_CHECK_CODE;
+		//将异或值转换成1个字节
+		return SocketMessageUtils.L2Bytes(xorValue,1);
 	}
 
 	public static void main(String[] args) {

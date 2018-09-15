@@ -1,6 +1,7 @@
 package com.eds.ma.socket.message.handler;
 
 import com.eds.ma.mongodb.collection.MongoDeviceRegister;
+import com.eds.ma.socket.SessionClient;
 import com.eds.ma.socket.message.MessageTypeConstants;
 import com.eds.ma.socket.message.vo.CommonHeadMessageVo;
 import com.eds.ma.socket.util.SocketMessageUtils;
@@ -27,6 +28,9 @@ public class RegisterMessageHandler extends BaseMessageHandler {
     @Autowired
     protected MongoTemplate mongoTemplate;
 
+    @Autowired
+    private CommonMessageHandler commonMessageHandler;
+
 
     @Override
     public Long getMessageType() {
@@ -37,11 +41,15 @@ public class RegisterMessageHandler extends BaseMessageHandler {
     public void processDataMessage(CommonHeadMessageVo commonHeadMessageVo, String[] mesasge) {
         //解析注册消息
         MongoDeviceRegister mongoDeviceRegister = parseRegisterMessage(commonHeadMessageVo, mesasge);
+        sendDataMessage(commonHeadMessageVo.getDeviceCode(),mongoDeviceRegister.toMessageByte());
+    }
+
+    public void sendDataMessage(Long deviceCode, byte[] mesasge) {
+        SessionClient.sendMessage(deviceCode,mesasge);
     }
 
     @Override
     public void sendDataMessage(CommonHeadMessageVo commonHeadMessageVo, Long... mesasgeField) {
-
     }
 
 
