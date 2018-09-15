@@ -53,7 +53,8 @@ public class RegisterMessageHandler extends BaseMessageHandler {
 //        byte[] checkByte = buildMessageCheckByte(mongoDeviceRegister.sum(),MessageTypeConstants.DEVICE_REGISTER,shortDeviceICCID);
 //        sendByte[23] = checkByte[0];
         asyncTaskExecutor.execute(()->{
-            byte[] sendByte = SocketMessageUtils.HBytes(mesasge);
+            byte[] sendByte = SocketMessageUtils.HBytes("21F628852BB8C60100000001F1898604332318200034730D");
+//            byte[] sendByte = SocketMessageUtils.HBytes(mesasge);
             SessionClient.sendMessage(mongoDeviceRegister.getDeviceCode(),sendByte);
         });
     }
