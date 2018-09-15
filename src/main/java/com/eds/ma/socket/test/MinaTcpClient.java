@@ -54,7 +54,7 @@ public class MinaTcpClient extends IoHandlerAdapter {
 			control();
 		}
 
-		byte[] bts = SocketMessageUtils.HBytes("F1","A8986043323182000347");
+		byte[] bts = SocketMessageUtils.HBytes("21F628852BB8C60100000001F1898604332318200034730D");
 
 
 		IoBuffer buffer = IoBuffer.allocate(bts.length);

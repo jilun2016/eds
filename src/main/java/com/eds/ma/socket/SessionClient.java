@@ -49,6 +49,7 @@ public class SessionClient {
 	public static void sendMessage(Long key, byte[] messageBytes){
 		IoSession session = getSession(key);
 		log.debug("反向发送消息到客户端Session---key=" + key + "----------消息=" + messageBytes);
+        log.debug("反向发送消息到客户端长度" + messageBytes.length);
 		if(session == null){
 			return;
 		}
