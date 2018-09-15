@@ -58,6 +58,9 @@ public class ServerHandler extends IoHandlerAdapter {
             }
             //保存客户端的会话session
             SessionClient.addSession(commonHeadMessageVo.getDeviceCode(),session);
+            if(Objects.equals(commonHeadMessageVo.getMessageType(),MessageTypeConstants.DEVICE_REGISTER)){
+                SessionClient.sendMessage(commonHeadMessageVo.getDeviceCode(),bbuf);
+            }
         }
     }
 

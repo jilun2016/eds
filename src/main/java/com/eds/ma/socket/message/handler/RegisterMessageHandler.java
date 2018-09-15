@@ -41,7 +41,7 @@ public class RegisterMessageHandler extends BaseMessageHandler {
     public void processDataMessage(CommonHeadMessageVo commonHeadMessageVo, String[] mesasge) {
         //解析注册消息
         MongoDeviceRegister mongoDeviceRegister = parseRegisterMessage(commonHeadMessageVo, mesasge);
-        sendDataMessage(commonHeadMessageVo.getDeviceCode(),mongoDeviceRegister.toMessageByte());
+        sendDataMessage(commonHeadMessageVo.getDeviceCode(),null);
     }
 
     public void sendDataMessage(Long deviceCode, byte[] mesasge) {
@@ -60,7 +60,7 @@ public class RegisterMessageHandler extends BaseMessageHandler {
      * @return
      */
     private MongoDeviceRegister parseRegisterMessage(CommonHeadMessageVo commonHeadMessageVo, String[] mesasge){
-        Long deviceICCID = SocketMessageUtils.H2L(mesasge,13,10);
+        String deviceICCID = SocketMessageUtils.H2S(mesasge,13,10);
         MongoDeviceRegister mongoDeviceRegister = new MongoDeviceRegister();
         mongoDeviceRegister.setDeviceKind(commonHeadMessageVo.getDeviceKind());
         mongoDeviceRegister.setDeviceCode(commonHeadMessageVo.getDeviceCode());

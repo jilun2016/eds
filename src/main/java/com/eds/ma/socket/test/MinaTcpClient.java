@@ -199,6 +199,8 @@ public class MinaTcpClient extends IoHandlerAdapter {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+
+
 	}
 
 	private static void gps(){

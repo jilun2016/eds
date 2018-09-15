@@ -67,4 +67,14 @@ public class SessionClient {
 		}
 	}
 
+	/**
+	 * 发送消息到客户端
+	 * @param key
+	 */
+	public static void sendMessage(Long key, IoBuffer buffer){
+		IoSession session = getSession(key);
+		buffer.flip();
+		session.write(buffer);
+	}
+
 }
