@@ -180,9 +180,13 @@
 			<artifactId>alipay-sdk-java</artifactId>
 			<version>3.3.4.ALL</version>
 		</dependency>
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+			<version>4.1.4.Final</version>
+		</dependency>
 
-
-        <dependency>
+		<dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-excelant</artifactId>
             <version>3.12</version>
